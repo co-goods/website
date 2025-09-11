@@ -91,11 +91,16 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
         </div>
       )}
 
-      {author.frontmatter.tags && author.frontmatter.tags.length > 0 && (
+      {((author.frontmatter.tags && author.frontmatter.tags.length > 0) || 
+        (author.frontmatter.expertise && author.frontmatter.expertise.length > 0)) && (
         <div className="mt-8">
           <h3 className="font-semibold mb-3">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {author.frontmatter.tags.map((tag) => (
+            {/* Combine tags and expertise, remove duplicates */}
+            {Array.from(new Set([
+              ...(author.frontmatter.tags || []),
+              ...(author.frontmatter.expertise || [])
+            ])).map((tag) => (
               <Link 
                 key={tag} 
                 href={`/whitepaper/tags/${tag}`}
