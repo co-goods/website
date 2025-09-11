@@ -75,7 +75,7 @@ export default async function InsightPage({ params }: { params: Promise<{ slug: 
               {insight.frontmatter.sources.map((sourceSlug) => (
                 <Link 
                   key={sourceSlug} 
-                  href={`/sources/${sourceSlug}`}
+                  href={`/whitepaper/sources/${sourceSlug}`}
                   className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <span className="text-blue-600 hover:text-blue-800 font-medium">
@@ -110,7 +110,7 @@ export default async function InsightPage({ params }: { params: Promise<{ slug: 
             {insight.frontmatter.tags.map((tag) => (
               <Link 
                 key={tag} 
-                href={`/tags/${tag}`}
+                href={`/whitepaper/tags/${tag}`}
                 className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
               >
                 {tag}
