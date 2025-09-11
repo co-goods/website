@@ -1,5 +1,4 @@
 import { getContentBySlug, getAllSlugs } from '@/lib/markdown'
-import { Contributor } from '@/types/content'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
