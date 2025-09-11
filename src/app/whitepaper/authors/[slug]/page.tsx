@@ -21,7 +21,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <Link href="/authors" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
+        <Link href="/whitepaper/authors" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
           ← Back to Authors
         </Link>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">{authorData.name}</h1>
@@ -55,18 +55,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
           </div>
         )}
 
-        {author.frontmatter.expertise && author.frontmatter.expertise.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-semibold mb-3">Areas of Expertise</h3>
-            <div className="flex flex-wrap gap-2">
-              {author.frontmatter.expertise.map((area) => (
-                <span key={area} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  {area}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {author.frontmatter.key_publications && author.frontmatter.key_publications.length > 0 && (
           <div className="mb-6">
@@ -91,7 +79,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
             {author.frontmatter.sources_by_author.map((sourceSlug) => (
               <Link 
                 key={sourceSlug} 
-                href={`/sources/${sourceSlug}`}
+                href={`/whitepaper/sources/${sourceSlug}`}
                 className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <span className="text-blue-600 hover:text-blue-800 font-medium">
@@ -110,7 +98,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
             {author.frontmatter.tags.map((tag) => (
               <Link 
                 key={tag} 
-                href={`/tags/${tag}`}
+                href={`/whitepaper/tags/${tag}`}
                 className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
               >
                 {tag}
