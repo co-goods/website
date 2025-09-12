@@ -21,7 +21,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <Link href="/whitepaper/authors" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
+        <Link href="/resources/authors" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
           ← Back to Authors
         </Link>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">{authorData.name}</h1>
@@ -79,7 +79,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
             {author.frontmatter.sources_by_author.map((sourceSlug) => (
               <Link 
                 key={sourceSlug} 
-                href={`/whitepaper/sources/${sourceSlug}`}
+                href={`/resources/sources/${sourceSlug}`}
                 className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <span className="text-blue-600 hover:text-blue-800 font-medium">
@@ -103,7 +103,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
             ])).map((tag) => (
               <Link 
                 key={tag} 
-                href={`/whitepaper/tags/${tag}`}
+                href={`/resources/tags/${tag}`}
                 className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
               >
                 {tag}

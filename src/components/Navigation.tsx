@@ -7,24 +7,15 @@ export default function Navigation() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold text-gray-900">
-              Co-Goods Research
+              Co-Goods
             </Link>
           </div>
           <div className="flex items-center space-x-8">
-            <Link href="/whitepaper/insights" className="text-gray-700 hover:text-gray-900">
-              Insights
+            <Link href="/research" className="text-gray-700 hover:text-gray-900">
+              Research
             </Link>
-            <Link href="/whitepaper/sources" className="text-gray-700 hover:text-gray-900">
-              Sources
-            </Link>
-            <Link href="/whitepaper/authors" className="text-gray-700 hover:text-gray-900">
-              Authors
-            </Link>
-            <Link href="/contributors" className="text-gray-700 hover:text-gray-900">
-              Contributors
-            </Link>
-            <Link href="/whitepaper/tags" className="text-gray-700 hover:text-gray-900">
-              Tags
+            <Link href="/schemas" className="text-gray-700 hover:text-gray-900">
+              Schemas
             </Link>
             <Link href="/about" className="text-gray-700 hover:text-gray-900">
               About

@@ -66,7 +66,7 @@ export default async function TagPage({ params }: { params: Promise<{ slug: stri
               {tag.frontmatter.related_tags.map((relatedTag) => (
                 <Link 
                   key={relatedTag} 
-                  href={`/whitepaper/tags/${relatedTag}`}
+                  href={`/resources/tags/${relatedTag}`}
                   className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
                 >
                   {relatedTag}

@@ -110,7 +110,7 @@ export default async function SourcePage({ params }: { params: Promise<{ slug: s
             {source.frontmatter.tags.map((tag) => (
               <Link 
                 key={tag} 
-                href={`/whitepaper/tags/${tag}`}
+                href={`/resources/tags/${tag}`}
                 className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
               >
                 {tag}

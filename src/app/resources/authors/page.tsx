@@ -19,7 +19,7 @@ export default async function AuthorsPage() {
           <div key={author.slug} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <div className="mb-4">
               <Link 
-                href={`/whitepaper/authors/${author.slug}`}
+                href={`/resources/authors/${author.slug}`}
                 className="text-xl font-semibold text-blue-600 hover:text-blue-800 mb-2 block"
               >
                 {author.frontmatter.name}
@@ -59,7 +59,7 @@ export default async function AuthorsPage() {
                 ])).slice(0, 4).map((tag) => (
                   <Link 
                     key={tag} 
-                    href={`/whitepaper/tags/${tag}`}
+                    href={`/resources/tags/${tag}`}
                     className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200"
                   >
                     {tag}

@@ -19,7 +19,7 @@ export default async function TagsPage() {
           <div key={tag.slug} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <div className="mb-4">
               <Link 
-                href={`/whitepaper/tags/${tag.slug}`}
+                href={`/resources/tags/${tag.slug}`}
                 className="text-xl font-semibold text-blue-600 hover:text-blue-800 mb-2 block"
               >
                 {tag.frontmatter.name}

@@ -6,30 +6,30 @@ export function processObsidianLinks(content: string): string {
   content = content.replace(/\[\[([a-z0-9-]+)\]\]/g, (match, slug) => {
     // Determine content type based on common patterns
     if (isTag(slug)) {
-      return `[${slug}](/whitepaper/tags/${slug})`;
+      return `[${slug}](/resources/tags/${slug})`;
     } else if (isAuthor(slug)) {
-      return `[${slug}](/whitepaper/authors/${slug})`;
+      return `[${slug}](/resources/authors/${slug})`;
     } else if (isSource(slug)) {
-      return `[${slug}](/whitepaper/sources/${slug})`;
+      return `[${slug}](/resources/sources/${slug})`;
     } else if (isInsight(slug)) {
-      return `[${slug}](/whitepaper/insights/${slug})`;
+      return `[${slug}](/resources/insights/${slug})`;
     } else if (isContributor(slug)) {
       return `[${slug}](/contributors/${slug})`;
     }
     
     // Default: assume it's a tag
-    return `[${slug}](/whitepaper/tags/${slug})`;
+    return `[${slug}](/resources/tags/${slug})`;
   });
 
   // Convert [[Display Name|slug]] format
   content = content.replace(/\[\[([^|]+)\|([a-z0-9-]+)\]\]/g, (match, displayName, slug) => {
     if (isTag(slug)) {
-      return `[${displayName}](/whitepaper/tags/${slug})`;
+      return `[${displayName}](/resources/tags/${slug})`;
     } else if (isAuthor(slug)) {
-      return `[${displayName}](/whitepaper/authors/${slug})`;
+      return `[${displayName}](/resources/authors/${slug})`;
     }
     // Add other types as needed
-    return `[${displayName}](/whitepaper/tags/${slug})`;
+    return `[${displayName}](/resources/tags/${slug})`;
   });
 
   return content;

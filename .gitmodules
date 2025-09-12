@@ -1,5 +1,5 @@
 [submodule "whitepaper"]
 	path = whitepaper
-	url = https://github.com/co-goods/whitepaper.git
+	url = https://github.com/co-goods/research.git
 	branch = main
 	update = rebase
