@@ -24,41 +24,53 @@ export default function Home() {
       </div>
 
       <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10">
+        <Link 
+          href="/resources/insights"
+          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
+        >
           <div className="mx-auto max-w-md">
             <h3 className="text-base font-semibold leading-6 text-gray-900">Research Insights</h3>
             <p className="mt-2 text-sm text-gray-600">
               Categorized research findings from empirical, theoretical, and practical perspectives.
             </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10">
+        <Link 
+          href="/resources/sources"
+          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
+        >
           <div className="mx-auto max-w-md">
             <h3 className="text-base font-semibold leading-6 text-gray-900">Academic Sources</h3>
             <p className="mt-2 text-sm text-gray-600">
               Curated collection of papers, books, and reports supporting our research.
             </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10">
+        <Link 
+          href="/resources/authors"
+          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
+        >
           <div className="mx-auto max-w-md">
             <h3 className="text-base font-semibold leading-6 text-gray-900">Expert Authors</h3>
             <p className="mt-2 text-sm text-gray-600">
               Profiles of researchers and experts whose work informs our protocol development.
             </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10">
+        <Link 
+          href="/reports"
+          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
+        >
           <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Protocol Whitepaper</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Reports</h3>
             <p className="mt-2 text-sm text-gray-600">
-              Our comprehensive research culminates in a whitepaper detailing the co-goods protocol.
+              Comprehensive research reports, whitepapers, and technical documentation.
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
