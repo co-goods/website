@@ -9,13 +9,13 @@ import { processObsidianLinks } from './linkProcessor';
 const whitepaperPath = path.join(process.cwd(), 'whitepaper');
 
 // Helper function to normalize dates in frontmatter
-function normalizeDates(data: any): any {
+function normalizeDates(data: Record<string, unknown>): Record<string, unknown> {
   const normalized = { ...data };
 
   // Convert any Date objects to ISO strings
   for (const key in normalized) {
     if (normalized[key] instanceof Date) {
-      normalized[key] = normalized[key].toISOString();
+      normalized[key] = (normalized[key] as Date).toISOString();
     }
   }
 
