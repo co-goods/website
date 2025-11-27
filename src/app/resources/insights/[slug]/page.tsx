@@ -33,8 +33,12 @@ export default async function InsightPage({ params }: { params: Promise<{ slug: 
           }`}>
             {insight.frontmatter.category}
           </span>
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-            Quality: {insight.frontmatter.quality_rating}/5
+          <span className={`px-3 py-1 rounded-full text-sm ${
+            insight.frontmatter.relevance_score === 'high' ? 'bg-blue-100 text-blue-800' :
+            insight.frontmatter.relevance_score === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-gray-100 text-gray-800'
+          }`}>
+            Relevance: {insight.frontmatter.relevance_score}
           </span>
         </div>
 
