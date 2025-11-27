@@ -8,6 +8,20 @@ import { processObsidianLinks } from './linkProcessor';
 
 const whitepaperPath = path.join(process.cwd(), 'whitepaper');
 
+// Helper function to normalize dates in frontmatter
+function normalizeDates(data: any): any {
+  const normalized = { ...data };
+
+  // Convert any Date objects to ISO strings
+  for (const key in normalized) {
+    if (normalized[key] instanceof Date) {
+      normalized[key] = normalized[key].toISOString();
+    }
+  }
+
+  return normalized;
+}
+
 export async function getContentByType(type: string): Promise<ContentWithContent[]> {
   const contentDir = getContentDirectory(type);
   
@@ -24,16 +38,19 @@ export async function getContentByType(type: string): Promise<ContentWithContent
       const fullPath = path.join(contentDir, file);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
       const { data, content } = matter(fileContents);
-      
+
+      // Normalize any Date objects to strings
+      const normalizedData = normalizeDates(data);
+
       // Process Obsidian wikilinks before markdown processing
       const processedObsidianContent = processObsidianLinks(content);
-      
+
       const processedContent = await remark()
         .use(html)
         .process(processedObsidianContent);
 
       return {
-        frontmatter: data as ContentType,
+        frontmatter: normalizedData as ContentType,
         content: processedContent.toString(),
         slug,
       };
@@ -53,16 +70,19 @@ export async function getContentBySlug(type: string, slug: string): Promise<Cont
 
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
-  
+
+  // Normalize any Date objects to strings
+  const normalizedData = normalizeDates(data);
+
   // Process Obsidian wikilinks before markdown processing
   const processedObsidianContent = processObsidianLinks(content);
-  
+
   const processedContent = await remark()
     .use(html)
     .process(processedObsidianContent);
 
   return {
-    frontmatter: data as ContentType,
+    frontmatter: normalizedData as ContentType,
     content: processedContent.toString(),
     slug,
   };
