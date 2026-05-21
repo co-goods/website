@@ -5,6 +5,7 @@ import { getCollection, CollectionConfig } from './collections';
 const RESEARCH_ROOT = path.join(process.cwd(), 'research');
 
 export interface ResolvedPage {
+  kind: 'page';
   collection: CollectionConfig;
   filepath: string;
   // URL segments after the collection name (e.g. ['conventions','frontmatter']
@@ -12,8 +13,18 @@ export interface ResolvedPage {
   innerSegments: string[];
 }
 
+export interface ResolvedIndex {
+  kind: 'index';
+  collection: CollectionConfig;
+  // URL segments after the collection name (empty for /docs, [<cat>] for
+  // /docs/<cat>, ['publishers'] for /library/publishers, etc.)
+  innerSegments: string[];
+}
+
+export type Resolved = ResolvedPage | ResolvedIndex;
+
 // Strip leading NN- ordering prefix from a folder or filename. Used by the
-// docs collection (and potentially other ordered collections later).
+// docs collection.
 export function stripOrderPrefix(name: string): string {
   const m = name.match(/^\d+-(.+)$/);
   return m ? m[1] : name;
@@ -42,7 +53,9 @@ function findEntryWithStrippedPrefix(
   return null;
 }
 
-function resolveDocs(rest: string[]): ResolvedPage | null {
+// ---------- Page resolvers ----------
+
+function resolveDocsPage(rest: string[]): ResolvedPage | null {
   if (rest.length !== 2) return null;
   const [category, slug] = rest;
 
@@ -53,13 +66,14 @@ function resolveDocs(rest: string[]): ResolvedPage | null {
   if (!filepath) return null;
 
   return {
+    kind: 'page',
     collection: getCollection('docs')!,
     filepath,
     innerSegments: [category, slug],
   };
 }
 
-function resolveBareSlug(collectionName: string, rest: string[]): ResolvedPage | null {
+function resolveBareSlugPage(collectionName: string, rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const collection = getCollection(collectionName);
   if (!collection) return null;
@@ -67,31 +81,30 @@ function resolveBareSlug(collectionName: string, rest: string[]): ResolvedPage |
   const filepath = path.join(RESEARCH_ROOT, collection.folder, `${rest[0]}.md`);
   if (!fs.existsSync(filepath)) return null;
 
-  return { collection, filepath, innerSegments: rest };
+  return { kind: 'page', collection, filepath, innerSegments: rest };
 }
 
-function resolveLibrary(rest: string[]): ResolvedPage | null {
+function resolveLibraryPage(rest: string[]): ResolvedPage | null {
   const collection = getCollection('library')!;
   if (rest.length === 1) {
     const filepath = path.join(RESEARCH_ROOT, 'library', `${rest[0]}.md`);
     if (!fs.existsSync(filepath)) return null;
-    return { collection, filepath, innerSegments: rest };
+    return { kind: 'page', collection, filepath, innerSegments: rest };
   }
   if (rest.length === 2 && (rest[0] === 'publishers' || rest[0] === 'publications')) {
     const filepath = path.join(RESEARCH_ROOT, 'library', rest[0], `${rest[1]}.md`);
     if (!fs.existsSync(filepath)) return null;
-    return { collection, filepath, innerSegments: rest };
+    return { kind: 'page', collection, filepath, innerSegments: rest };
   }
   return null;
 }
 
-function resolveBlog(rest: string[]): ResolvedPage | null {
+function resolveBlogPage(rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const collection = getCollection('blog')!;
   const blogRoot = path.join(RESEARCH_ROOT, 'blog');
   if (!fs.existsSync(blogRoot)) return null;
 
-  // Walk year/month folders to find <slug>.md
   for (const year of fs.readdirSync(blogRoot)) {
     const yearPath = path.join(blogRoot, year);
     if (!fs.statSync(yearPath).isDirectory()) continue;
@@ -100,14 +113,14 @@ function resolveBlog(rest: string[]): ResolvedPage | null {
       if (!fs.statSync(monthPath).isDirectory()) continue;
       const filepath = path.join(monthPath, `${rest[0]}.md`);
       if (fs.existsSync(filepath)) {
-        return { collection, filepath, innerSegments: rest };
+        return { kind: 'page', collection, filepath, innerSegments: rest };
       }
     }
   }
   return null;
 }
 
-function resolveReports(rest: string[]): ResolvedPage | null {
+function resolveReportsPage(rest: string[]): ResolvedPage | null {
   if (rest.length < 1) return null;
   const collection = getCollection('reports')!;
   const [slug, maybeVersion] = rest;
@@ -119,7 +132,6 @@ function resolveReports(rest: string[]): ResolvedPage | null {
 
   let version = maybeVersion;
   if (!version) {
-    // Pick latest version: highest-sorted directory entry starting with 'v'
     const versions = fs.readdirSync(reportFolder)
       .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
       .sort();
@@ -131,39 +143,88 @@ function resolveReports(rest: string[]): ResolvedPage | null {
   if (!fs.existsSync(filepath)) return null;
 
   return {
+    kind: 'page',
     collection,
     filepath,
     innerSegments: maybeVersion ? rest : [slug, version],
   };
 }
 
-function resolveContributing(): ResolvedPage | null {
+function resolveContributingPage(): ResolvedPage | null {
   const filepath = path.join(RESEARCH_ROOT, 'CONTRIBUTING.md');
   if (!fs.existsSync(filepath)) return null;
   return {
+    kind: 'page',
     collection: getCollection('contributing')!,
     filepath,
     innerSegments: [],
   };
 }
 
-export function resolveUrl(slug: string[]): ResolvedPage | null {
+function resolvePage(slug: string[]): ResolvedPage | null {
   if (!slug.length) return null;
   const [first, ...rest] = slug;
 
-  if (first === 'contributing' && rest.length === 0) return resolveContributing();
-  if (first === 'docs') return resolveDocs(rest);
-  if (first === 'library') return resolveLibrary(rest);
-  if (first === 'blog') return resolveBlog(rest);
-  if (first === 'reports') return resolveReports(rest);
+  if (first === 'contributing' && rest.length === 0) return resolveContributingPage();
+  if (first === 'docs') return resolveDocsPage(rest);
+  if (first === 'library') return resolveLibraryPage(rest);
+  if (first === 'blog') return resolveBlogPage(rest);
+  if (first === 'reports') return resolveReportsPage(rest);
 
   const bareCollections = [
     'wiki', 'essays', 'insights', 'observations', 'hypotheses',
     'glossary', 'people', 'tags', 'topics',
   ];
   if (bareCollections.includes(first)) {
-    return resolveBareSlug(first, rest);
+    return resolveBareSlugPage(first, rest);
   }
 
   return null;
+}
+
+// ---------- Index resolvers ----------
+
+function resolveIndex(slug: string[]): ResolvedIndex | null {
+  if (slug.length === 1) {
+    const name = slug[0];
+    const collection = getCollection(name);
+    if (!collection) return null;
+
+    // Index exists if the folder exists on disk
+    const folderToCheck = collection.folder || '';
+    const dir = folderToCheck ? path.join(RESEARCH_ROOT, folderToCheck) : RESEARCH_ROOT;
+    if (folderToCheck && !fs.existsSync(dir)) return null;
+    return { kind: 'index', collection, innerSegments: [] };
+  }
+
+  // /docs/<category>
+  if (slug.length === 2 && slug[0] === 'docs') {
+    const docsRoot = path.join(RESEARCH_ROOT, 'docs');
+    const dir = findEntryWithStrippedPrefix(docsRoot, slug[1], true);
+    if (dir) {
+      return { kind: 'index', collection: getCollection('docs')!, innerSegments: [slug[1]] };
+    }
+  }
+
+  // /library/publishers, /library/publications
+  if (
+    slug.length === 2 &&
+    slug[0] === 'library' &&
+    (slug[1] === 'publishers' || slug[1] === 'publications')
+  ) {
+    const subDir = path.join(RESEARCH_ROOT, 'library', slug[1]);
+    if (fs.existsSync(subDir) && fs.statSync(subDir).isDirectory()) {
+      return { kind: 'index', collection: getCollection('library')!, innerSegments: [slug[1]] };
+    }
+  }
+
+  return null;
+}
+
+// ---------- Public entrypoint ----------
+
+export function resolveUrl(slug: string[]): Resolved | null {
+  const page = resolvePage(slug);
+  if (page) return page;
+  return resolveIndex(slug);
 }

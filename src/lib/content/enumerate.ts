@@ -45,9 +45,7 @@ function listReportPaths(): string[][] {
       .sort();
     if (!versions.length) continue;
 
-    // Latest-version stable URL
     paths.push([slug]);
-    // Per-version URLs
     for (const v of versions) paths.push([slug, v]);
   }
 
@@ -60,41 +58,54 @@ function listReportPaths(): string[][] {
 export function enumerateAllParams(): { slug: string[] }[] {
   const params: { slug: string[] }[] = [];
 
-  // /docs/<category>/<slug>
-  for (const page of getDocsTree().flatList) {
+  // /docs index + /docs/<category> index + /docs/<category>/<slug> pages
+  params.push({ slug: ['docs'] });
+  const tree = getDocsTree();
+  for (const category of tree.categories) {
+    params.push({ slug: ['docs', category.name] });
+  }
+  for (const page of tree.flatList) {
     params.push({ slug: page.url.replace(/^\//, '').split('/') });
   }
 
-  // Simple-folder collections
+  // Simple-folder collections — index + leaf pages
   const bareCollections = [
     'wiki', 'essays', 'insights', 'observations', 'hypotheses',
     'glossary', 'people', 'tags',
   ];
   for (const folder of bareCollections) {
+    params.push({ slug: [folder] });
     for (const slug of listMdSlugs(folder)) {
       params.push({ slug: [folder, slug] });
     }
   }
 
-  // /library/<slug>
+  // /library — index + nested indexes + leaf pages
+  params.push({ slug: ['library'] });
   for (const slug of listMdSlugs('library')) {
     params.push({ slug: ['library', slug] });
   }
-  // /library/publishers/<slug>
-  for (const slug of listMdSlugs('library/publishers')) {
-    params.push({ slug: ['library', 'publishers', slug] });
+  if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publishers'))) {
+    params.push({ slug: ['library', 'publishers'] });
+    for (const slug of listMdSlugs('library/publishers')) {
+      params.push({ slug: ['library', 'publishers', slug] });
+    }
   }
-  // /library/publications/<slug>
-  for (const slug of listMdSlugs('library/publications')) {
-    params.push({ slug: ['library', 'publications', slug] });
+  if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publications'))) {
+    params.push({ slug: ['library', 'publications'] });
+    for (const slug of listMdSlugs('library/publications')) {
+      params.push({ slug: ['library', 'publications', slug] });
+    }
   }
 
-  // /blog/<slug>
+  // /blog — index + posts
+  params.push({ slug: ['blog'] });
   for (const { slug } of listBlogSlugs()) {
     params.push({ slug: ['blog', slug] });
   }
 
-  // /reports/<slug>[/<version>]
+  // /reports — index + per-report URLs
+  params.push({ slug: ['reports'] });
   for (const reportPath of listReportPaths()) {
     params.push({ slug: ['reports', ...reportPath] });
   }
@@ -103,6 +114,9 @@ export function enumerateAllParams(): { slug: string[] }[] {
   if (fs.existsSync(path.join(RESEARCH_ROOT, 'CONTRIBUTING.md'))) {
     params.push({ slug: ['contributing'] });
   }
+
+  // /topics — index only (aggregation is Phase 4)
+  params.push({ slug: ['topics'] });
 
   return params;
 }
