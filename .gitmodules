@@ -3,3 +3,7 @@
 	url = https://github.com/co-goods/research.git
 	branch = main
 	update = rebase
+[submodule "grund"]
+	path = grund
+	url = https://github.com/depalmaworkshop/grund.git
+	branch = main
