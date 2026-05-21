@@ -6,7 +6,7 @@ import html from 'remark-html';
 import { ContentType, ContentWithContent } from '@/types/content';
 import { processObsidianLinks } from './linkProcessor';
 
-const whitepaperPath = path.join(process.cwd(), 'whitepaper');
+const researchPath = path.join(process.cwd(), 'research');
 
 // Helper function to normalize dates in frontmatter
 function normalizeDates(data: Record<string, unknown>): Record<string, unknown> {
@@ -103,17 +103,17 @@ export function getAllSlugs(type: string): string[] {
 function getContentDirectory(type: string): string {
   switch (type) {
     case 'insights':
-      return path.join(whitepaperPath, 'insights');
+      return path.join(researchPath, 'insights');
     case 'sources':
-      return path.join(whitepaperPath, 'sources');
+      return path.join(researchPath, 'sources');
     case 'authors':
-      return path.join(whitepaperPath, 'authors');
+      return path.join(researchPath, 'authors');
     case 'tags':
-      return path.join(whitepaperPath, 'tags');
+      return path.join(researchPath, 'tags');
     case 'contributors':
-      return path.join(whitepaperPath, 'contributors');
+      return path.join(researchPath, 'contributors');
     case 'pages':
-      return whitepaperPath;
+      return researchPath;
     default:
       throw new Error(`Unknown content type: ${type}`);
   }

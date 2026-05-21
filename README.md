@@ -35,14 +35,14 @@ npm run lint         # Run ESLint
 
 ## Content Integration
 
-The website automatically renders active content from the `../whitepaper/` repository:
+The website automatically renders active content from the `research/` submodule:
 
-- Research insights from `whitepaper/insights/`
-- Academic sources from `whitepaper/sources/`
-- Author profiles from `whitepaper/authors/`
-- Contributor profiles from `whitepaper/contributors/`
-- Tag definitions from `whitepaper/tags/`
-- About page from `whitepaper/about.md`
+- Research insights from `research/insights/`
+- Academic sources from `research/sources/`
+- Author profiles from `research/authors/`
+- Contributor profiles from `research/contributors/`
+- Tag definitions from `research/tags/`
+- About page from `research/about.md`
 
 **Important**: Only content with `status: "active"` in the YAML frontmatter will be displayed.
 
