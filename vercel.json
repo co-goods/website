@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "git submodule update --init research && npm install"
+  "installCommand": "git submodule deinit -f research 2>/dev/null || true; rm -rf research; git submodule update --init research && echo 'research has:' && ls research | head -8 && npm install"
 }
