@@ -11,11 +11,17 @@ export default function Navigation() {
             </Link>
           </div>
           <div className="flex items-center space-x-8">
-            <Link href="/research" className="text-gray-700 hover:text-gray-900">
-              Research
+            <Link href="/wiki" className="text-gray-700 hover:text-gray-900">
+              Wiki
             </Link>
-            <Link href="/schemas" className="text-gray-700 hover:text-gray-900">
-              Schemas
+            <Link href="/library" className="text-gray-700 hover:text-gray-900">
+              Library
+            </Link>
+            <Link href="/insights" className="text-gray-700 hover:text-gray-900">
+              Insights
+            </Link>
+            <Link href="/docs" className="text-gray-700 hover:text-gray-900">
+              Docs
             </Link>
             <Link href="/about" className="text-gray-700 hover:text-gray-900">
               About

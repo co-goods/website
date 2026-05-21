@@ -12,7 +12,7 @@ export default function Home() {
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <Link
-            href="/research"
+            href="/wiki"
             className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Explore Research
@@ -24,8 +24,8 @@ export default function Home() {
       </div>
 
       <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <Link 
-          href="/resources/insights"
+        <Link
+          href="/insights"
           className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
         >
           <div className="mx-auto max-w-md">
@@ -36,31 +36,31 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link 
-          href="/resources/sources"
+        <Link
+          href="/library"
           className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
         >
           <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Academic Sources</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">Library</h3>
             <p className="mt-2 text-sm text-gray-600">
-              Curated collection of papers, books, and reports supporting our research.
+              Curated collection of papers, books, and other sources that inform our research.
             </p>
           </div>
         </Link>
 
-        <Link 
-          href="/resources/authors"
+        <Link
+          href="/people"
           className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
         >
           <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Expert Authors</h3>
+            <h3 className="text-base font-semibold leading-6 text-gray-900">People</h3>
             <p className="mt-2 text-sm text-gray-600">
-              Profiles of researchers and experts whose work informs our protocol development.
+              Profiles of contributors and researchers whose work informs our protocol development.
             </p>
           </div>
         </Link>
 
-        <Link 
+        <Link
           href="/reports"
           className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
         >
