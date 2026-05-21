@@ -11,6 +11,15 @@ import DocLayout from '@/components/layouts/DocLayout';
 import DocsIndexLayout from '@/components/layouts/DocsIndexLayout';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
+import WikiArticle from '@/components/layouts/WikiArticle';
+import EssayDetail from '@/components/layouts/EssayDetail';
+import LibraryEntry from '@/components/layouts/LibraryEntry';
+import InsightDetail from '@/components/layouts/InsightDetail';
+import ObservationDetail from '@/components/layouts/ObservationDetail';
+import HypothesisDetail from '@/components/layouts/HypothesisDetail';
+import PersonProfile from '@/components/layouts/PersonProfile';
+import GlossaryTerm from '@/components/layouts/GlossaryTerm';
+import BlogPost from '@/components/layouts/BlogPost';
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;
@@ -69,13 +78,38 @@ export default async function CatchAll({ params }: PageProps) {
     );
   }
 
-  return (
-    <ArticleLayout
-      collection={resolved.collection.name}
-      segments={resolved.innerSegments}
-      frontmatter={parsed.frontmatter}
-      html={parsed.rendered.html}
-      toc={parsed.rendered.toc}
-    />
-  );
+  const articleProps = {
+    segments: resolved.innerSegments,
+    frontmatter: parsed.frontmatter,
+    html: parsed.rendered.html,
+    toc: parsed.rendered.toc,
+  };
+
+  switch (resolved.collection.layout) {
+    case 'WikiArticle':
+      return <WikiArticle {...articleProps} />;
+    case 'EssayDetail':
+      return <EssayDetail {...articleProps} />;
+    case 'LibraryEntry':
+      return <LibraryEntry {...articleProps} />;
+    case 'InsightDetail':
+      return <InsightDetail {...articleProps} />;
+    case 'ObservationDetail':
+      return <ObservationDetail {...articleProps} />;
+    case 'HypothesisDetail':
+      return <HypothesisDetail {...articleProps} />;
+    case 'PersonProfile':
+      return <PersonProfile {...articleProps} />;
+    case 'GlossaryTerm':
+      return <GlossaryTerm {...articleProps} />;
+    case 'BlogPost':
+      return <BlogPost {...articleProps} />;
+    default:
+      return (
+        <ArticleLayout
+          collection={resolved.collection.name}
+          {...articleProps}
+        />
+      );
+  }
 }
