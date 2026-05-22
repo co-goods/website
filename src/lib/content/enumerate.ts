@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getDocsTree } from './docs';
+import { isCollectionEnabled } from '@/site.config';
 
 const RESEARCH_ROOT = path.join(process.cwd(), 'research');
 
@@ -59,13 +60,15 @@ export function enumerateAllParams(): { slug: string[] }[] {
   const params: { slug: string[] }[] = [];
 
   // /docs index + /docs/<category> index + /docs/<category>/<slug> pages
-  params.push({ slug: ['docs'] });
-  const tree = getDocsTree();
-  for (const category of tree.categories) {
-    params.push({ slug: ['docs', category.name] });
-  }
-  for (const page of tree.flatList) {
-    params.push({ slug: page.url.replace(/^\//, '').split('/') });
+  if (isCollectionEnabled('docs')) {
+    params.push({ slug: ['docs'] });
+    const tree = getDocsTree();
+    for (const category of tree.categories) {
+      params.push({ slug: ['docs', category.name] });
+    }
+    for (const page of tree.flatList) {
+      params.push({ slug: page.url.replace(/^\//, '').split('/') });
+    }
   }
 
   // Simple-folder collections — index + leaf pages
@@ -74,6 +77,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
     'glossary', 'people', 'tags',
   ];
   for (const folder of bareCollections) {
+    if (!isCollectionEnabled(folder)) continue;
     params.push({ slug: [folder] });
     for (const slug of listMdSlugs(folder)) {
       params.push({ slug: [folder, slug] });
@@ -81,42 +85,52 @@ export function enumerateAllParams(): { slug: string[] }[] {
   }
 
   // /library — index + nested indexes + leaf pages
-  params.push({ slug: ['library'] });
-  for (const slug of listMdSlugs('library')) {
-    params.push({ slug: ['library', slug] });
-  }
-  if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publishers'))) {
-    params.push({ slug: ['library', 'publishers'] });
-    for (const slug of listMdSlugs('library/publishers')) {
-      params.push({ slug: ['library', 'publishers', slug] });
+  if (isCollectionEnabled('library')) {
+    params.push({ slug: ['library'] });
+    for (const slug of listMdSlugs('library')) {
+      params.push({ slug: ['library', slug] });
     }
-  }
-  if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publications'))) {
-    params.push({ slug: ['library', 'publications'] });
-    for (const slug of listMdSlugs('library/publications')) {
-      params.push({ slug: ['library', 'publications', slug] });
+    if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publishers'))) {
+      params.push({ slug: ['library', 'publishers'] });
+      for (const slug of listMdSlugs('library/publishers')) {
+        params.push({ slug: ['library', 'publishers', slug] });
+      }
+    }
+    if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publications'))) {
+      params.push({ slug: ['library', 'publications'] });
+      for (const slug of listMdSlugs('library/publications')) {
+        params.push({ slug: ['library', 'publications', slug] });
+      }
     }
   }
 
   // /blog — index + posts
-  params.push({ slug: ['blog'] });
-  for (const { slug } of listBlogSlugs()) {
-    params.push({ slug: ['blog', slug] });
+  if (isCollectionEnabled('blog')) {
+    params.push({ slug: ['blog'] });
+    for (const { slug } of listBlogSlugs()) {
+      params.push({ slug: ['blog', slug] });
+    }
   }
 
   // /reports — index + per-report URLs
-  params.push({ slug: ['reports'] });
-  for (const reportPath of listReportPaths()) {
-    params.push({ slug: ['reports', ...reportPath] });
+  if (isCollectionEnabled('reports')) {
+    params.push({ slug: ['reports'] });
+    for (const reportPath of listReportPaths()) {
+      params.push({ slug: ['reports', ...reportPath] });
+    }
   }
 
   // /contributing
-  if (fs.existsSync(path.join(RESEARCH_ROOT, 'CONTRIBUTING.md'))) {
-    params.push({ slug: ['contributing'] });
+  if (isCollectionEnabled('contributing')) {
+    if (fs.existsSync(path.join(RESEARCH_ROOT, 'CONTRIBUTING.md'))) {
+      params.push({ slug: ['contributing'] });
+    }
   }
 
   // /topics — index only (aggregation is Phase 4)
-  params.push({ slug: ['topics'] });
+  if (isCollectionEnabled('topics')) {
+    params.push({ slug: ['topics'] });
+  }
 
   return params;
 }
