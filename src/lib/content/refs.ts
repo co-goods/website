@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { CollectionName, getCollection } from './collections';
 
-const RESEARCH_ROOT = path.join(process.cwd(), 'research');
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
 export interface ResolvedRef {
   url: string;
@@ -34,12 +34,12 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
 
   switch (collection) {
     case 'library':
-      filepath = path.join(RESEARCH_ROOT, 'library', `${slug}.md`);
+      filepath = path.join(CONTENT_ROOT, 'library', `${slug}.md`);
       url = `/library/${slug}`;
       break;
     case 'blog': {
       url = `/blog/${slug}`;
-      const blogRoot = path.join(RESEARCH_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, 'blog');
       if (fs.existsSync(blogRoot)) {
         outer: for (const year of fs.readdirSync(blogRoot)) {
           const yearPath = path.join(blogRoot, year);
@@ -61,7 +61,7 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
       url = `/reports/${slug}`;
       // Best-effort title lookup: latest version
       {
-        const reportFolder = path.join(RESEARCH_ROOT, 'reports', slug);
+        const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
         if (fs.existsSync(reportFolder)) {
           const versions = fs.readdirSync(reportFolder)
             .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
@@ -73,7 +73,7 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
       }
       break;
     default:
-      filepath = path.join(RESEARCH_ROOT, cfg.folder, `${slug}.md`);
+      filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
       url = `/${collection}/${slug}`;
   }
 

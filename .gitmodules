@@ -1,6 +1,6 @@
-[submodule "research"]
-	path = research
-	url = https://github.com/co-goods/research.git
+[submodule "content"]
+	path = content
+	url = https://github.com/co-goods/content.git
 	branch = main
 	update = rebase
 [submodule "grund"]

@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { getDocsTree, DocCategory } from './docs';
 
-const RESEARCH_ROOT = path.join(process.cwd(), 'research');
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
 export interface IndexItem {
   url: string;
@@ -44,7 +44,7 @@ function listFolderAsIndex(
   title: string,
   description?: string,
 ): IndexData {
-  const dir = path.join(RESEARCH_ROOT, folder);
+  const dir = path.join(CONTENT_ROOT, folder);
   if (!fs.existsSync(dir)) return { title, description, items: [] };
 
   const items: IndexItem[] = [];
@@ -105,7 +105,7 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
     }
     case 'blog': {
       // Walk year/month subfolders and gather all posts.
-      const blogRoot = path.join(RESEARCH_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, 'blog');
       const items: IndexItem[] = [];
       if (fs.existsSync(blogRoot)) {
         for (const year of fs.readdirSync(blogRoot)) {
@@ -132,7 +132,7 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return { title: 'Blog', description: 'Project narrative.', items };
     }
     case 'reports': {
-      const reportsRoot = path.join(RESEARCH_ROOT, 'reports');
+      const reportsRoot = path.join(CONTENT_ROOT, 'reports');
       const items: IndexItem[] = [];
       if (fs.existsSync(reportsRoot)) {
         for (const slug of fs.readdirSync(reportsRoot)) {

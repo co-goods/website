@@ -3,10 +3,10 @@ import path from 'path';
 import { getDocsTree } from './docs';
 import { isCollectionEnabled } from '@/site.config';
 
-const RESEARCH_ROOT = path.join(process.cwd(), 'research');
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
 function listMdSlugs(folder: string): string[] {
-  const dir = path.join(RESEARCH_ROOT, folder);
+  const dir = path.join(CONTENT_ROOT, folder);
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
     .filter(f => f.endsWith('.md') && !f.startsWith('template-') && !f.startsWith('_'))
@@ -14,7 +14,7 @@ function listMdSlugs(folder: string): string[] {
 }
 
 function listBlogSlugs(): { slug: string }[] {
-  const blogRoot = path.join(RESEARCH_ROOT, 'blog');
+  const blogRoot = path.join(CONTENT_ROOT, 'blog');
   if (!fs.existsSync(blogRoot)) return [];
   const slugs: { slug: string }[] = [];
   for (const year of fs.readdirSync(blogRoot)) {
@@ -34,7 +34,7 @@ function listBlogSlugs(): { slug: string }[] {
 }
 
 function listReportPaths(): string[][] {
-  const reportsRoot = path.join(RESEARCH_ROOT, 'reports');
+  const reportsRoot = path.join(CONTENT_ROOT, 'reports');
   if (!fs.existsSync(reportsRoot)) return [];
   const paths: string[][] = [];
 
@@ -90,13 +90,13 @@ export function enumerateAllParams(): { slug: string[] }[] {
     for (const slug of listMdSlugs('library')) {
       params.push({ slug: ['library', slug] });
     }
-    if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publishers'))) {
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'library', 'publishers'))) {
       params.push({ slug: ['library', 'publishers'] });
       for (const slug of listMdSlugs('library/publishers')) {
         params.push({ slug: ['library', 'publishers', slug] });
       }
     }
-    if (fs.existsSync(path.join(RESEARCH_ROOT, 'library', 'publications'))) {
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'library', 'publications'))) {
       params.push({ slug: ['library', 'publications'] });
       for (const slug of listMdSlugs('library/publications')) {
         params.push({ slug: ['library', 'publications', slug] });
@@ -122,7 +122,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
 
   // /contributing
   if (isCollectionEnabled('contributing')) {
-    if (fs.existsSync(path.join(RESEARCH_ROOT, 'CONTRIBUTING.md'))) {
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'CONTRIBUTING.md'))) {
       params.push({ slug: ['contributing'] });
     }
   }
