@@ -3,40 +3,52 @@
  *
  * Syntaxes:
  *
- * 1. **Qualified-path** (the Co-Goods convention):
- *    - `[[<collection>/<slug>]]`              → `[<slug>](/<collection>/<slug>)`
- *    - `[[<collection>/<slug>|<display>]]`    → `[<display>](/<collection>/<slug>)`
- *    - Multi-segment paths work too: `[[library/publishers/example-press]]`
- *    - The collection must be in the known set; URL is the wikilink path
- *      verbatim, prefixed with `/`.
+ * 1. **Qualified-path** (the Co-Goods convention): the first segment is
+ *    a collection name from the content-repo folder layout. The URL is
+ *    built using that collection's URL prefix (which may not match the
+ *    folder name).
  *
- * 2. **Bare-slug** (no slash): falls through to `/topics/<slug>`. The
- *    topic-aggregation page is the natural concept-level destination for an
- *    unqualified reference. Build-time validation against a slug index is a
- *    later phase.
+ *      [[wiki/network-coordination]]
+ *        → /resources/wiki/network-coordination
+ *
+ *      [[essays/on-collaboration]]
+ *        → /thinking/essays/on-collaboration
+ *
+ *      [[insights/asynchronous-coordination-density]]
+ *        → /research/insights/asynchronous-coordination-density
+ *
+ *      [[people/jane-doe|Jane Doe]]
+ *        → /people/jane-doe (link text: "Jane Doe")
+ *
+ *      [[library/publishers/example-press]]
+ *        → /library/publishers/example-press (multi-segment path)
+ *
+ * 2. **Bare-slug** (no slash): falls through to /topics/<slug>. The
+ *    topic-aggregation page is the natural concept-level destination
+ *    for an unqualified reference. Build-time validation against a
+ *    slug index is a later phase.
  */
 
-const KNOWN_COLLECTIONS = new Set([
-  'docs',
-  'wiki',
-  'essays',
-  'reports',
-  'insights',
-  'observations',
-  'hypotheses',
-  'library',
-  'glossary',
-  'blog',
-  'people',
-  'tags',
-  'topics',
-  'contributing',
-]);
+import { collections, CollectionName, getCollection } from './content/collections';
 
-function isQualified(path: string): boolean {
-  if (!path.includes('/')) return false;
-  const first = path.split('/')[0];
+const KNOWN_COLLECTIONS = new Set<string>(Object.keys(collections));
+
+function isQualified(linkPath: string): boolean {
+  if (!linkPath.includes('/')) return false;
+  const first = linkPath.split('/')[0];
   return KNOWN_COLLECTIONS.has(first);
+}
+
+// Build the website URL for a qualified path like "wiki/<slug>" or
+// "library/publishers/<slug>". Uses the collection's urlPrefix + remaining
+// segments verbatim. For collections with multi-segment URL paths (e.g.
+// library nested under /library/publishers/), the urlPrefix is /library
+// and the remaining segments are joined to it.
+function buildUrlFromQualifiedPath(linkPath: string): string {
+  const [collectionName, ...rest] = linkPath.split('/');
+  const cfg = getCollection(collectionName);
+  if (!cfg) return `/${linkPath}`;
+  return `${cfg.urlPrefix}/${rest.join('/')}`;
 }
 
 // Mask out code regions (fenced ```...``` and inline `...`) before running
@@ -63,9 +75,8 @@ function transformWikilinks(content: string): string {
     /\[\[([a-z0-9\-/]+)\|([^\]]+)\]\]/g,
     (_match, linkPath, display) => {
       if (isQualified(linkPath)) {
-        return `[${display}](/${linkPath})`;
+        return `[${display}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      // Bare-slug with display: link to topic page
       return `[${display}](/topics/${linkPath})`;
     },
   );
@@ -76,9 +87,8 @@ function transformWikilinks(content: string): string {
     (_match, linkPath) => {
       if (isQualified(linkPath)) {
         const lastSegment = linkPath.split('/').pop();
-        return `[${lastSegment}](/${linkPath})`;
+        return `[${lastSegment}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      // Bare slug → topic page
       return `[${linkPath}](/topics/${linkPath})`;
     },
   );
@@ -89,3 +99,7 @@ function transformWikilinks(content: string): string {
 export function processObsidianLinks(content: string): string {
   return withCodeRegionsMasked(content, transformWikilinks);
 }
+
+// Re-exported for use by other modules if they need the canonical list.
+export const _knownCollections: Set<string> = KNOWN_COLLECTIONS;
+export type _CollectionName = CollectionName;

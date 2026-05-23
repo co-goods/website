@@ -23,22 +23,20 @@ function readTitle(filepath: string, fallback: string): string {
   return fallback;
 }
 
-// Resolve a bare slug inside a known collection. For collections whose folder
-// layout is non-trivial (blog, reports), the URL is the bare slug form.
+// Resolve a bare slug inside a known collection. URL is built from the
+// collection's urlPrefix so it adapts to URL grouping changes automatically.
 export function resolveRef(collection: CollectionName, slug: string): ResolvedRef {
   const cfg = getCollection(collection);
   if (!cfg) return { url: `/${collection}/${slug}`, label: slug, exists: false };
 
   let filepath: string | null = null;
-  let url: string;
+  const url = `${cfg.urlPrefix}/${slug}`;
 
   switch (collection) {
     case 'library':
       filepath = path.join(CONTENT_ROOT, 'library', `${slug}.md`);
-      url = `/library/${slug}`;
       break;
     case 'blog': {
-      url = `/blog/${slug}`;
       const blogRoot = path.join(CONTENT_ROOT, 'blog');
       if (fs.existsSync(blogRoot)) {
         outer: for (const year of fs.readdirSync(blogRoot)) {
@@ -57,24 +55,20 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
       }
       break;
     }
-    case 'reports':
-      url = `/reports/${slug}`;
-      // Best-effort title lookup: latest version
-      {
-        const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
-        if (fs.existsSync(reportFolder)) {
-          const versions = fs.readdirSync(reportFolder)
-            .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
-            .sort();
-          if (versions.length) {
-            filepath = path.join(reportFolder, versions[versions.length - 1], `${slug}.md`);
-          }
+    case 'reports': {
+      const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
+      if (fs.existsSync(reportFolder)) {
+        const versions = fs.readdirSync(reportFolder)
+          .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
+          .sort();
+        if (versions.length) {
+          filepath = path.join(reportFolder, versions[versions.length - 1], `${slug}.md`);
         }
       }
       break;
+    }
     default:
       filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
-      url = `/${collection}/${slug}`;
   }
 
   const exists = !!(filepath && fs.existsSync(filepath));
@@ -82,7 +76,10 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
   return { url, label, exists };
 }
 
-// Resolve a qualified-path wikilink reference like "glossary/network-coordination".
+// Resolve a qualified-path wikilink reference like "wiki/network-coordination"
+// or "library/olleros-antirival-goods". The first segment is the
+// collection name (per the content-repo folder layout); the URL is built
+// from that collection's urlPrefix.
 // Bare (no slash) refs default to the topic-aggregation page.
 export function resolveQualifiedRef(qualified: string): ResolvedRef {
   if (qualified.includes('/')) {

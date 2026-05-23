@@ -7,12 +7,16 @@ import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
   getCollectionIndex,
   getDocsCategoryIndex,
+  getResearchSourcesIndex,
+  getResearchTagsIndex,
+  getUmbrellaIndex,
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import DocLayout from '@/components/layouts/DocLayout';
 import DocsIndexLayout from '@/components/layouts/DocsIndexLayout';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
+import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
 import WikiArticle from '@/components/layouts/WikiArticle';
 import EssayDetail from '@/components/layouts/EssayDetail';
 import LibraryEntry from '@/components/layouts/LibraryEntry';
@@ -47,6 +51,37 @@ export default async function CatchAll({ params }: PageProps) {
   const resolved = resolveUrl(slug);
   if (!resolved) notFound();
 
+  // Umbrella landings — /thinking, /resources, /research
+  if (resolved.kind === 'umbrella') {
+    const data = getUmbrellaIndex(resolved.name);
+    return <UmbrellaLandingLayout name={resolved.name} data={data} />;
+  }
+
+  // Derived filter views — /research/sources, /research/tags
+  if (resolved.kind === 'derived') {
+    if (resolved.view === 'research-sources') {
+      const data = getResearchSourcesIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="library"
+          segments={['research', 'sources']}
+        />
+      );
+    }
+    if (resolved.view === 'research-tags') {
+      const data = getResearchTagsIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="tags"
+          segments={['research', 'tags']}
+        />
+      );
+    }
+  }
+
+  // Below: standard page / index resolution
   if (!isCollectionEnabled(resolved.collection.name)) {
     notFound();
   }
