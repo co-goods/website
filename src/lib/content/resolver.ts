@@ -177,6 +177,20 @@ function resolveContributingPage(): ResolvedPage | null {
   };
 }
 
+function resolveSingleFilePage(
+  collectionName: 'manifesto' | 'about',
+  fileBasename: string,
+): ResolvedPage | null {
+  const filepath = path.join(CONTENT_ROOT, fileBasename);
+  if (!fs.existsSync(filepath)) return null;
+  return {
+    kind: 'page',
+    collection: getCollection(collectionName)!,
+    filepath,
+    innerSegments: [],
+  };
+}
+
 function resolvePage(slug: string[]): ResolvedPage | null {
   if (!slug.length) return null;
 
@@ -292,6 +306,14 @@ export function resolveUrl(slug: string[]): ResolveResult | null {
 
   if (slug.length === 1 && slug[0] === 'contributing') {
     const page = resolveContributingPage();
+    if (page) return page;
+  }
+  if (slug.length === 1 && slug[0] === 'manifesto') {
+    const page = resolveSingleFilePage('manifesto', 'manifesto.md');
+    if (page) return page;
+  }
+  if (slug.length === 1 && slug[0] === 'about') {
+    const page = resolveSingleFilePage('about', 'about.md');
     if (page) return page;
   }
 

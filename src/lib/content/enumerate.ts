@@ -150,6 +150,20 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
+  // Manifesto (single-file collection)
+  if (isCollectionEnabled('manifesto')) {
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'manifesto.md'))) {
+      params.push({ slug: ['manifesto'] });
+    }
+  }
+
+  // About (single-file collection — moved from app/about/page.tsx)
+  if (isCollectionEnabled('about')) {
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'about.md'))) {
+      params.push({ slug: ['about'] });
+    }
+  }
+
   // /research/sources, /research/tags derived views
   if (isCollectionEnabled('research') || isCollectionEnabled('library')) {
     params.push({ slug: ['research', 'sources'] });

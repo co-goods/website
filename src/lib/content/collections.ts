@@ -21,7 +21,9 @@ export type CollectionName =
   | 'organizations'
   | 'tags'
   | 'topics'
-  | 'contributing';
+  | 'contributing'
+  | 'manifesto'
+  | 'about';
 
 export type ResolverKind =
   | 'bare-slug'
@@ -55,6 +57,8 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   tags:         { name: 'tags',         folder: 'tags',         urlPrefix: '/tags',                  resolver: 'bare-slug',        layout: 'ArticleLayout' },
   topics:       { name: 'topics',       folder: '',             urlPrefix: '/topics',                resolver: 'bare-slug',        layout: 'ArticleLayout' },
   contributing: { name: 'contributing', folder: '',             urlPrefix: '/contributing',          resolver: 'single-file',      layout: 'ArticleLayout' },
+  manifesto:    { name: 'manifesto',    folder: '',             urlPrefix: '/manifesto',             resolver: 'single-file',      layout: 'ArticleLayout' },
+  about:        { name: 'about',        folder: '',             urlPrefix: '/about',                 resolver: 'single-file',      layout: 'ArticleLayout' },
 };
 
 export function getCollection(name: string): CollectionConfig | null {

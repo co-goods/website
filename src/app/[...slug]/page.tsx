@@ -130,9 +130,17 @@ export default async function CatchAll({ params }: PageProps) {
     );
   }
 
+  // Merge bodyTitle as a frontmatter fallback if frontmatter.title is missing.
+  // This avoids the duplicate-H1 issue: the layout's h1 uses the body's H1
+  // text, and the H1 has already been stripped from the rendered body.
+  const mergedFrontmatter =
+    parsed.bodyTitle && !parsed.frontmatter.title
+      ? { ...parsed.frontmatter, title: parsed.bodyTitle }
+      : parsed.frontmatter;
+
   const articleProps = {
     segments: resolved.innerSegments,
-    frontmatter: parsed.frontmatter,
+    frontmatter: mergedFrontmatter,
     html: parsed.rendered.html,
     toc: parsed.rendered.toc,
   };

@@ -33,6 +33,8 @@ export const enabledCollections = {
   topics: false,
   docs: false,
   contributing: true,
+  manifesto: true,
+  about: true,
   // Umbrella landings — reachable when devMode or when any child is enabled.
   thinking: false,
   resources: false,
@@ -50,6 +52,8 @@ export const enabledPages = {
 // Everything else is noindex,nofollow.
 export const indexablePaths = new Set<string>([
   '/',
+  '/manifesto',
+  '/about',
   // Add to this set only when a page is ready for public discovery.
 ]);
 
