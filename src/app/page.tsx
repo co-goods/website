@@ -1,77 +1,70 @@
-import Link from 'next/link';
+import { Hero, Quote, Callout, EmailSignup, CTA } from '@/components/blocks';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 sm:text-6xl">
-          Co-Goods
-        </h1>
-        <p className="mt-6 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
-          Developing a protocol and token for co-created and networked physical products that become more valuable through shared use and collaborative ownership.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link
-            href="/wiki"
-            className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Explore Research
-          </Link>
-          <Link href="/about" className="text-sm font-semibold leading-6 text-gray-900">
-            Learn more <span aria-hidden="true">→</span>
-          </Link>
+    <>
+      <Hero
+        variant="gradient"
+        eyebrow="Open-innovation research"
+        title="Co-Goods"
+        subtitle="A protocol for co-created and networked physical products that become more valuable through shared use and collaborative ownership."
+        cta={{ label: 'Stay in the loop', href: '#signup' }}
+        secondaryCta={{ label: 'On GitHub', href: 'https://github.com/co-goods' }}
+      />
+
+      <section className="px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+            What we&rsquo;re working on
+          </h2>
+          <div className="mt-5 space-y-4 text-base sm:text-lg text-gray-700 leading-relaxed">
+            <p>
+              Co-Goods is a research project developing the protocol layer
+              for goods that get better as more people use them together —
+              <em> antirival</em> goods, in the academic sense. Physical
+              products designed and produced collectively, with a shared
+              fabric of design, manufacturing, and value.
+            </p>
+            <p>
+              The work is open. Findings live in a public research repo;
+              the protocol&rsquo;s vocabulary, mechanics, and decisions are
+              drafted in the open. This site is the public face of that
+              work — in early development.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <Link
-          href="/insights"
-          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
-        >
-          <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Research Insights</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Categorized research findings from empirical, theoretical, and practical perspectives.
-            </p>
-          </div>
-        </Link>
+      <Quote cite="An old proverb, repurposed">
+        Many hands make light work — and shared work, when designed well,
+        makes more than the sum of its parts.
+      </Quote>
 
-        <Link
-          href="/library"
-          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
-        >
-          <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Library</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Curated collection of papers, books, and other sources that inform our research.
-            </p>
-          </div>
-        </Link>
+      <Callout type="info" title="Early days">
+        The Co-Goods website is a work in progress. We&rsquo;re sharing what
+        we have so the community can engage early. Most pages are not yet
+        public — they&rsquo;re being assembled. Sign up below to hear when
+        more lands.
+      </Callout>
 
-        <Link
-          href="/people"
-          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
-        >
-          <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">People</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Profiles of contributors and researchers whose work informs our protocol development.
-            </p>
-          </div>
-        </Link>
+      <section id="signup" className="px-4 sm:px-6 lg:px-8 py-16 bg-gray-50">
+        <div className="mx-auto max-w-xl">
+          <EmailSignup
+            variant="card"
+            heading="Get updates"
+            description="A short note when there's something new — usually no more than once a month."
+            source="home"
+          />
+        </div>
+      </section>
 
-        <Link
-          href="/reports"
-          className="relative overflow-hidden rounded-lg bg-white px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:px-10 hover:shadow-2xl transition-shadow"
-        >
-          <div className="mx-auto max-w-md">
-            <h3 className="text-base font-semibold leading-6 text-gray-900">Reports</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Comprehensive research reports, whitepapers, and technical documentation.
-            </p>
-          </div>
-        </Link>
-      </div>
-    </div>
+      <CTA
+        heading="Contribute"
+        description="Co-Goods is open-innovation research. The protocol evolves through community contribution. Issues, pull requests, and discussion are welcome."
+        label="See how to contribute"
+        href="/contributing"
+        variant="secondary"
+      />
+    </>
   );
 }

@@ -1,5 +1,7 @@
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { resolveUrl } from '@/lib/content/resolver';
+import { isCollectionEnabled, isIndexable } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
 import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
@@ -29,10 +31,25 @@ export async function generateStaticParams() {
   return enumerateAllParams();
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const url = '/' + slug.join('/');
+  if (isIndexable(url)) {
+    return {};
+  }
+  return {
+    robots: { index: false, follow: false },
+  };
+}
+
 export default async function CatchAll({ params }: PageProps) {
   const { slug } = await params;
   const resolved = resolveUrl(slug);
   if (!resolved) notFound();
+
+  if (!isCollectionEnabled(resolved.collection.name)) {
+    notFound();
+  }
 
   if (resolved.kind === 'index') {
     const collectionName = resolved.collection.name;
