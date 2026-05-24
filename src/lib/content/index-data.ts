@@ -205,6 +205,21 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
 
 // ---------- Derived views ----------
 
+// /research/authors — people with affiliation in cited-author /
+// external-author / unclaimed (inverse of the /people index filter)
+export function getResearchAuthorsIndex(): IndexData {
+  return listFolderAsIndex(
+    folderOf('people'),
+    urlPrefixOf('people'),
+    'Authors',
+    'Cited and external authors referenced in Co-Goods research.',
+    fm => {
+      const a = typeof fm.affiliation === 'string' ? fm.affiliation : '';
+      return a === 'cited-author' || a === 'external-author' || a === 'unclaimed';
+    },
+  );
+}
+
 // /research/sources — library entries flagged is-cited: true
 export function getResearchSourcesIndex(): IndexData {
   return listFolderAsIndex(
@@ -323,6 +338,7 @@ export function getUmbrellaIndex(
           { heading: 'Hypotheses', url: urlPrefixOf('hypotheses'), description: 'Testable predictions building on insights.' },
           { heading: 'Reports', url: urlPrefixOf('reports'), description: 'Formal versioned compilations of research.' },
           { heading: 'Sources', url: '/research/sources', description: 'Library entries cited in research.' },
+          { heading: 'Authors', url: '/research/authors', description: 'Cited and external authors referenced in research.' },
           { heading: 'Tags', url: '/research/tags', description: 'Tags appearing in research collections.' },
         ],
       };

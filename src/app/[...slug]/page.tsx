@@ -7,6 +7,7 @@ import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
   getCollectionIndex,
   getDocsCategoryIndex,
+  getResearchAuthorsIndex,
   getResearchSourcesIndex,
   getResearchTagsIndex,
   getUmbrellaIndex,
@@ -76,6 +77,16 @@ export default async function CatchAll({ params }: PageProps) {
           data={data}
           collectionName="tags"
           segments={['research', 'tags']}
+        />
+      );
+    }
+    if (resolved.view === 'research-authors') {
+      const data = getResearchAuthorsIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="people"
+          segments={['research', 'authors']}
         />
       );
     }

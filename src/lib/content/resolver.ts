@@ -276,7 +276,7 @@ function resolveUmbrella(slug: string[]): ResolvedUmbrella | null {
 
 export interface ResolvedDerived {
   kind: 'derived';
-  view: 'research-sources' | 'research-tags';
+  view: 'research-sources' | 'research-tags' | 'research-authors';
   slug?: string;
 }
 
@@ -289,6 +289,9 @@ function resolveDerived(slug: string[]): ResolvedDerived | null {
   }
   if (slug.length === 3 && slug[0] === 'research' && slug[1] === 'tags') {
     return { kind: 'derived', view: 'research-tags', slug: slug[2] };
+  }
+  if (slug.length === 2 && slug[0] === 'research' && slug[1] === 'authors') {
+    return { kind: 'derived', view: 'research-authors' };
   }
   return null;
 }

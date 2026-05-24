@@ -164,12 +164,15 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // /research/sources, /research/tags derived views
+  // /research/sources, /research/tags, /research/authors derived views
   if (isCollectionEnabled('research') || isCollectionEnabled('library')) {
     params.push({ slug: ['research', 'sources'] });
   }
   if (isCollectionEnabled('research') || isCollectionEnabled('tags')) {
     params.push({ slug: ['research', 'tags'] });
+  }
+  if (isCollectionEnabled('research') || isCollectionEnabled('people')) {
+    params.push({ slug: ['research', 'authors'] });
   }
 
   // /topics — index only
