@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { CollectionName, getCollection } from './collections';
+import { CollectionName, collections, getCollection } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
@@ -34,10 +34,10 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
 
   switch (collection) {
     case 'library':
-      filepath = path.join(CONTENT_ROOT, 'library', `${slug}.md`);
+      filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
       break;
     case 'blog': {
-      const blogRoot = path.join(CONTENT_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, cfg.folder);
       if (fs.existsSync(blogRoot)) {
         outer: for (const year of fs.readdirSync(blogRoot)) {
           const yearPath = path.join(blogRoot, year);
@@ -56,7 +56,7 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
       break;
     }
     case 'reports': {
-      const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
+      const reportFolder = path.join(CONTENT_ROOT, cfg.folder, slug);
       if (fs.existsSync(reportFolder)) {
         const versions = fs.readdirSync(reportFolder)
           .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
@@ -76,17 +76,37 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
   return { url, label, exists };
 }
 
-// Resolve a qualified-path wikilink reference like "wiki/network-coordination"
-// or "library/olleros-antirival-goods". The first segment is the
-// collection name (per the content-repo folder layout); the URL is built
-// from that collection's urlPrefix.
+// Resolve a qualified-path wikilink reference. The wikilink path mirrors
+// the folder layout in the content repo — e.g.
+// `[[research/insights/foo]]` → file at `content/research/insights/foo.md`,
+// URL `/research/insights/foo`. Top-level collections (people, blog,
+// tags, organizations) keep their single-segment prefix.
 // Bare (no slash) refs default to the topic-aggregation page.
 export function resolveQualifiedRef(qualified: string): ResolvedRef {
-  if (qualified.includes('/')) {
-    const [collection, ...rest] = qualified.split('/');
-    const slug = rest.join('/');
-    const cfg = getCollection(collection);
-    if (cfg) return resolveRef(collection as CollectionName, slug);
+  if (!qualified.includes('/')) {
+    return { url: `/topics/${qualified}`, label: qualified, exists: false };
   }
-  return { url: `/topics/${qualified}`, label: qualified, exists: false };
+
+  // Find the collection by longest-matching folder path. Most collections
+  // are 2-segment (research/insights, resources/wiki); top-level collections
+  // are 1-segment (people, blog, tags).
+  const cfg = findCollectionByQualified(qualified);
+  if (!cfg) {
+    return { url: `/${qualified}`, label: qualified.split('/').pop() || qualified, exists: false };
+  }
+
+  // Compute slug = everything after the collection's folder path.
+  const remainder = qualified.slice(cfg.folder.length).replace(/^\//, '');
+  return resolveRef(cfg.name, remainder);
+}
+
+function findCollectionByQualified(qualified: string) {
+  const sorted = Object.values(collections)
+    .filter(c => c.folder)
+    .sort((a, b) => b.folder.length - a.folder.length);
+  for (const cfg of sorted) {
+    if (qualified === cfg.folder) return cfg;
+    if (qualified.startsWith(cfg.folder + '/')) return cfg;
+  }
+  return null;
 }

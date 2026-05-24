@@ -2,9 +2,10 @@
 // Each collection declares which layout to use, which resolver handles
 // its URL → file mapping, and the URL prefix that surfaces it to readers.
 //
-// The URL prefix is independent of the folder name in the content repo —
-// folders stay flat (wiki/, essays/, etc.); the prefix is applied by the
-// routing layer. This lets URL grouping evolve without renaming files.
+// Folder structure in the content repo mirrors the URL groupings: collections
+// under /research/, /resources/, /thinking/ live in matching subfolders;
+// cross-cutting collections (blog, people, organizations, tags, docs) stay
+// at the content root.
 
 export type CollectionName =
   | 'docs'
@@ -42,23 +43,23 @@ export interface CollectionConfig {
 }
 
 export const collections: Record<CollectionName, CollectionConfig> = {
-  docs:         { name: 'docs',         folder: 'docs',         urlPrefix: '/docs',                  resolver: 'docs-prefixed',    layout: 'DocLayout' },
-  wiki:         { name: 'wiki',         folder: 'wiki',         urlPrefix: '/resources/wiki',        resolver: 'bare-slug',        layout: 'WikiArticle' },
-  glossary:     { name: 'glossary',     folder: 'glossary',     urlPrefix: '/resources/glossary',    resolver: 'bare-slug',        layout: 'GlossaryTerm' },
-  library:      { name: 'library',      folder: 'library',      urlPrefix: '/library',               resolver: 'library-nested',   layout: 'LibraryEntry' },
-  essays:       { name: 'essays',       folder: 'essays',       urlPrefix: '/thinking/essays',       resolver: 'bare-slug',        layout: 'EssayDetail' },
-  insights:     { name: 'insights',     folder: 'insights',     urlPrefix: '/research/insights',     resolver: 'bare-slug',        layout: 'InsightDetail' },
-  observations: { name: 'observations', folder: 'observations', urlPrefix: '/research/observations', resolver: 'bare-slug',        layout: 'ObservationDetail' },
-  hypotheses:   { name: 'hypotheses',   folder: 'hypotheses',   urlPrefix: '/research/hypotheses',   resolver: 'bare-slug',        layout: 'HypothesisDetail' },
-  reports:      { name: 'reports',      folder: 'reports',      urlPrefix: '/research/reports',      resolver: 'reports-versioned', layout: 'ArticleLayout' },
-  blog:         { name: 'blog',         folder: 'blog',         urlPrefix: '/blog',                  resolver: 'blog-flattened',   layout: 'BlogPost' },
-  people:       { name: 'people',       folder: 'people',       urlPrefix: '/people',                resolver: 'bare-slug',        layout: 'PersonProfile' },
-  organizations:{ name: 'organizations',folder: 'organizations',urlPrefix: '/organizations',         resolver: 'bare-slug',        layout: 'ArticleLayout' },
-  tags:         { name: 'tags',         folder: 'tags',         urlPrefix: '/tags',                  resolver: 'bare-slug',        layout: 'ArticleLayout' },
-  topics:       { name: 'topics',       folder: '',             urlPrefix: '/topics',                resolver: 'bare-slug',        layout: 'ArticleLayout' },
-  contributing: { name: 'contributing', folder: '',             urlPrefix: '/contributing',          resolver: 'single-file',      layout: 'ArticleLayout' },
-  manifesto:    { name: 'manifesto',    folder: '',             urlPrefix: '/manifesto',             resolver: 'single-file',      layout: 'ArticleLayout' },
-  about:        { name: 'about',        folder: '',             urlPrefix: '/about',                 resolver: 'single-file',      layout: 'ArticleLayout' },
+  docs:         { name: 'docs',         folder: 'docs',                  urlPrefix: '/docs',                  resolver: 'docs-prefixed',    layout: 'DocLayout' },
+  wiki:         { name: 'wiki',         folder: 'resources/wiki',        urlPrefix: '/resources/wiki',        resolver: 'bare-slug',        layout: 'WikiArticle' },
+  glossary:     { name: 'glossary',     folder: 'resources/glossary',    urlPrefix: '/resources/glossary',    resolver: 'bare-slug',        layout: 'GlossaryTerm' },
+  library:      { name: 'library',      folder: 'resources/library',     urlPrefix: '/resources/library',     resolver: 'library-nested',   layout: 'LibraryEntry' },
+  essays:       { name: 'essays',       folder: 'thinking/essays',       urlPrefix: '/thinking/essays',       resolver: 'bare-slug',        layout: 'EssayDetail' },
+  insights:     { name: 'insights',     folder: 'research/insights',     urlPrefix: '/research/insights',     resolver: 'bare-slug',        layout: 'InsightDetail' },
+  observations: { name: 'observations', folder: 'research/observations', urlPrefix: '/research/observations', resolver: 'bare-slug',        layout: 'ObservationDetail' },
+  hypotheses:   { name: 'hypotheses',   folder: 'research/hypotheses',   urlPrefix: '/research/hypotheses',   resolver: 'bare-slug',        layout: 'HypothesisDetail' },
+  reports:      { name: 'reports',      folder: 'research/reports',      urlPrefix: '/research/reports',      resolver: 'reports-versioned', layout: 'ArticleLayout' },
+  blog:         { name: 'blog',         folder: 'blog',                  urlPrefix: '/blog',                  resolver: 'blog-flattened',   layout: 'BlogPost' },
+  people:       { name: 'people',       folder: 'people',                urlPrefix: '/people',                resolver: 'bare-slug',        layout: 'PersonProfile' },
+  organizations:{ name: 'organizations',folder: 'organizations',         urlPrefix: '/organizations',         resolver: 'bare-slug',        layout: 'ArticleLayout' },
+  tags:         { name: 'tags',         folder: 'tags',                  urlPrefix: '/tags',                  resolver: 'bare-slug',        layout: 'ArticleLayout' },
+  topics:       { name: 'topics',       folder: '',                      urlPrefix: '/topics',                resolver: 'bare-slug',        layout: 'ArticleLayout' },
+  contributing: { name: 'contributing', folder: '',                      urlPrefix: '/contributing',          resolver: 'single-file',      layout: 'ArticleLayout' },
+  manifesto:    { name: 'manifesto',    folder: '',                      urlPrefix: '/thinking/manifesto',    resolver: 'single-file',      layout: 'ArticleLayout' },
+  about:        { name: 'about',        folder: '',                      urlPrefix: '/about',                 resolver: 'single-file',      layout: 'ArticleLayout' },
 };
 
 export function getCollection(name: string): CollectionConfig | null {

@@ -79,6 +79,10 @@ function urlPrefixOf(name: CollectionName): string {
   return collections[name].urlPrefix;
 }
 
+function folderOf(name: CollectionName): string {
+  return collections[name].folder;
+}
+
 export function getDocsRootIndex() {
   return getDocsTree();
 }
@@ -92,21 +96,21 @@ export function getDocsCategoryIndex(category: string): { category: DocCategory 
 export function getCollectionIndex(name: string, subPath: string[]): IndexData {
   switch (name) {
     case 'wiki':
-      return listFolderAsIndex('wiki', urlPrefixOf('wiki'), 'Wiki', 'Neutral, encyclopedic articles.');
+      return listFolderAsIndex(folderOf('wiki'), urlPrefixOf('wiki'), 'Wiki', 'Neutral, encyclopedic articles.');
     case 'essays':
-      return listFolderAsIndex('essays', urlPrefixOf('essays'), 'Essays', 'POV writing.');
+      return listFolderAsIndex(folderOf('essays'), urlPrefixOf('essays'), 'Essays', 'POV writing.');
     case 'insights':
-      return listFolderAsIndex('insights', urlPrefixOf('insights'), 'Insights', 'Atomic research findings.');
+      return listFolderAsIndex(folderOf('insights'), urlPrefixOf('insights'), 'Insights', 'Atomic research findings.');
     case 'observations':
-      return listFolderAsIndex('observations', urlPrefixOf('observations'), 'Observations', 'External signals from the world.');
+      return listFolderAsIndex(folderOf('observations'), urlPrefixOf('observations'), 'Observations', 'External signals from the world.');
     case 'hypotheses':
-      return listFolderAsIndex('hypotheses', urlPrefixOf('hypotheses'), 'Hypotheses', 'Testable predictions.');
+      return listFolderAsIndex(folderOf('hypotheses'), urlPrefixOf('hypotheses'), 'Hypotheses', 'Testable predictions.');
     case 'glossary':
-      return listFolderAsIndex('glossary', urlPrefixOf('glossary'), 'Glossary', 'Term definitions.');
+      return listFolderAsIndex(folderOf('glossary'), urlPrefixOf('glossary'), 'Glossary', 'Term definitions.');
     case 'people':
       // Hide cited-author / external-author profiles from the People index.
       return listFolderAsIndex(
-        'people',
+        folderOf('people'),
         urlPrefixOf('people'),
         'People',
         'Profiles of people involved in Co-Goods.',
@@ -116,29 +120,31 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
         },
       );
     case 'organizations':
-      return listFolderAsIndex('organizations', urlPrefixOf('organizations'), 'Organizations', 'Organisations involved with Co-Goods.');
+      return listFolderAsIndex(folderOf('organizations'), urlPrefixOf('organizations'), 'Organizations', 'Organisations involved with Co-Goods.');
     case 'tags':
-      return listFolderAsIndex('tags', urlPrefixOf('tags'), 'Tags', 'Operational labels.');
+      return listFolderAsIndex(folderOf('tags'), urlPrefixOf('tags'), 'Tags', 'Operational labels.');
     case 'library': {
+      const libFolder = folderOf('library');
+      const libUrl = urlPrefixOf('library');
       if (subPath[0] === 'publishers') {
-        return listFolderAsIndex('library/publishers', urlPrefixOf('library') + '/publishers', 'Publishers');
+        return listFolderAsIndex(`${libFolder}/publishers`, `${libUrl}/publishers`, 'Publishers');
       }
       if (subPath[0] === 'publications') {
-        return listFolderAsIndex('library/publications', urlPrefixOf('library') + '/publications', 'Publications');
+        return listFolderAsIndex(`${libFolder}/publications`, `${libUrl}/publications`, 'Publications');
       }
       // Default library index — filters by is-featured (recommended reading).
-      // /library/<slug> remains the canonical detail URL for individual items;
+      // /resources/library/<slug> is the canonical detail URL for items;
       // cited-only entries appear in the derived /research/sources view.
       return listFolderAsIndex(
-        'library',
-        urlPrefixOf('library'),
+        libFolder,
+        libUrl,
         'Library',
         'Recommended reading — books, papers, podcasts, articles, videos, courses.',
         fm => fm['is-featured'] === true,
       );
     }
     case 'blog': {
-      const blogRoot = path.join(CONTENT_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, folderOf('blog'));
       const items: IndexItem[] = [];
       if (fs.existsSync(blogRoot)) {
         for (const year of fs.readdirSync(blogRoot)) {
@@ -165,7 +171,7 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return { title: 'Blog', description: 'Project narrative.', items };
     }
     case 'reports': {
-      const reportsRoot = path.join(CONTENT_ROOT, 'reports');
+      const reportsRoot = path.join(CONTENT_ROOT, folderOf('reports'));
       const items: IndexItem[] = [];
       if (fs.existsSync(reportsRoot)) {
         for (const slug of fs.readdirSync(reportsRoot)) {
@@ -202,7 +208,7 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
 // /research/sources — library entries flagged is-cited: true
 export function getResearchSourcesIndex(): IndexData {
   return listFolderAsIndex(
-    'library',
+    folderOf('library'),
     urlPrefixOf('library'),
     'Sources',
     'Cited sources used in Co-Goods research.',
@@ -212,11 +218,11 @@ export function getResearchSourcesIndex(): IndexData {
 
 // /research/tags — tags actually used by any research-collection item
 export function getResearchTagsIndex(): IndexData {
-  const researchFolders = ['insights', 'observations', 'hypotheses', 'reports'];
+  const researchCollections: CollectionName[] = ['insights', 'observations', 'hypotheses', 'reports'];
   const usedTags = new Set<string>();
 
-  for (const folder of researchFolders) {
-    const dir = path.join(CONTENT_ROOT, folder);
+  for (const name of researchCollections) {
+    const dir = path.join(CONTENT_ROOT, folderOf(name));
     if (!fs.existsSync(dir)) continue;
     for (const file of fs.readdirSync(dir)) {
       if (!file.endsWith('.md')) continue;
@@ -236,7 +242,7 @@ export function getResearchTagsIndex(): IndexData {
   // Read each tag's frontmatter (if it exists in content/tags/) for the title.
   const items: IndexItem[] = [];
   for (const tag of usedTags) {
-    const filepath = path.join(CONTENT_ROOT, 'tags', `${tag}.md`);
+    const filepath = path.join(CONTENT_ROOT, folderOf('tags'), `${tag}.md`);
     if (fs.existsSync(filepath)) {
       const meta = readMeta(filepath);
       items.push({

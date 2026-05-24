@@ -52,7 +52,7 @@ export const enabledPages = {
 // Everything else is noindex,nofollow.
 export const indexablePaths = new Set<string>([
   '/',
-  '/manifesto',
+  '/thinking/manifesto',
   '/about',
   // Add to this set only when a page is ready for public discovery.
 ]);

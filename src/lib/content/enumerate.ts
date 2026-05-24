@@ -150,10 +150,10 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // Manifesto (single-file collection)
+  // Manifesto (single-file collection — lives under thinking/)
   if (isCollectionEnabled('manifesto')) {
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'manifesto.md'))) {
-      params.push({ slug: ['manifesto'] });
+    if (fs.existsSync(path.join(CONTENT_ROOT, 'thinking', 'manifesto.md'))) {
+      params.push({ slug: ['thinking', 'manifesto'] });
     }
   }
 

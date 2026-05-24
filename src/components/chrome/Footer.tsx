@@ -30,7 +30,7 @@ const COLUMNS: FooterColumn[] = [
     links: [
       { label: 'Wiki', href: '/resources/wiki' },
       { label: 'Glossary', href: '/resources/glossary' },
-      { label: 'Library', href: '/library' },
+      { label: 'Library', href: '/resources/library' },
     ],
   },
   {

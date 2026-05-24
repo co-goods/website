@@ -103,12 +103,12 @@ function resolveBareSlugPage(cfg: CollectionConfig, rest: string[]): ResolvedPag
 function resolveLibraryPage(rest: string[]): ResolvedPage | null {
   const collection = getCollection('library')!;
   if (rest.length === 1) {
-    const filepath = path.join(CONTENT_ROOT, 'library', `${rest[0]}.md`);
+    const filepath = path.join(CONTENT_ROOT, collection.folder, `${rest[0]}.md`);
     if (!fs.existsSync(filepath)) return null;
     return { kind: 'page', collection, filepath, innerSegments: rest };
   }
   if (rest.length === 2 && (rest[0] === 'publishers' || rest[0] === 'publications')) {
-    const filepath = path.join(CONTENT_ROOT, 'library', rest[0], `${rest[1]}.md`);
+    const filepath = path.join(CONTENT_ROOT, collection.folder, rest[0], `${rest[1]}.md`);
     if (!fs.existsSync(filepath)) return null;
     return { kind: 'page', collection, filepath, innerSegments: rest };
   }
@@ -118,7 +118,7 @@ function resolveLibraryPage(rest: string[]): ResolvedPage | null {
 function resolveBlogPage(rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const collection = getCollection('blog')!;
-  const blogRoot = path.join(CONTENT_ROOT, 'blog');
+  const blogRoot = path.join(CONTENT_ROOT, collection.folder);
   if (!fs.existsSync(blogRoot)) return null;
 
   for (const year of fs.readdirSync(blogRoot)) {
@@ -141,7 +141,7 @@ function resolveReportsPage(rest: string[]): ResolvedPage | null {
   const collection = getCollection('reports')!;
   const [slug, maybeVersion] = rest;
 
-  const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
+  const reportFolder = path.join(CONTENT_ROOT, collection.folder, slug);
   if (!fs.existsSync(reportFolder) || !fs.statSync(reportFolder).isDirectory()) {
     return null;
   }
@@ -179,9 +179,9 @@ function resolveContributingPage(): ResolvedPage | null {
 
 function resolveSingleFilePage(
   collectionName: 'manifesto' | 'about',
-  fileBasename: string,
+  relativePath: string,
 ): ResolvedPage | null {
-  const filepath = path.join(CONTENT_ROOT, fileBasename);
+  const filepath = path.join(CONTENT_ROOT, relativePath);
   if (!fs.existsSync(filepath)) return null;
   return {
     kind: 'page',
@@ -308,8 +308,8 @@ export function resolveUrl(slug: string[]): ResolveResult | null {
     const page = resolveContributingPage();
     if (page) return page;
   }
-  if (slug.length === 1 && slug[0] === 'manifesto') {
-    const page = resolveSingleFilePage('manifesto', 'manifesto.md');
+  if (slug.length === 2 && slug[0] === 'thinking' && slug[1] === 'manifesto') {
+    const page = resolveSingleFilePage('manifesto', 'thinking/manifesto.md');
     if (page) return page;
   }
   if (slug.length === 1 && slug[0] === 'about') {

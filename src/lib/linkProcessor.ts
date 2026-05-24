@@ -3,25 +3,29 @@
  *
  * Syntaxes:
  *
- * 1. **Qualified-path** (the Co-Goods convention): the first segment is
- *    a collection name from the content-repo folder layout. The URL is
- *    built using that collection's URL prefix (which may not match the
- *    folder name).
+ * 1. **Qualified-path** (the Co-Goods convention): the wikilink path
+ *    mirrors the folder layout in the content repo. The URL is the same
+ *    path with a leading slash. For example:
  *
- *      [[wiki/network-coordination]]
+ *      [[research/insights/foo]]
+ *        → /research/insights/foo
+ *
+ *      [[resources/wiki/network-coordination]]
  *        → /resources/wiki/network-coordination
  *
- *      [[essays/on-collaboration]]
+ *      [[thinking/essays/on-collaboration]]
  *        → /thinking/essays/on-collaboration
- *
- *      [[insights/asynchronous-coordination-density]]
- *        → /research/insights/asynchronous-coordination-density
  *
  *      [[people/jane-doe|Jane Doe]]
  *        → /people/jane-doe (link text: "Jane Doe")
  *
- *      [[library/publishers/example-press]]
- *        → /library/publishers/example-press (multi-segment path)
+ *      [[resources/library/publishers/example-press]]
+ *        → /resources/library/publishers/example-press
+ *
+ *    The first segment must be a recognised umbrella (`research`,
+ *    `resources`, `thinking`) or a top-level collection name (`people`,
+ *    `blog`, `tags`, `organizations`, `topics`, `docs`). Other shapes
+ *    fall through to the topic page.
  *
  * 2. **Bare-slug** (no slash): falls through to /topics/<slug>. The
  *    topic-aggregation page is the natural concept-level destination
@@ -29,26 +33,33 @@
  *    slug index is a later phase.
  */
 
-import { collections, CollectionName, getCollection } from './content/collections';
+import { collections, CollectionName } from './content/collections';
 
-const KNOWN_COLLECTIONS = new Set<string>(Object.keys(collections));
+// First-segment vocabulary recognised in qualified wikilinks. Umbrellas
+// + top-level collections.
+const RECOGNISED_FIRST_SEGMENTS: Set<string> = new Set([
+  'research',
+  'resources',
+  'thinking',
+  'blog',
+  'people',
+  'organizations',
+  'tags',
+  'topics',
+  'docs',
+]);
 
 function isQualified(linkPath: string): boolean {
   if (!linkPath.includes('/')) return false;
   const first = linkPath.split('/')[0];
-  return KNOWN_COLLECTIONS.has(first);
+  return RECOGNISED_FIRST_SEGMENTS.has(first);
 }
 
-// Build the website URL for a qualified path like "wiki/<slug>" or
-// "library/publishers/<slug>". Uses the collection's urlPrefix + remaining
-// segments verbatim. For collections with multi-segment URL paths (e.g.
-// library nested under /library/publishers/), the urlPrefix is /library
-// and the remaining segments are joined to it.
+// For a qualified wikilink path, the URL is simply the path with a
+// leading slash. The folder structure in the content repo mirrors the
+// URL groupings, so wikilink path === URL path.
 function buildUrlFromQualifiedPath(linkPath: string): string {
-  const [collectionName, ...rest] = linkPath.split('/');
-  const cfg = getCollection(collectionName);
-  if (!cfg) return `/${linkPath}`;
-  return `${cfg.urlPrefix}/${rest.join('/')}`;
+  return `/${linkPath}`;
 }
 
 // Mask out code regions (fenced ```...``` and inline `...`) before running
@@ -100,6 +111,7 @@ export function processObsidianLinks(content: string): string {
   return withCodeRegionsMasked(content, transformWikilinks);
 }
 
-// Re-exported for use by other modules if they need the canonical list.
-export const _knownCollections: Set<string> = KNOWN_COLLECTIONS;
+// Re-exported for use by other modules if they need the recognised set.
+export const _recognisedFirstSegments: Set<string> = RECOGNISED_FIRST_SEGMENTS;
+export const _knownCollections: Set<string> = new Set<string>(Object.keys(collections));
 export type _CollectionName = CollectionName;
