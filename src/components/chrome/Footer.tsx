@@ -20,7 +20,7 @@ const COLUMNS: FooterColumn[] = [
     heading: 'Project',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Manifesto', href: '/manifesto' },
+      { label: 'Manifesto', href: '/thinking/manifesto' },
       { label: 'Blog', href: '/blog' },
       { label: 'Contributing', href: '/contributing' },
     ],

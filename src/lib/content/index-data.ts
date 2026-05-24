@@ -296,7 +296,7 @@ export function getUmbrellaIndex(
           'Where we make a case — essays, manifesto, and (later) audio and video pieces. Our voice.',
         sections: [
           { heading: 'Essays', url: urlPrefixOf('essays'), description: 'POV writing on co-goods, antirival goods, and adjacent themes.' },
-          { heading: 'Manifesto', url: '/manifesto', description: 'The foundational statement.' },
+          { heading: 'Manifesto', url: '/thinking/manifesto', description: 'The foundational statement.' },
         ],
       };
     case 'resources':
