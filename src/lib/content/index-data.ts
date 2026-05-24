@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { getDocsTree, DocCategory } from './docs';
-import { collections, getCollection, CollectionName } from './collections';
+import { collections, CollectionName } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
