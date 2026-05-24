@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getCollection, CollectionConfig } from './collections';
 
-const RESEARCH_ROOT = path.join(process.cwd(), 'research');
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
 export interface ResolvedPage {
   kind: 'page';
@@ -59,7 +59,7 @@ function resolveDocsPage(rest: string[]): ResolvedPage | null {
   if (rest.length !== 2) return null;
   const [category, slug] = rest;
 
-  const docsRoot = path.join(RESEARCH_ROOT, 'docs');
+  const docsRoot = path.join(CONTENT_ROOT, 'docs');
   const categoryDir = findEntryWithStrippedPrefix(docsRoot, category, true);
   if (!categoryDir) return null;
   const filepath = findEntryWithStrippedPrefix(categoryDir, slug, false);
@@ -78,7 +78,7 @@ function resolveBareSlugPage(collectionName: string, rest: string[]): ResolvedPa
   const collection = getCollection(collectionName);
   if (!collection) return null;
 
-  const filepath = path.join(RESEARCH_ROOT, collection.folder, `${rest[0]}.md`);
+  const filepath = path.join(CONTENT_ROOT, collection.folder, `${rest[0]}.md`);
   if (!fs.existsSync(filepath)) return null;
 
   return { kind: 'page', collection, filepath, innerSegments: rest };
@@ -87,12 +87,12 @@ function resolveBareSlugPage(collectionName: string, rest: string[]): ResolvedPa
 function resolveLibraryPage(rest: string[]): ResolvedPage | null {
   const collection = getCollection('library')!;
   if (rest.length === 1) {
-    const filepath = path.join(RESEARCH_ROOT, 'library', `${rest[0]}.md`);
+    const filepath = path.join(CONTENT_ROOT, 'library', `${rest[0]}.md`);
     if (!fs.existsSync(filepath)) return null;
     return { kind: 'page', collection, filepath, innerSegments: rest };
   }
   if (rest.length === 2 && (rest[0] === 'publishers' || rest[0] === 'publications')) {
-    const filepath = path.join(RESEARCH_ROOT, 'library', rest[0], `${rest[1]}.md`);
+    const filepath = path.join(CONTENT_ROOT, 'library', rest[0], `${rest[1]}.md`);
     if (!fs.existsSync(filepath)) return null;
     return { kind: 'page', collection, filepath, innerSegments: rest };
   }
@@ -102,7 +102,7 @@ function resolveLibraryPage(rest: string[]): ResolvedPage | null {
 function resolveBlogPage(rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const collection = getCollection('blog')!;
-  const blogRoot = path.join(RESEARCH_ROOT, 'blog');
+  const blogRoot = path.join(CONTENT_ROOT, 'blog');
   if (!fs.existsSync(blogRoot)) return null;
 
   for (const year of fs.readdirSync(blogRoot)) {
@@ -125,7 +125,7 @@ function resolveReportsPage(rest: string[]): ResolvedPage | null {
   const collection = getCollection('reports')!;
   const [slug, maybeVersion] = rest;
 
-  const reportFolder = path.join(RESEARCH_ROOT, 'reports', slug);
+  const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
   if (!fs.existsSync(reportFolder) || !fs.statSync(reportFolder).isDirectory()) {
     return null;
   }
@@ -151,7 +151,7 @@ function resolveReportsPage(rest: string[]): ResolvedPage | null {
 }
 
 function resolveContributingPage(): ResolvedPage | null {
-  const filepath = path.join(RESEARCH_ROOT, 'CONTRIBUTING.md');
+  const filepath = path.join(CONTENT_ROOT, 'CONTRIBUTING.md');
   if (!fs.existsSync(filepath)) return null;
   return {
     kind: 'page',
@@ -192,14 +192,14 @@ function resolveIndex(slug: string[]): ResolvedIndex | null {
 
     // Index exists if the folder exists on disk
     const folderToCheck = collection.folder || '';
-    const dir = folderToCheck ? path.join(RESEARCH_ROOT, folderToCheck) : RESEARCH_ROOT;
+    const dir = folderToCheck ? path.join(CONTENT_ROOT, folderToCheck) : CONTENT_ROOT;
     if (folderToCheck && !fs.existsSync(dir)) return null;
     return { kind: 'index', collection, innerSegments: [] };
   }
 
   // /docs/<category>
   if (slug.length === 2 && slug[0] === 'docs') {
-    const docsRoot = path.join(RESEARCH_ROOT, 'docs');
+    const docsRoot = path.join(CONTENT_ROOT, 'docs');
     const dir = findEntryWithStrippedPrefix(docsRoot, slug[1], true);
     if (dir) {
       return { kind: 'index', collection: getCollection('docs')!, innerSegments: [slug[1]] };
@@ -212,7 +212,7 @@ function resolveIndex(slug: string[]): ResolvedIndex | null {
     slug[0] === 'library' &&
     (slug[1] === 'publishers' || slug[1] === 'publications')
   ) {
-    const subDir = path.join(RESEARCH_ROOT, 'library', slug[1]);
+    const subDir = path.join(CONTENT_ROOT, 'library', slug[1]);
     if (fs.existsSync(subDir) && fs.statSync(subDir).isDirectory()) {
       return { kind: 'index', collection: getCollection('library')!, innerSegments: [slug[1]] };
     }

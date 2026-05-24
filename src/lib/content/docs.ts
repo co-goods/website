@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
-const DOCS_ROOT = path.join(process.cwd(), 'research', 'docs');
+const DOCS_ROOT = path.join(process.cwd(), 'content', 'docs');
 
 export interface DocPage {
   url: string;          // /docs/<category>/<slug>

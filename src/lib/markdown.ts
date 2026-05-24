@@ -6,7 +6,7 @@ import html from 'remark-html';
 import { ContentType, ContentWithContent } from '@/types/content';
 import { processObsidianLinks } from './linkProcessor';
 
-const researchPath = path.join(process.cwd(), 'research');
+const contentPath = path.join(process.cwd(), 'content');
 
 export interface TocEntry {
   level: 2 | 3 | 4;
@@ -165,17 +165,17 @@ export function getAllSlugs(type: string): string[] {
 function getContentDirectory(type: string): string {
   switch (type) {
     case 'insights':
-      return path.join(researchPath, 'insights');
+      return path.join(contentPath, 'insights');
     case 'sources':
-      return path.join(researchPath, 'sources');
+      return path.join(contentPath, 'sources');
     case 'authors':
-      return path.join(researchPath, 'authors');
+      return path.join(contentPath, 'authors');
     case 'tags':
-      return path.join(researchPath, 'tags');
+      return path.join(contentPath, 'tags');
     case 'contributors':
-      return path.join(researchPath, 'contributors');
+      return path.join(contentPath, 'contributors');
     case 'pages':
-      return researchPath;
+      return contentPath;
     default:
       throw new Error(`Unknown content type: ${type}`);
   }

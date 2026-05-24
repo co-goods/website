@@ -35,14 +35,19 @@ npm run lint         # Run ESLint
 
 ## Content Integration
 
-The website automatically renders active content from the `research/` submodule:
+The website automatically renders active content from the `content/` submodule
+(`co-goods/content` on GitHub):
 
-- Research insights from `research/insights/`
-- Academic sources from `research/sources/`
-- Author profiles from `research/authors/`
-- Contributor profiles from `research/contributors/`
-- Tag definitions from `research/tags/`
-- About page from `research/about.md`
+- Insights from `content/insights/`
+- Wiki articles from `content/wiki/`
+- Essays from `content/essays/`
+- Library entries from `content/library/`
+- People profiles from `content/people/`
+- Glossary terms from `content/glossary/`
+- Blog posts from `content/blog/<year>/<month>/`
+- Observations and hypotheses from `content/observations/` and `content/hypotheses/`
+- Tag definitions from `content/tags/`
+- About page from `content/about.md`
 
 **Important**: Only content with `status: "active"` in the YAML frontmatter will be displayed.
 
