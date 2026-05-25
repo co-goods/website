@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { getDocsTree, DocCategory } from './docs';
+import { collections, CollectionName } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
@@ -18,13 +19,19 @@ export interface IndexData {
   items: IndexItem[];
 }
 
-function readTitleAndSummary(filepath: string): { title: string; summary?: string } {
+function readMeta(filepath: string): {
+  title: string;
+  summary?: string;
+  frontmatter: Record<string, unknown>;
+} {
   const raw = fs.readFileSync(filepath, 'utf8');
   const { data, content } = matter(raw);
 
   let title: string;
   if (typeof data.title === 'string' && data.title.trim()) {
     title = data.title.trim();
+  } else if (typeof data.name === 'string' && data.name.trim()) {
+    title = data.name.trim();
   } else {
     const h1 = content.split('\n').find(l => l.startsWith('# '));
     title = h1 ? h1.replace(/^#\s+/, '').trim() : path.basename(filepath, '.md');
@@ -35,7 +42,7 @@ function readTitleAndSummary(filepath: string): { title: string; summary?: strin
     (typeof data.description === 'string' && data.description) ||
     undefined;
 
-  return { title, summary };
+  return { title, summary, frontmatter: data };
 }
 
 function listFolderAsIndex(
@@ -43,6 +50,7 @@ function listFolderAsIndex(
   urlPrefix: string,
   title: string,
   description?: string,
+  filter?: (frontmatter: Record<string, unknown>) => boolean,
 ): IndexData {
   const dir = path.join(CONTENT_ROOT, folder);
   if (!fs.existsSync(dir)) return { title, description, items: [] };
@@ -53,7 +61,8 @@ function listFolderAsIndex(
     if (file === 'INDEX.md') continue;
     const slug = file.replace(/\.md$/, '');
     const filepath = path.join(dir, file);
-    const meta = readTitleAndSummary(filepath);
+    const meta = readMeta(filepath);
+    if (filter && !filter(meta.frontmatter)) continue;
     items.push({
       url: `${urlPrefix}/${slug}`,
       slug,
@@ -64,6 +73,14 @@ function listFolderAsIndex(
 
   items.sort((a, b) => a.title.localeCompare(b.title));
   return { title, description, items };
+}
+
+function urlPrefixOf(name: CollectionName): string {
+  return collections[name].urlPrefix;
+}
+
+function folderOf(name: CollectionName): string {
+  return collections[name].folder;
 }
 
 export function getDocsRootIndex() {
@@ -79,33 +96,55 @@ export function getDocsCategoryIndex(category: string): { category: DocCategory 
 export function getCollectionIndex(name: string, subPath: string[]): IndexData {
   switch (name) {
     case 'wiki':
-      return listFolderAsIndex('wiki', '/wiki', 'Wiki', 'Neutral, encyclopedic articles.');
+      return listFolderAsIndex(folderOf('wiki'), urlPrefixOf('wiki'), 'Wiki', 'Neutral, encyclopedic articles.');
     case 'essays':
-      return listFolderAsIndex('essays', '/essays', 'Essays', 'Authored POV writing.');
+      return listFolderAsIndex(folderOf('essays'), urlPrefixOf('essays'), 'Essays', 'POV writing.');
     case 'insights':
-      return listFolderAsIndex('insights', '/insights', 'Insights', 'Atomic research findings.');
+      return listFolderAsIndex(folderOf('insights'), urlPrefixOf('insights'), 'Insights', 'Atomic research findings.');
     case 'observations':
-      return listFolderAsIndex('observations', '/observations', 'Observations', 'External signals from the world.');
+      return listFolderAsIndex(folderOf('observations'), urlPrefixOf('observations'), 'Observations', 'External signals from the world.');
     case 'hypotheses':
-      return listFolderAsIndex('hypotheses', '/hypotheses', 'Hypotheses', 'Testable predictions.');
+      return listFolderAsIndex(folderOf('hypotheses'), urlPrefixOf('hypotheses'), 'Hypotheses', 'Testable predictions.');
     case 'glossary':
-      return listFolderAsIndex('glossary', '/glossary', 'Glossary', 'Term definitions.');
+      return listFolderAsIndex(folderOf('glossary'), urlPrefixOf('glossary'), 'Glossary', 'Term definitions.');
     case 'people':
-      return listFolderAsIndex('people', '/people', 'People', 'Profiles.');
+      // Hide cited-author / external-author profiles from the People index.
+      return listFolderAsIndex(
+        folderOf('people'),
+        urlPrefixOf('people'),
+        'People',
+        'Profiles of people involved in Co-Goods.',
+        fm => {
+          const a = typeof fm.affiliation === 'string' ? fm.affiliation : '';
+          return a !== 'cited-author' && a !== 'external-author';
+        },
+      );
+    case 'organizations':
+      return listFolderAsIndex(folderOf('organizations'), urlPrefixOf('organizations'), 'Organizations', 'Organisations involved with Co-Goods.');
     case 'tags':
-      return listFolderAsIndex('tags', '/tags', 'Tags', 'Operational labels.');
+      return listFolderAsIndex(folderOf('tags'), urlPrefixOf('tags'), 'Tags', 'Operational labels.');
     case 'library': {
+      const libFolder = folderOf('library');
+      const libUrl = urlPrefixOf('library');
       if (subPath[0] === 'publishers') {
-        return listFolderAsIndex('library/publishers', '/library/publishers', 'Publishers');
+        return listFolderAsIndex(`${libFolder}/publishers`, `${libUrl}/publishers`, 'Publishers');
       }
       if (subPath[0] === 'publications') {
-        return listFolderAsIndex('library/publications', '/library/publications', 'Publications');
+        return listFolderAsIndex(`${libFolder}/publications`, `${libUrl}/publications`, 'Publications');
       }
-      return listFolderAsIndex('library', '/library', 'Library', 'Bibliographic records — books, papers, podcasts, articles, videos, courses.');
+      // Default library index — filters by is-featured (recommended reading).
+      // /resources/library/<slug> is the canonical detail URL for items;
+      // cited-only entries appear in the derived /research/sources view.
+      return listFolderAsIndex(
+        libFolder,
+        libUrl,
+        'Library',
+        'Recommended reading — books, papers, podcasts, articles, videos, courses.',
+        fm => fm['is-featured'] === true,
+      );
     }
     case 'blog': {
-      // Walk year/month subfolders and gather all posts.
-      const blogRoot = path.join(CONTENT_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, folderOf('blog'));
       const items: IndexItem[] = [];
       if (fs.existsSync(blogRoot)) {
         for (const year of fs.readdirSync(blogRoot)) {
@@ -117,9 +156,9 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
             for (const file of fs.readdirSync(monthPath)) {
               if (!file.endsWith('.md')) continue;
               const slug = file.replace(/\.md$/, '');
-              const meta = readTitleAndSummary(path.join(monthPath, file));
+              const meta = readMeta(path.join(monthPath, file));
               items.push({
-                url: `/blog/${slug}`,
+                url: `${urlPrefixOf('blog')}/${slug}`,
                 slug,
                 title: meta.title,
                 summary: meta.summary,
@@ -132,7 +171,7 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return { title: 'Blog', description: 'Project narrative.', items };
     }
     case 'reports': {
-      const reportsRoot = path.join(CONTENT_ROOT, 'reports');
+      const reportsRoot = path.join(CONTENT_ROOT, folderOf('reports'));
       const items: IndexItem[] = [];
       if (fs.existsSync(reportsRoot)) {
         for (const slug of fs.readdirSync(reportsRoot)) {
@@ -145,9 +184,9 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
           const latest = versions[versions.length - 1];
           const filepath = path.join(slugDir, latest, `${slug}.md`);
           if (!fs.existsSync(filepath)) continue;
-          const meta = readTitleAndSummary(filepath);
+          const meta = readMeta(filepath);
           items.push({
-            url: `/reports/${slug}`,
+            url: `${urlPrefixOf('reports')}/${slug}`,
             slug,
             title: meta.title,
             summary: meta.summary,
@@ -158,9 +197,150 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return { title: 'Reports', description: 'Versioned formal compilations.', items };
     }
     case 'topics':
-      // Topic aggregation is Phase 4 work — emit an empty index for now.
       return { title: 'Topics', description: 'Cross-collection topic pages.', items: [] };
     default:
       return { title: name, items: [] };
+  }
+}
+
+// ---------- Derived views ----------
+
+// /research/authors — people with affiliation in cited-author /
+// external-author / unclaimed (inverse of the /people index filter)
+export function getResearchAuthorsIndex(): IndexData {
+  return listFolderAsIndex(
+    folderOf('people'),
+    urlPrefixOf('people'),
+    'Authors',
+    'Cited and external authors referenced in Co-Goods research.',
+    fm => {
+      const a = typeof fm.affiliation === 'string' ? fm.affiliation : '';
+      return a === 'cited-author' || a === 'external-author' || a === 'unclaimed';
+    },
+  );
+}
+
+// /research/sources — library entries flagged is-cited: true
+export function getResearchSourcesIndex(): IndexData {
+  return listFolderAsIndex(
+    folderOf('library'),
+    urlPrefixOf('library'),
+    'Sources',
+    'Cited sources used in Co-Goods research.',
+    fm => fm['is-cited'] === true,
+  );
+}
+
+// /research/tags — tags actually used by any research-collection item
+export function getResearchTagsIndex(): IndexData {
+  const researchCollections: CollectionName[] = ['insights', 'observations', 'hypotheses', 'reports'];
+  const usedTags = new Set<string>();
+
+  for (const name of researchCollections) {
+    const dir = path.join(CONTENT_ROOT, folderOf(name));
+    if (!fs.existsSync(dir)) continue;
+    for (const file of fs.readdirSync(dir)) {
+      if (!file.endsWith('.md')) continue;
+      try {
+        const { data } = matter(fs.readFileSync(path.join(dir, file), 'utf8'));
+        if (Array.isArray(data.tags)) {
+          for (const t of data.tags) {
+            if (typeof t === 'string') usedTags.add(t);
+          }
+        }
+      } catch {
+        // skip malformed files
+      }
+    }
+  }
+
+  // Read each tag's frontmatter (if it exists in content/tags/) for the title.
+  const items: IndexItem[] = [];
+  for (const tag of usedTags) {
+    const filepath = path.join(CONTENT_ROOT, folderOf('tags'), `${tag}.md`);
+    if (fs.existsSync(filepath)) {
+      const meta = readMeta(filepath);
+      items.push({
+        url: `${urlPrefixOf('tags')}/${tag}`,
+        slug: tag,
+        title: meta.title,
+        summary: meta.summary,
+      });
+    } else {
+      // Tag file doesn't exist but the slug is used; emit a stub entry
+      items.push({
+        url: `${urlPrefixOf('tags')}/${tag}`,
+        slug: tag,
+        title: tag,
+      });
+    }
+  }
+
+  items.sort((a, b) => a.title.localeCompare(b.title));
+  return {
+    title: 'Tags',
+    description: 'Tags that appear in Co-Goods research collections.',
+    items,
+  };
+}
+
+// ---------- Umbrella landings ----------
+
+export interface UmbrellaSection {
+  heading: string;
+  description?: string;
+  url: string;
+}
+
+export interface UmbrellaIndexData {
+  name: 'thinking' | 'resources' | 'research';
+  title: string;
+  description: string;
+  sections: UmbrellaSection[];
+}
+
+export function getUmbrellaIndex(
+  name: 'thinking' | 'resources' | 'research',
+): UmbrellaIndexData {
+  switch (name) {
+    case 'thinking':
+      return {
+        name,
+        title: 'Thinking',
+        description:
+          'Where we make a case — essays, manifesto, and (later) audio and video pieces. Our voice.',
+        sections: [
+          { heading: 'Essays', url: urlPrefixOf('essays'), description: 'POV writing on co-goods, antirival goods, and adjacent themes.' },
+          { heading: 'Manifesto', url: '/thinking/manifesto', description: 'The foundational statement.' },
+        ],
+      };
+    case 'resources':
+      return {
+        name,
+        title: 'Resources',
+        description:
+          'Things you can use — encyclopedic reference, term definitions, recommended reading, and (later) tools and templates.',
+        sections: [
+          { heading: 'Wiki', url: urlPrefixOf('wiki'), description: 'Concept reference, neutral and encyclopedic.' },
+          { heading: 'Glossary', url: urlPrefixOf('glossary'), description: 'Definitions of terms used across the site.' },
+          { heading: 'Library', url: urlPrefixOf('library'), description: 'Recommended reading and reference.' },
+        ],
+      };
+    case 'research':
+      return {
+        name,
+        title: 'Research',
+        description:
+          'The epistemic chain — what we have observed, what we have synthesised, what we are testing.',
+        sections: [
+          { heading: 'Insights', url: urlPrefixOf('insights'), description: 'Atomic findings synthesising observations and sources.' },
+          { heading: 'Observations', url: urlPrefixOf('observations'), description: 'External signals from the world.' },
+          { heading: 'Hypotheses', url: urlPrefixOf('hypotheses'), description: 'Testable predictions building on insights.' },
+          { heading: 'Reports', url: urlPrefixOf('reports'), description: 'Formal versioned compilations of research.' },
+          { heading: 'Sources', url: '/research/sources', description: 'Library entries cited in research.' },
+          { heading: 'Authors', url: '/research/authors', description: 'Cited and external authors referenced in research.' },
+          { heading: 'Tags', url: '/research/tags', description: 'Tags appearing in research collections.' },
+        ],
+      };
   }
 }

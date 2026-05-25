@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "git config --global url.\"https://${GRUND_TOKEN}@github.com/\".insteadOf \"https://github.com/\" && git submodule update --init --recursive --depth 1 && npm install"
+  "installCommand": "bash vercel-install.sh"
 }

@@ -23,6 +23,11 @@ export interface ParsedDoc {
   frontmatter: Record<string, unknown>;
   body: string;
   rendered: RenderResult;
+  // If the markdown body started with a top-level H1, its text is captured
+  // here and the H1 is stripped from the rendered body. Layouts that emit
+  // their own h1 use this as the fallback when frontmatter.title is missing,
+  // avoiding the duplicate-H1 problem.
+  bodyTitle?: string;
 }
 
 // GitHub-style heading slugification. Lowercase, replace whitespace with
@@ -70,11 +75,29 @@ export async function renderMarkdown(rawMarkdown: string): Promise<RenderResult>
   return { html: withIds, toc };
 }
 
+// If the first non-blank line of the body is an H1 (`# Title`), extract its
+// text and return the body with that H1 line removed.
+function extractAndStripBodyTitle(body: string): { bodyTitle?: string; stripped: string } {
+  const lines = body.split('\n');
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (i < lines.length) {
+    const m = lines[i].match(/^#\s+(.+?)\s*#*\s*$/);
+    if (m) {
+      const bodyTitle = m[1].trim();
+      const stripped = [...lines.slice(0, i), ...lines.slice(i + 1)].join('\n');
+      return { bodyTitle, stripped };
+    }
+  }
+  return { stripped: body };
+}
+
 export async function readAndRender(filepath: string): Promise<ParsedDoc> {
   const raw = fs.readFileSync(filepath, 'utf8');
   const { data, content } = matter(raw);
-  const rendered = await renderMarkdown(content);
-  return { frontmatter: data, body: content, rendered };
+  const { bodyTitle, stripped } = extractAndStripBodyTitle(content);
+  const rendered = await renderMarkdown(stripped);
+  return { frontmatter: data, body: stripped, rendered, bodyTitle };
 }
 
 // Helper function to normalize dates in frontmatter

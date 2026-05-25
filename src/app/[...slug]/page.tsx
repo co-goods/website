@@ -7,12 +7,17 @@ import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
   getCollectionIndex,
   getDocsCategoryIndex,
+  getResearchAuthorsIndex,
+  getResearchSourcesIndex,
+  getResearchTagsIndex,
+  getUmbrellaIndex,
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import DocLayout from '@/components/layouts/DocLayout';
 import DocsIndexLayout from '@/components/layouts/DocsIndexLayout';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
+import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
 import WikiArticle from '@/components/layouts/WikiArticle';
 import EssayDetail from '@/components/layouts/EssayDetail';
 import LibraryEntry from '@/components/layouts/LibraryEntry';
@@ -47,6 +52,47 @@ export default async function CatchAll({ params }: PageProps) {
   const resolved = resolveUrl(slug);
   if (!resolved) notFound();
 
+  // Umbrella landings — /thinking, /resources, /research
+  if (resolved.kind === 'umbrella') {
+    const data = getUmbrellaIndex(resolved.name);
+    return <UmbrellaLandingLayout name={resolved.name} data={data} />;
+  }
+
+  // Derived filter views — /research/sources, /research/tags
+  if (resolved.kind === 'derived') {
+    if (resolved.view === 'research-sources') {
+      const data = getResearchSourcesIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="library"
+          segments={['research', 'sources']}
+        />
+      );
+    }
+    if (resolved.view === 'research-tags') {
+      const data = getResearchTagsIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="tags"
+          segments={['research', 'tags']}
+        />
+      );
+    }
+    if (resolved.view === 'research-authors') {
+      const data = getResearchAuthorsIndex();
+      return (
+        <CollectionIndexLayout
+          data={data}
+          collectionName="people"
+          segments={['research', 'authors']}
+        />
+      );
+    }
+  }
+
+  // Below: standard page / index resolution
   if (!isCollectionEnabled(resolved.collection.name)) {
     notFound();
   }
@@ -95,9 +141,17 @@ export default async function CatchAll({ params }: PageProps) {
     );
   }
 
+  // Merge bodyTitle as a frontmatter fallback if frontmatter.title is missing.
+  // This avoids the duplicate-H1 issue: the layout's h1 uses the body's H1
+  // text, and the H1 has already been stripped from the rendered body.
+  const mergedFrontmatter =
+    parsed.bodyTitle && !parsed.frontmatter.title
+      ? { ...parsed.frontmatter, title: parsed.bodyTitle }
+      : parsed.frontmatter;
+
   const articleProps = {
     segments: resolved.innerSegments,
-    frontmatter: parsed.frontmatter,
+    frontmatter: mergedFrontmatter,
     html: parsed.rendered.html,
     toc: parsed.rendered.toc,
   };

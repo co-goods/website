@@ -10,19 +10,17 @@ interface NavItem {
   href: string;
 }
 
-const PUBLIC_NAV: NavItem[] = [
-  // Empty in soft-launch mode — public site has only the home page until
-  // we choose to expose more. Items added here appear in the public nav.
-];
+// Public soft-launch nav — empty until we choose to expose more.
+const PUBLIC_NAV: NavItem[] = [];
 
+// Full nav shown when devMode is on (locally + preview deploys).
+// Audience-first ordering: Thinking (our voice) → Resources (practical) →
+// Research (rigor) → Blog (narrative) → About.
 const DEV_NAV: NavItem[] = [
-  { label: 'Wiki', href: '/wiki' },
-  { label: 'Essays', href: '/essays' },
-  { label: 'Insights', href: '/insights' },
-  { label: 'Library', href: '/library' },
-  { label: 'Glossary', href: '/glossary' },
-  { label: 'People', href: '/people' },
-  { label: 'Docs', href: '/docs' },
+  { label: 'Thinking', href: '/thinking' },
+  { label: 'Resources', href: '/resources' },
+  { label: 'Research', href: '/research' },
+  { label: 'Blog', href: '/blog' },
   { label: 'About', href: '/about' },
 ];
 

@@ -3,40 +3,63 @@
  *
  * Syntaxes:
  *
- * 1. **Qualified-path** (the Co-Goods convention):
- *    - `[[<collection>/<slug>]]`              → `[<slug>](/<collection>/<slug>)`
- *    - `[[<collection>/<slug>|<display>]]`    → `[<display>](/<collection>/<slug>)`
- *    - Multi-segment paths work too: `[[library/publishers/example-press]]`
- *    - The collection must be in the known set; URL is the wikilink path
- *      verbatim, prefixed with `/`.
+ * 1. **Qualified-path** (the Co-Goods convention): the wikilink path
+ *    mirrors the folder layout in the content repo. The URL is the same
+ *    path with a leading slash. For example:
  *
- * 2. **Bare-slug** (no slash): falls through to `/topics/<slug>`. The
- *    topic-aggregation page is the natural concept-level destination for an
- *    unqualified reference. Build-time validation against a slug index is a
- *    later phase.
+ *      [[research/insights/foo]]
+ *        → /research/insights/foo
+ *
+ *      [[resources/wiki/network-coordination]]
+ *        → /resources/wiki/network-coordination
+ *
+ *      [[thinking/essays/on-collaboration]]
+ *        → /thinking/essays/on-collaboration
+ *
+ *      [[people/jane-doe|Jane Doe]]
+ *        → /people/jane-doe (link text: "Jane Doe")
+ *
+ *      [[resources/library/publishers/example-press]]
+ *        → /resources/library/publishers/example-press
+ *
+ *    The first segment must be a recognised umbrella (`research`,
+ *    `resources`, `thinking`) or a top-level collection name (`people`,
+ *    `blog`, `tags`, `organizations`, `topics`, `docs`). Other shapes
+ *    fall through to the topic page.
+ *
+ * 2. **Bare-slug** (no slash): falls through to /topics/<slug>. The
+ *    topic-aggregation page is the natural concept-level destination
+ *    for an unqualified reference. Build-time validation against a
+ *    slug index is a later phase.
  */
 
-const KNOWN_COLLECTIONS = new Set([
-  'docs',
-  'wiki',
-  'essays',
-  'reports',
-  'insights',
-  'observations',
-  'hypotheses',
-  'library',
-  'glossary',
+import { collections, CollectionName } from './content/collections';
+
+// First-segment vocabulary recognised in qualified wikilinks. Umbrellas
+// + top-level collections.
+const RECOGNISED_FIRST_SEGMENTS: Set<string> = new Set([
+  'research',
+  'resources',
+  'thinking',
   'blog',
   'people',
+  'organizations',
   'tags',
   'topics',
-  'contributing',
+  'docs',
 ]);
 
-function isQualified(path: string): boolean {
-  if (!path.includes('/')) return false;
-  const first = path.split('/')[0];
-  return KNOWN_COLLECTIONS.has(first);
+function isQualified(linkPath: string): boolean {
+  if (!linkPath.includes('/')) return false;
+  const first = linkPath.split('/')[0];
+  return RECOGNISED_FIRST_SEGMENTS.has(first);
+}
+
+// For a qualified wikilink path, the URL is simply the path with a
+// leading slash. The folder structure in the content repo mirrors the
+// URL groupings, so wikilink path === URL path.
+function buildUrlFromQualifiedPath(linkPath: string): string {
+  return `/${linkPath}`;
 }
 
 // Mask out code regions (fenced ```...``` and inline `...`) before running
@@ -63,9 +86,8 @@ function transformWikilinks(content: string): string {
     /\[\[([a-z0-9\-/]+)\|([^\]]+)\]\]/g,
     (_match, linkPath, display) => {
       if (isQualified(linkPath)) {
-        return `[${display}](/${linkPath})`;
+        return `[${display}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      // Bare-slug with display: link to topic page
       return `[${display}](/topics/${linkPath})`;
     },
   );
@@ -76,9 +98,8 @@ function transformWikilinks(content: string): string {
     (_match, linkPath) => {
       if (isQualified(linkPath)) {
         const lastSegment = linkPath.split('/').pop();
-        return `[${lastSegment}](/${linkPath})`;
+        return `[${lastSegment}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      // Bare slug → topic page
       return `[${linkPath}](/topics/${linkPath})`;
     },
   );
@@ -89,3 +110,8 @@ function transformWikilinks(content: string): string {
 export function processObsidianLinks(content: string): string {
   return withCodeRegionsMasked(content, transformWikilinks);
 }
+
+// Re-exported for use by other modules if they need the recognised set.
+export const _recognisedFirstSegments: Set<string> = RECOGNISED_FIRST_SEGMENTS;
+export const _knownCollections: Set<string> = new Set<string>(Object.keys(collections));
+export type _CollectionName = CollectionName;

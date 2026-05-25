@@ -5,7 +5,14 @@
 // NEXT_PUBLIC_DEV_MODE at build time) flips the public/private gating off so
 // every route is reachable during development and on preview deploys.
 
-const devMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+// Dev-mode triggers route-gate bypass: every collection / page is reachable.
+// Defaults ON during `next dev` (NODE_ENV !== 'production') so /wiki, /insights,
+// /research/* etc. just work locally. In production builds (Vercel), the
+// explicit env var NEXT_PUBLIC_DEV_MODE=true keeps the bypass on if set;
+// otherwise the explicit toggles below decide what's reachable.
+const devMode =
+  process.env.NEXT_PUBLIC_DEV_MODE === 'true' ||
+  process.env.NODE_ENV !== 'production';
 
 // Collection-level toggles. When false in production, the collection's URLs
 // return 404 (catch-all sees the toggle and rejects). When `devMode` is true,
@@ -20,11 +27,18 @@ export const enabledCollections = {
   glossary: false,
   blog: false,
   people: false,
+  organizations: false,
   tags: false,
   reports: false,
   topics: false,
   docs: false,
   contributing: true,
+  manifesto: true,
+  about: true,
+  // Umbrella landings — reachable when devMode or when any child is enabled.
+  thinking: false,
+  resources: false,
+  research: false,
 };
 
 // Page-level toggles for the hand-written / one-off pages.
@@ -38,6 +52,8 @@ export const enabledPages = {
 // Everything else is noindex,nofollow.
 export const indexablePaths = new Set<string>([
   '/',
+  '/thinking/manifesto',
+  '/about',
   // Add to this set only when a page is ready for public discovery.
 ]);
 

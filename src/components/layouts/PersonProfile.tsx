@@ -142,6 +142,12 @@ export default function PersonProfile({ segments, frontmatter, html, toc }: Pers
               </ul>
             </section>
           )}
+
+          {(affiliation === 'cited-author' ||
+            affiliation === 'external-author' ||
+            affiliation === 'unclaimed') && (
+            <ClaimProfileCTA name={name as string} />
+          )}
         </>
       }
     >
@@ -149,5 +155,38 @@ export default function PersonProfile({ segments, frontmatter, html, toc }: Pers
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
     </ArticleShell>
+  );
+}
+
+function ClaimProfileCTA({ name }: { name: string }) {
+  return (
+    <aside className="not-prose mt-10 rounded-lg border border-indigo-200 bg-indigo-50 p-6">
+      <h2 className="text-sm font-semibold text-indigo-900 uppercase tracking-wide mb-2">
+        Is this you?
+      </h2>
+      <p className="text-gray-800">
+        Co-Goods has referenced {name}&rsquo;s work. If you&rsquo;d like to be
+        involved — as advisor, collaborator, or to claim this profile — we&rsquo;d
+        love to hear from you. Open an issue or say hi on Discord.
+      </p>
+      <div className="mt-4 flex flex-wrap gap-3 text-sm">
+        <a
+          href="https://github.com/co-goods/content/issues/new"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-500"
+        >
+          Open an issue on GitHub
+        </a>
+        <a
+          href="https://discord.gg/8asdWDW5QY"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md border border-indigo-300 px-3 py-1.5 text-indigo-700 hover:bg-indigo-100"
+        >
+          Join us on Discord
+        </a>
+      </div>
+    </aside>
   );
 }

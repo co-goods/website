@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { CollectionName, getCollection } from './collections';
+import { CollectionName, collections, getCollection } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
@@ -23,23 +23,21 @@ function readTitle(filepath: string, fallback: string): string {
   return fallback;
 }
 
-// Resolve a bare slug inside a known collection. For collections whose folder
-// layout is non-trivial (blog, reports), the URL is the bare slug form.
+// Resolve a bare slug inside a known collection. URL is built from the
+// collection's urlPrefix so it adapts to URL grouping changes automatically.
 export function resolveRef(collection: CollectionName, slug: string): ResolvedRef {
   const cfg = getCollection(collection);
   if (!cfg) return { url: `/${collection}/${slug}`, label: slug, exists: false };
 
   let filepath: string | null = null;
-  let url: string;
+  const url = `${cfg.urlPrefix}/${slug}`;
 
   switch (collection) {
     case 'library':
-      filepath = path.join(CONTENT_ROOT, 'library', `${slug}.md`);
-      url = `/library/${slug}`;
+      filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
       break;
     case 'blog': {
-      url = `/blog/${slug}`;
-      const blogRoot = path.join(CONTENT_ROOT, 'blog');
+      const blogRoot = path.join(CONTENT_ROOT, cfg.folder);
       if (fs.existsSync(blogRoot)) {
         outer: for (const year of fs.readdirSync(blogRoot)) {
           const yearPath = path.join(blogRoot, year);
@@ -57,24 +55,20 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
       }
       break;
     }
-    case 'reports':
-      url = `/reports/${slug}`;
-      // Best-effort title lookup: latest version
-      {
-        const reportFolder = path.join(CONTENT_ROOT, 'reports', slug);
-        if (fs.existsSync(reportFolder)) {
-          const versions = fs.readdirSync(reportFolder)
-            .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
-            .sort();
-          if (versions.length) {
-            filepath = path.join(reportFolder, versions[versions.length - 1], `${slug}.md`);
-          }
+    case 'reports': {
+      const reportFolder = path.join(CONTENT_ROOT, cfg.folder, slug);
+      if (fs.existsSync(reportFolder)) {
+        const versions = fs.readdirSync(reportFolder)
+          .filter(v => v.startsWith('v') && fs.statSync(path.join(reportFolder, v)).isDirectory())
+          .sort();
+        if (versions.length) {
+          filepath = path.join(reportFolder, versions[versions.length - 1], `${slug}.md`);
         }
       }
       break;
+    }
     default:
       filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
-      url = `/${collection}/${slug}`;
   }
 
   const exists = !!(filepath && fs.existsSync(filepath));
@@ -82,14 +76,37 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
   return { url, label, exists };
 }
 
-// Resolve a qualified-path wikilink reference like "glossary/network-coordination".
+// Resolve a qualified-path wikilink reference. The wikilink path mirrors
+// the folder layout in the content repo — e.g.
+// `[[research/insights/foo]]` → file at `content/research/insights/foo.md`,
+// URL `/research/insights/foo`. Top-level collections (people, blog,
+// tags, organizations) keep their single-segment prefix.
 // Bare (no slash) refs default to the topic-aggregation page.
 export function resolveQualifiedRef(qualified: string): ResolvedRef {
-  if (qualified.includes('/')) {
-    const [collection, ...rest] = qualified.split('/');
-    const slug = rest.join('/');
-    const cfg = getCollection(collection);
-    if (cfg) return resolveRef(collection as CollectionName, slug);
+  if (!qualified.includes('/')) {
+    return { url: `/topics/${qualified}`, label: qualified, exists: false };
   }
-  return { url: `/topics/${qualified}`, label: qualified, exists: false };
+
+  // Find the collection by longest-matching folder path. Most collections
+  // are 2-segment (research/insights, resources/wiki); top-level collections
+  // are 1-segment (people, blog, tags).
+  const cfg = findCollectionByQualified(qualified);
+  if (!cfg) {
+    return { url: `/${qualified}`, label: qualified.split('/').pop() || qualified, exists: false };
+  }
+
+  // Compute slug = everything after the collection's folder path.
+  const remainder = qualified.slice(cfg.folder.length).replace(/^\//, '');
+  return resolveRef(cfg.name, remainder);
+}
+
+function findCollectionByQualified(qualified: string) {
+  const sorted = Object.values(collections)
+    .filter(c => c.folder)
+    .sort((a, b) => b.folder.length - a.folder.length);
+  for (const cfg of sorted) {
+    if (qualified === cfg.folder) return cfg;
+    if (qualified.startsWith(cfg.folder + '/')) return cfg;
+  }
+  return null;
 }
