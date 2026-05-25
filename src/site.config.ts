@@ -31,7 +31,6 @@ export const enabledCollections = {
 export const enabledPages = {
   home: true,
   about: false,
-  internal: true, // /_dev — always reachable; noindexed
 };
 
 // Pages that should appear in sitemap.xml and be indexable by search engines.
