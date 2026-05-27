@@ -24,7 +24,7 @@ export type CollectionName =
   | 'topics'
   | 'contributing'
   | 'manifesto'
-  | 'about';
+  | 'pages';
 
 export type ResolverKind =
   | 'bare-slug'
@@ -32,7 +32,8 @@ export type ResolverKind =
   | 'library-nested'
   | 'blog-flattened'
   | 'reports-versioned'
-  | 'single-file';
+  | 'single-file'
+  | 'pages-transparent';
 
 export interface CollectionConfig {
   name: CollectionName;
@@ -59,7 +60,11 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   topics:       { name: 'topics',       folder: '',                      urlPrefix: '/topics',                resolver: 'bare-slug',        layout: 'ArticleLayout' },
   contributing: { name: 'contributing', folder: '',                      urlPrefix: '/contributing',          resolver: 'single-file',      layout: 'ArticleLayout' },
   manifesto:    { name: 'manifesto',    folder: '',                      urlPrefix: '/thinking/manifesto',    resolver: 'single-file',      layout: 'ArticleLayout' },
-  about:        { name: 'about',        folder: '',                      urlPrefix: '/about',                 resolver: 'single-file',      layout: 'ArticleLayout' },
+  // Composed / non-typed pages. The `pages/` folder is routing-transparent:
+  // pages/home.md is served at / (by app/page.tsx); pages/<slug>.md resolves
+  // at /<slug>. No urlPrefix — handled by the dedicated pages-transparent
+  // resolver as a fallback after prefixed collections.
+  pages:        { name: 'pages',        folder: 'pages',                 urlPrefix: '',                       resolver: 'pages-transparent', layout: 'ArticleLayout' },
 };
 
 export function getCollection(name: string): CollectionConfig | null {
