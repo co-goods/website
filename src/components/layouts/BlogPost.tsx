@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   DraftBanner,
   ExampleBanner,
@@ -14,9 +15,10 @@ interface BlogPostProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
-export default function BlogPost({ segments, frontmatter, html, toc }: BlogPostProps) {
+export default function BlogPost({ segments, frontmatter, html, toc, overlay }: BlogPostProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -31,7 +33,7 @@ export default function BlogPost({ segments, frontmatter, html, toc }: BlogPostP
     : null;
 
   return (
-    <ArticleShell collection="blog" segments={segments} toc={toc}
+    <ArticleShell collection="blog" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">

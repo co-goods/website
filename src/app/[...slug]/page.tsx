@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import path from 'path';
 import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
+import { loadOverlay } from '@/lib/overlays';
 import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
   getCollectionIndex,
@@ -90,6 +92,7 @@ export default async function CatchAll({ params }: PageProps) {
         />
       );
     }
+    notFound(); // exhaustive over derived views; also narrows `resolved` below
   }
 
   // Below: standard page / index resolution
@@ -149,11 +152,17 @@ export default async function CatchAll({ params }: PageProps) {
       ? { ...parsed.frontmatter, title: parsed.bodyTitle }
       : parsed.frontmatter;
 
+  // Overlay (splice) sections live parallel to the source at
+  // content/overlays/<collection-folder>/<slug>.md; absent for most pages.
+  const overlaySlug = path.basename(resolved.filepath, '.md');
+  const overlay = await loadOverlay(resolved.collection.folder, overlaySlug);
+
   const articleProps = {
     segments: resolved.innerSegments,
     frontmatter: mergedFrontmatter,
     html: parsed.rendered.html,
     toc: parsed.rendered.toc,
+    overlay,
   };
 
   switch (resolved.collection.layout) {

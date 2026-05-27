@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   DraftBanner,
   ExampleBanner,
@@ -14,16 +15,17 @@ interface WikiArticleProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
-export default function WikiArticle({ segments, frontmatter, html, toc }: WikiArticleProps) {
+export default function WikiArticle({ segments, frontmatter, html, toc, overlay }: WikiArticleProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Wiki article';
 
   return (
-    <ArticleShell collection="wiki" segments={segments} toc={toc}
+    <ArticleShell collection="wiki" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <FrontmatterMeta collection="wiki" frontmatter={frontmatter} />

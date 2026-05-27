@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   DraftBanner,
   ExampleBanner,
@@ -15,16 +16,17 @@ interface EssayDetailProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
-export default function EssayDetail({ segments, frontmatter, html, toc }: EssayDetailProps) {
+export default function EssayDetail({ segments, frontmatter, html, toc, overlay }: EssayDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Essay';
 
   return (
-    <ArticleShell collection="essays" segments={segments} toc={toc}
+    <ArticleShell collection="essays" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <FrontmatterMeta collection="essays" frontmatter={frontmatter} />

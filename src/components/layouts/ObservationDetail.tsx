@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   CollectionRefList,
   DraftBanner,
@@ -16,9 +17,10 @@ interface ObservationDetailProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
-export default function ObservationDetail({ segments, frontmatter, html, toc }: ObservationDetailProps) {
+export default function ObservationDetail({ segments, frontmatter, html, toc, overlay }: ObservationDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -27,7 +29,7 @@ export default function ObservationDetail({ segments, frontmatter, html, toc }: 
   const year = frontmatter['year-of-observation'];
 
   return (
-    <ArticleShell collection="observations" segments={segments} toc={toc}
+    <ArticleShell collection="observations" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">
