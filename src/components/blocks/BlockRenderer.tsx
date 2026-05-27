@@ -27,7 +27,13 @@ export function BlockRenderer({ blocks }: { blocks: RenderedBlock[] }) {
 
         const node = entry.body ? (
           <Component {...props}>
-            <div dangerouslySetInnerHTML={{ __html: block.bodyHtml }} />
+            {/* display:contents so the body has no box of its own — a single
+                paragraph flows inline (e.g. inside a quote's marks) while
+                multi-paragraph bodies still stack as blocks. */}
+            <div
+              style={{ display: 'contents' }}
+              dangerouslySetInnerHTML={{ __html: block.bodyHtml }}
+            />
           </Component>
         ) : (
           <Component {...props} />
