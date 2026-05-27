@@ -82,7 +82,7 @@ export default function EmailSignup({
     minimal: '',
   };
 
-  return (
+  const inner = (
     <div className={containerStyles[variant]}>
       {heading && (
         <h3 className="text-base font-semibold text-gray-900 mb-1">{heading}</h3>
@@ -127,4 +127,17 @@ export default function EmailSignup({
       )}
     </div>
   );
+
+  // The card variant stands alone as a full section, so it carries its own
+  // padding and centered width instead of relying on a page-level wrapper.
+  // inline / minimal are meant to be embedded and render bare.
+  if (variant === 'card') {
+    return (
+      <section className="px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mx-auto max-w-xl">{inner}</div>
+      </section>
+    );
+  }
+
+  return inner;
 }
