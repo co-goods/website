@@ -157,10 +157,12 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // About (single-file collection — moved from app/about/page.tsx)
-  if (isCollectionEnabled('about')) {
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'about.md'))) {
-      params.push({ slug: ['about'] });
+  // Composed pages — content/pages/<slug>.md served transparently at /<slug>.
+  // home is excluded; it's served at / by app/page.tsx, not /home.
+  if (isCollectionEnabled('pages')) {
+    for (const slug of listMdSlugs('pages')) {
+      if (slug === 'home') continue;
+      params.push({ slug: [slug] });
     }
   }
 

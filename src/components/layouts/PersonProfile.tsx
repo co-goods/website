@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import { CollectionRefList, ExampleBanner, TagList } from './atoms';
 
 interface PersonProfileProps {
@@ -7,6 +8,7 @@ interface PersonProfileProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
 type Affiliation = 'co-goods-team' | 'depalma-pilot' | 'external-author' | 'unclaimed';
@@ -68,7 +70,7 @@ function ContactLinks({ frontmatter }: { frontmatter: Record<string, unknown> })
   );
 }
 
-export default function PersonProfile({ segments, frontmatter, html, toc }: PersonProfileProps) {
+export default function PersonProfile({ segments, frontmatter, html, toc, overlay }: PersonProfileProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -83,7 +85,7 @@ export default function PersonProfile({ segments, frontmatter, html, toc }: Pers
   const aliases = Array.isArray(frontmatter.aliases) ? frontmatter.aliases.filter((a) => typeof a === 'string' && a) : [];
 
   return (
-    <ArticleShell collection="people" segments={segments} toc={toc}
+    <ArticleShell collection="people" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-center gap-x-3 text-xs uppercase tracking-wide text-gray-500">

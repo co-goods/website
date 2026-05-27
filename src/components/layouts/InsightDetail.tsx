@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   CollectionRefList,
   DraftBanner,
@@ -17,6 +18,7 @@ interface InsightDetailProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
 function BulletSection({
@@ -39,14 +41,14 @@ function BulletSection({
   );
 }
 
-export default function InsightDetail({ segments, frontmatter, html, toc }: InsightDetailProps) {
+export default function InsightDetail({ segments, frontmatter, html, toc, overlay }: InsightDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Insight';
 
   return (
-    <ArticleShell collection="insights" segments={segments} toc={toc}
+    <ArticleShell collection="insights" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <FrontmatterMeta collection="insights" frontmatter={frontmatter} />

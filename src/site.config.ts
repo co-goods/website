@@ -34,7 +34,7 @@ export const enabledCollections = {
   docs: false,
   contributing: true,
   manifesto: true,
-  about: true,
+  pages: true,
   // Umbrella landings — reachable when devMode or when any child is enabled.
   thinking: false,
   resources: false,

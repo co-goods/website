@@ -16,6 +16,13 @@ function unwrapSoleParagraph(html: string): string {
   return html;
 }
 
+// Render a single block's markdown body to HTML. Shared by the page-block and
+// overlay pipelines so both treat single- vs multi-paragraph bodies the same.
+export async function renderBlockBody(bodyMarkdown: string): Promise<string> {
+  if (!bodyMarkdown) return '';
+  return unwrapSoleParagraph((await renderMarkdown(bodyMarkdown)).html);
+}
+
 // Parse a custom page's markdown into blocks and pre-render the markdown body
 // of each body-rich block to HTML (rendering is async; components are not).
 // Any leading frontmatter (title, layout, …) is stripped first.
@@ -26,9 +33,7 @@ export async function renderPageBlocks(raw: string): Promise<RenderedBlock[]> {
     parsed.map(async (block) => ({
       name: block.name,
       props: block.props,
-      bodyHtml: block.bodyMarkdown
-        ? unwrapSoleParagraph((await renderMarkdown(block.bodyMarkdown)).html)
-        : '',
+      bodyHtml: await renderBlockBody(block.bodyMarkdown),
     }))
   );
 }

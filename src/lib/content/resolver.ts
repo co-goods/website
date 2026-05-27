@@ -178,7 +178,7 @@ function resolveContributingPage(): ResolvedPage | null {
 }
 
 function resolveSingleFilePage(
-  collectionName: 'manifesto' | 'about',
+  collectionName: 'manifesto',
   relativePath: string,
 ): ResolvedPage | null {
   const filepath = path.join(CONTENT_ROOT, relativePath);
@@ -189,6 +189,18 @@ function resolveSingleFilePage(
     filepath,
     innerSegments: [],
   };
+}
+
+// Routing-transparent pages: a single-segment URL maps to content/pages/<slug>.md.
+// `home` is excluded — pages/home.md is served at / by app/page.tsx, not /home.
+// Runs as a fallback after prefixed collections so /blog, /people, /tags, etc.
+// keep priority; only unclaimed single segments fall through to pages/.
+function resolvePagesPage(slug: string[]): ResolvedPage | null {
+  if (slug.length !== 1 || slug[0] === 'home') return null;
+  const collection = getCollection('pages')!;
+  const filepath = path.join(CONTENT_ROOT, collection.folder, `${slug[0]}.md`);
+  if (!fs.existsSync(filepath)) return null;
+  return { kind: 'page', collection, filepath, innerSegments: [] };
 }
 
 function resolvePage(slug: string[]): ResolvedPage | null {
@@ -315,15 +327,15 @@ export function resolveUrl(slug: string[]): ResolveResult | null {
     const page = resolveSingleFilePage('manifesto', 'thinking/manifesto.md');
     if (page) return page;
   }
-  if (slug.length === 1 && slug[0] === 'about') {
-    const page = resolveSingleFilePage('about', 'about.md');
-    if (page) return page;
-  }
 
   const page = resolvePage(slug);
   if (page) return page;
 
-  return resolveIndex(slug);
+  const index = resolveIndex(slug);
+  if (index) return index;
+
+  // Fallback: unclaimed single segments map to content/pages/<slug>.md.
+  return resolvePagesPage(slug);
 }
 
 // Convenience: build a URL for a collection slug at the right prefix.

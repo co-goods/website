@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import type { OverlaySlots } from '@/lib/overlays';
 import {
   CollectionRefList,
   DraftBanner,
@@ -15,6 +16,7 @@ interface HypothesisDetailProps {
   frontmatter: Record<string, unknown>;
   html: string;
   toc: TocEntry[];
+  overlay?: OverlaySlots | null;
 }
 
 type ValidationStatus = 'pending' | 'validated' | 'invalidated' | 'revised';
@@ -35,7 +37,7 @@ function ValidationBadge({ status }: { status: string }) {
   );
 }
 
-export default function HypothesisDetail({ segments, frontmatter, html, toc }: HypothesisDetailProps) {
+export default function HypothesisDetail({ segments, frontmatter, html, toc, overlay }: HypothesisDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -49,7 +51,7 @@ export default function HypothesisDetail({ segments, frontmatter, html, toc }: H
     : null;
 
   return (
-    <ArticleShell collection="hypotheses" segments={segments} toc={toc}
+    <ArticleShell collection="hypotheses" segments={segments} toc={toc} overlay={overlay}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-center gap-x-3 text-xs uppercase tracking-wide text-gray-500">
