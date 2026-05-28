@@ -157,12 +157,17 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // Composed pages — content/pages/<slug>.md served transparently at /<slug>.
+  // Composed pages — website/pages/<slug>.md served transparently at /<slug>.
   // home is excluded; it's served at / by app/page.tsx, not /home.
   if (isCollectionEnabled('pages')) {
-    for (const slug of listMdSlugs('pages')) {
-      if (slug === 'home') continue;
-      params.push({ slug: [slug] });
+    const pagesRoot = path.join(process.cwd(), 'pages');
+    if (fs.existsSync(pagesRoot)) {
+      for (const f of fs.readdirSync(pagesRoot)) {
+        if (!f.endsWith('.md')) continue;
+        const slug = f.replace(/\.md$/, '');
+        if (slug === 'home') continue;
+        params.push({ slug: [slug] });
+      }
     }
   }
 

@@ -191,14 +191,17 @@ function resolveSingleFilePage(
   };
 }
 
-// Routing-transparent pages: a single-segment URL maps to content/pages/<slug>.md.
-// `home` is excluded — pages/home.md is served at / by app/page.tsx, not /home.
-// Runs as a fallback after prefixed collections so /blog, /people, /tags, etc.
-// keep priority; only unclaimed single segments fall through to pages/.
+// Composed pages live in the website repo (not the content submodule), under
+// `pages/`. A single-segment URL maps to pages/<slug>.md. `home` is excluded —
+// pages/home.md is served at / by app/page.tsx, not /home. Runs as a fallback
+// after prefixed collections so /blog, /people, /tags, etc. keep priority;
+// only unclaimed single segments fall through to pages/.
+const PAGES_ROOT = path.join(process.cwd(), 'pages');
+
 function resolvePagesPage(slug: string[]): ResolvedPage | null {
   if (slug.length !== 1 || slug[0] === 'home') return null;
   const collection = getCollection('pages')!;
-  const filepath = path.join(CONTENT_ROOT, collection.folder, `${slug[0]}.md`);
+  const filepath = path.join(PAGES_ROOT, `${slug[0]}.md`);
   if (!fs.existsSync(filepath)) return null;
   return { kind: 'page', collection, filepath, innerSegments: [] };
 }
