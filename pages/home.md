@@ -6,6 +6,7 @@ title: Co-Goods
 
 ```hero
 variant: gradient
+backgroundYouTube: dQw4w9WgXcQ
 eyebrow: Open-innovation research
 title: Co-Goods
 subtitle: A protocol for co-created and networked physical products that become more valuable through shared use and collaborative ownership.
