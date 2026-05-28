@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { UmbrellaIndexData } from '@/lib/content/index-data';
 
 interface UmbrellaLandingLayoutProps {
-  name: 'thinking' | 'resources' | 'research';
+  name: 'thinking' | 'resources' | 'research' | 'docs' | 'library';
   data: UmbrellaIndexData;
 }
 

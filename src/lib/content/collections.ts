@@ -58,13 +58,13 @@ export const collections: Record<CollectionName, CollectionConfig> = {
 
   // /resources
   wiki:         { name: 'wiki',         folder: 'resources/wiki',        urlPrefix: '/resources/wiki',        resolver: 'bare-slug', layout: 'WikiArticle' },
-  glossary:     { name: 'glossary',     folder: 'resources/glossary',    urlPrefix: '/resources/glossary',    resolver: 'bare-slug', layout: 'GlossaryItem' },
+  glossary:     { name: 'glossary',     folder: 'resources/glossary',    urlPrefix: '/resources/glossary',    resolver: 'bare-slug', layout: 'GlossaryTerm' },
 
   // /resources/library — per-entity sibling collections
-  books:        { name: 'books',        folder: 'resources/library/books',        urlPrefix: '/resources/library/books',        resolver: 'bare-slug', layout: 'BookLayout' },
-  papers:       { name: 'papers',       folder: 'resources/library/papers',       urlPrefix: '/resources/library/papers',       resolver: 'bare-slug', layout: 'PaperLayout' },
-  publishers:   { name: 'publishers',   folder: 'resources/library/publishers',   urlPrefix: '/resources/library/publishers',   resolver: 'bare-slug', layout: 'PublisherLayout' },
-  publications: { name: 'publications', folder: 'resources/library/publications', urlPrefix: '/resources/library/publications', resolver: 'bare-slug', layout: 'PublicationLayout' },
+  books:        { name: 'books',        folder: 'resources/library/books',        urlPrefix: '/resources/library/books',        resolver: 'bare-slug', layout: 'LibraryEntry' },
+  papers:       { name: 'papers',       folder: 'resources/library/papers',       urlPrefix: '/resources/library/papers',       resolver: 'bare-slug', layout: 'LibraryEntry' },
+  publishers:   { name: 'publishers',   folder: 'resources/library/publishers',   urlPrefix: '/resources/library/publishers',   resolver: 'bare-slug', layout: 'ArticleLayout' },
+  publications: { name: 'publications', folder: 'resources/library/publications', urlPrefix: '/resources/library/publications', resolver: 'bare-slug', layout: 'ArticleLayout' },
 
   // /research
   observations: { name: 'observations', folder: 'research/observations', urlPrefix: '/research/observations', resolver: 'bare-slug', layout: 'ObservationDetail' },
@@ -73,11 +73,11 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   reports:      { name: 'reports',      folder: 'research/reports',      urlPrefix: '/research/reports',      resolver: 'reports-versioned', layout: 'ArticleLayout' },
 
   // /docs — top-level docs collections + nested sub-collections
-  conventions:                 { name: 'conventions',                folder: 'docs/conventions',                urlPrefix: '/docs/conventions',                resolver: 'bare-slug', layout: 'DocLayout' },
-  'conventions/naming':        { name: 'conventions/naming',         folder: 'docs/conventions/naming',         urlPrefix: '/docs/conventions/naming',         resolver: 'bare-slug', layout: 'DocLayout', parent: 'conventions' },
-  'conventions/frontmatter':   { name: 'conventions/frontmatter',    folder: 'docs/conventions/frontmatter',    urlPrefix: '/docs/conventions/frontmatter',    resolver: 'bare-slug', layout: 'DocLayout', parent: 'conventions' },
-  schemas:                     { name: 'schemas',                    folder: 'docs/schemas',                    urlPrefix: '/docs/schemas',                    resolver: 'bare-slug', layout: 'DocLayout' },
-  contributing:                { name: 'contributing',               folder: 'docs/contributing',               urlPrefix: '/docs/contributing',               resolver: 'bare-slug', layout: 'DocLayout' },
+  conventions:                 { name: 'conventions',                folder: 'docs/conventions',                urlPrefix: '/docs/conventions',                resolver: 'bare-slug', layout: 'ArticleLayout' },
+  'conventions/naming':        { name: 'conventions/naming',         folder: 'docs/conventions/naming',         urlPrefix: '/docs/conventions/naming',         resolver: 'bare-slug', layout: 'ArticleLayout', parent: 'conventions' },
+  'conventions/frontmatter':   { name: 'conventions/frontmatter',    folder: 'docs/conventions/frontmatter',    urlPrefix: '/docs/conventions/frontmatter',    resolver: 'bare-slug', layout: 'ArticleLayout', parent: 'conventions' },
+  schemas:                     { name: 'schemas',                    folder: 'docs/schemas',                    urlPrefix: '/docs/schemas',                    resolver: 'bare-slug', layout: 'ArticleLayout' },
+  contributing:                { name: 'contributing',               folder: 'docs/contributing',               urlPrefix: '/docs/contributing',               resolver: 'bare-slug', layout: 'ArticleLayout' },
 
   // Top-level (no enclosing URL grouping)
   blog:          { name: 'blog',          folder: 'blog',          urlPrefix: '/blog',          resolver: 'blog-flattened', layout: 'BlogPost' },

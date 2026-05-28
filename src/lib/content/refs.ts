@@ -23,9 +23,35 @@ function readTitle(filepath: string, fallback: string): string {
   return fallback;
 }
 
+// Library is no longer a single collection — `sources:` and friends reference
+// a slug that may live in books, papers, publishers, or publications. This
+// virtual lookup walks the sub-collections in order and returns the first hit.
+const LIBRARY_SUB_COLLECTIONS = ['books', 'papers', 'publishers', 'publications'] as const;
+
+function resolveLibraryRef(slug: string): ResolvedRef {
+  for (const sub of LIBRARY_SUB_COLLECTIONS) {
+    const cfg = getCollection(sub);
+    if (!cfg) continue;
+    const filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
+    if (fs.existsSync(filepath)) {
+      return {
+        url: `${cfg.urlPrefix}/${slug}`,
+        label: readTitle(filepath, slug),
+        exists: true,
+      };
+    }
+  }
+  // Not found anywhere — return a books URL as fallback (so links don't break)
+  return { url: `/resources/library/books/${slug}`, label: slug, exists: false };
+}
+
 // Resolve a bare slug inside a known collection. URL is built from the
 // collection's urlPrefix so it adapts to URL grouping changes automatically.
-export function resolveRef(collection: CollectionName, slug: string): ResolvedRef {
+// The string 'library' is a virtual lookup across the bibliographic
+// sub-collections (books, papers, publishers, publications).
+export function resolveRef(collection: CollectionName | 'library', slug: string): ResolvedRef {
+  if (collection === 'library') return resolveLibraryRef(slug);
+
   const cfg = getCollection(collection);
   if (!cfg) return { url: `/${collection}/${slug}`, label: slug, exists: false };
 
@@ -33,9 +59,6 @@ export function resolveRef(collection: CollectionName, slug: string): ResolvedRe
   const url = `${cfg.urlPrefix}/${slug}`;
 
   switch (collection) {
-    case 'library':
-      filepath = path.join(CONTENT_ROOT, cfg.folder, `${slug}.md`);
-      break;
     case 'blog': {
       const blogRoot = path.join(CONTENT_ROOT, cfg.folder);
       if (fs.existsSync(blogRoot)) {
