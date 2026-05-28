@@ -1,13 +1,17 @@
+import PageActions from './PageActions';
+
 interface PlainPageLayoutProps {
   frontmatter: Record<string, unknown>;
   html: string;
+  editUrl?: string;
+  discordUrl?: string;
 }
 
 // Layout for plain-page standalones (manifesto, root CONTRIBUTING.md). No
 // collection breadcrumb, no per-collection chrome — just centered title +
 // markdown body. Site-specific framing for these pages is intended to come
 // via overlays; not wired in this layout yet.
-export default function PlainPageLayout({ frontmatter, html }: PlainPageLayoutProps) {
+export default function PlainPageLayout({ frontmatter, html, editUrl, discordUrl }: PlainPageLayoutProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) || '';
 
@@ -20,6 +24,7 @@ export default function PlainPageLayout({ frontmatter, html }: PlainPageLayoutPr
         className="prose prose-slate max-w-none"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      <PageActions editUrl={editUrl} discordUrl={discordUrl} />
     </div>
   );
 }

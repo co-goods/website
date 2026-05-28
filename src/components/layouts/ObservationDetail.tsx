@@ -18,9 +18,11 @@ interface ObservationDetailProps {
   html: string;
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
+  editUrl?: string;
+  discordUrl?: string;
 }
 
-export default function ObservationDetail({ segments, frontmatter, html, toc, overlay }: ObservationDetailProps) {
+export default function ObservationDetail({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: ObservationDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -29,7 +31,7 @@ export default function ObservationDetail({ segments, frontmatter, html, toc, ov
   const year = frontmatter['year-of-observation'];
 
   return (
-    <ArticleShell collection="observations" segments={segments} toc={toc} overlay={overlay}
+    <ArticleShell collection="observations" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">

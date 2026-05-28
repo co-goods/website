@@ -7,6 +7,7 @@ import EmailSignup from './EmailSignup';
 import Prose from './Prose';
 import Image from './Image';
 import Video from './Video';
+import Events from './Events';
 import type { BlockSpecMap } from '@/lib/blockParser';
 
 interface RegistryEntry {
@@ -27,6 +28,7 @@ export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
   cta: { component: CTA, body: false },
   image: { component: Image, body: false },
   video: { component: Video, body: false },
+  events: { component: Events, body: false },
 };
 
 // Body flags only — handed to the parser, which stays component-agnostic.
