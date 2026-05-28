@@ -17,6 +17,7 @@ import {
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
+import PlainPageLayout from '@/components/layouts/PlainPageLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
 import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
 import WikiArticle from '@/components/layouts/WikiArticle';
@@ -54,7 +55,7 @@ export default async function CatchAll({ params }: PageProps) {
   if (!resolved) notFound();
 
   // Plain-page standalones (manifesto, root CONTRIBUTING.md). Rendered via
-  // ArticleLayout for now; a dedicated PlainPage layout lands in a follow-up.
+  // PlainPageLayout — title + body, no collection chrome.
   if (resolved.kind === 'standalone') {
     const parsed = await readAndRender(resolved.filepath);
     const mergedFrontmatter =
@@ -62,12 +63,9 @@ export default async function CatchAll({ params }: PageProps) {
         ? { ...parsed.frontmatter, title: parsed.bodyTitle }
         : parsed.frontmatter;
     return (
-      <ArticleLayout
-        collection="standalone"
-        segments={[]}
+      <PlainPageLayout
         frontmatter={mergedFrontmatter}
         html={parsed.rendered.html}
-        toc={parsed.rendered.toc}
       />
     );
   }
