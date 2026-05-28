@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { siteConfig } from '@/site.config';
+import SearchBox from './SearchBox';
 
 interface NavItem {
   label: string;
@@ -68,7 +69,10 @@ export default function Header() {
           </Link>
 
           {items.length > 0 && (
-            <>
+            <div className="flex items-center gap-x-6">
+              <div className="hidden lg:block">
+                <SearchBox />
+              </div>
               <ul className="hidden lg:flex items-center gap-x-8">
                 {items.map(item => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -122,7 +126,7 @@ export default function Header() {
                   )}
                 </svg>
               </button>
-            </>
+            </div>
           )}
         </div>
 
