@@ -14,6 +14,8 @@ interface LibraryEntryProps {
   html: string;
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
+  editUrl?: string;
+  discordUrl?: string;
 }
 
 const KNOWN_TYPES: Record<string, string> = {
@@ -52,7 +54,7 @@ function MetaRow({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-export default function LibraryEntry({ segments, frontmatter, html, toc, overlay }: LibraryEntryProps) {
+export default function LibraryEntry({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: LibraryEntryProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -79,7 +81,7 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
   const openAccess = frontmatter.open_access === true;
 
   return (
-    <ArticleShell collection="library" segments={segments} toc={toc} overlay={overlay}
+    <ArticleShell collection="library" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
       header={
         <>
           <div className="mb-3 not-prose flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">

@@ -14,6 +14,8 @@ interface GlossaryTermProps {
   html: string;
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
+  editUrl?: string;
+  discordUrl?: string;
 }
 
 // Dictionary Schema class-entry shape:
@@ -60,7 +62,7 @@ function ClassBlock({ entry }: { entry: ClassEntry }) {
   );
 }
 
-export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay }: GlossaryTermProps) {
+export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: GlossaryTermProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -75,7 +77,7 @@ export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay
   const links = Array.isArray(frontmatter.links) ? frontmatter.links : [];
 
   return (
-    <ArticleShell collection="glossary" segments={segments} toc={toc} overlay={overlay}
+    <ArticleShell collection="glossary" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
       header={
         <>
           <div className="not-prose mb-3 text-xs uppercase tracking-wide text-gray-500">
