@@ -120,7 +120,7 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-gray-100 text-xs text-gray-500 space-y-1">
           <p>© {year} DePalma Workwear Limited and contributors</p>
-          <p>Content licensed CC BY-SA 4.0</p>
+          <p>Content licensed CC BY-SA 4.0 unless otherwise noted</p>
         </div>
       </div>
     </footer>

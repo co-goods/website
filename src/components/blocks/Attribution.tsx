@@ -8,8 +8,9 @@ interface AttributionProps {
 
 // The credit + license line shown under an image or video. Renders nothing
 // when no attribution fields are set. Links each part when a URL is given.
-// The license string is editorial (e.g. "CC BY-SA 4.0") — site content is
-// CC BY-SA 4.0, so media should carry a compatible license and say so.
+// The license string is editorial (e.g. "CC BY-SA 4.0"). A media item's
+// license is its own — independent of the surrounding content's license —
+// so reused or embedded media should declare it.
 //
 // TODO: migrate to Grund — caption/attribution typography belongs in the
 // Grund Figure Component once it exists; the license semantics stay here.

@@ -18,7 +18,7 @@ interface ImageProps {
 
 // Wraps next/image with caption + attribution support. For decorative images,
 // pass alt="". For above-the-fold (hero) images, pass priority for LCP.
-// Media should carry a license compatible with the site's CC BY-SA 4.0 —
+// Media carries its own license, independent of the surrounding content —
 // see the credit/license fields.
 //
 // TODO: migrate to Grund — the responsive image + aspect-ratio box belong in

@@ -24,7 +24,7 @@ interface VideoProps {
 // Embeds a YouTube/Vimeo video or plays a self-hosted MP4. Embeds are the
 // default for anything substantial — self-hosted files are served from the
 // site's own bandwidth, so reserve `provider: file` for short clips.
-// Media should carry a license compatible with the site's CC BY-SA 4.0.
+// Media carries its own license, independent of the surrounding content.
 //
 // TODO: migrate to Grund — the responsive aspect-ratio frame belongs in a
 // Grund Component (aspect-ratios foundation); provider handling and license
