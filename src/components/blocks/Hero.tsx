@@ -12,11 +12,13 @@ interface HeroProps {
   cta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
   children?: React.ReactNode;
-  // Full-bleed background media — an image or a muted looping video — with the
-  // text overlaid (the text-on-image treatment from the DePalma Workwear hero).
-  // When neither is set, the hero renders on the flat `variant` background, as
-  // before. `backgroundImage` wins if both are given.
+  // Full-bleed background media — an image, a YouTube clip, or a muted looping
+  // self-hosted video — with the text overlaid (the text-on-image treatment
+  // from the DePalma Workwear hero). When none is set, the hero renders on the
+  // flat `variant` background, as before. Precedence: image, then YouTube,
+  // then video.
   backgroundImage?: string;
+  backgroundYouTube?: string;
   backgroundVideo?: string;
   poster?: string;
   // Text colour over the background. Defaults to `light` when media is present
@@ -47,12 +49,13 @@ export default function Hero({
   secondaryCta,
   children,
   backgroundImage,
+  backgroundYouTube,
   backgroundVideo,
   poster,
   tone,
   overlay,
 }: HeroProps) {
-  const hasMedia = Boolean(backgroundImage || backgroundVideo);
+  const hasMedia = Boolean(backgroundImage || backgroundYouTube || backgroundVideo);
   const isLight = (tone ?? (hasMedia ? 'light' : 'dark')) === 'light';
   const showScrim = hasMedia && (overlay ?? 'scrim') === 'scrim';
   const isRemote = backgroundImage ? /^https?:\/\//.test(backgroundImage) : false;
@@ -64,7 +67,7 @@ export default function Hero({
   return (
     <section className={sectionClass}>
       {hasMedia && (
-        <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
           {backgroundImage ? (
             <NextImage
               src={backgroundImage}
@@ -73,6 +76,17 @@ export default function Hero({
               priority
               unoptimized={isRemote}
               className="object-cover"
+            />
+          ) : backgroundYouTube ? (
+            // YouTube can't object-cover like a <video>, so size the iframe to
+            // 16:9 and centre it large enough to cover the box (177.78vh wide /
+            // 56.25vw tall, whichever wins). pointer-events-none so the cover
+            // video never intercepts clicks on the hero.
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${backgroundYouTube}?autoplay=1&mute=1&loop=1&playlist=${backgroundYouTube}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0`}
+              title=""
+              allow="autoplay; encrypted-media"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
             />
           ) : (
             <video
