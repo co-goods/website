@@ -18,41 +18,21 @@ export interface ResolvedIndex {
   innerSegments: string[];
 }
 
-export type Resolved = ResolvedPage | ResolvedIndex;
-
-// Strip leading NN- ordering prefix from a folder or filename.
-export function stripOrderPrefix(name: string): string {
-  const m = name.match(/^\d+-(.+)$/);
-  return m ? m[1] : name;
+// Plain-page standalones (manifesto, root CONTRIBUTING.md). Rendered via the
+// PlainPage layout. Not part of any collection.
+export interface ResolvedStandalone {
+  kind: 'standalone';
+  filepath: string;
+  url: string;
 }
 
-function findEntryWithStrippedPrefix(
-  dir: string,
-  bareName: string,
-  isDir: boolean,
-): string | null {
-  if (!fs.existsSync(dir)) return null;
-  for (const entry of fs.readdirSync(dir)) {
-    const fullPath = path.join(dir, entry);
-    const stat = fs.statSync(fullPath);
-    if (isDir && !stat.isDirectory()) continue;
-    if (!isDir && !stat.isFile()) continue;
-
-    if (isDir) {
-      if (stripOrderPrefix(entry) === bareName) return fullPath;
-    } else {
-      if (!entry.endsWith('.md')) continue;
-      const slug = stripOrderPrefix(entry.replace(/\.md$/, ''));
-      if (slug === bareName) return fullPath;
-    }
-  }
-  return null;
-}
+export type Resolved = ResolvedPage | ResolvedIndex | ResolvedStandalone;
 
 // ---------- URL prefix matching ----------
 
 // Match the start of `slug` against any collection's urlPrefix.
-// Longest-prefix-first so /research/insights wins over /research.
+// Longest-prefix-first so /resources/library/books wins over /resources, and
+// /docs/conventions/naming wins over /docs/conventions.
 function matchUrlPrefix(slug: string[]): { collection: CollectionConfig; rest: string[] } | null {
   const fullPath = '/' + slug.join('/');
 
@@ -75,44 +55,11 @@ function matchUrlPrefix(slug: string[]): { collection: CollectionConfig; rest: s
 
 // ---------- Page resolvers ----------
 
-function resolveDocsPage(rest: string[]): ResolvedPage | null {
-  if (rest.length !== 2) return null;
-  const [category, slug] = rest;
-
-  const docsRoot = path.join(CONTENT_ROOT, 'docs');
-  const categoryDir = findEntryWithStrippedPrefix(docsRoot, category, true);
-  if (!categoryDir) return null;
-  const filepath = findEntryWithStrippedPrefix(categoryDir, slug, false);
-  if (!filepath) return null;
-
-  return {
-    kind: 'page',
-    collection: getCollection('docs')!,
-    filepath,
-    innerSegments: [category, slug],
-  };
-}
-
 function resolveBareSlugPage(cfg: CollectionConfig, rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const filepath = path.join(CONTENT_ROOT, cfg.folder, `${rest[0]}.md`);
   if (!fs.existsSync(filepath)) return null;
   return { kind: 'page', collection: cfg, filepath, innerSegments: rest };
-}
-
-function resolveLibraryPage(rest: string[]): ResolvedPage | null {
-  const collection = getCollection('library')!;
-  if (rest.length === 1) {
-    const filepath = path.join(CONTENT_ROOT, collection.folder, `${rest[0]}.md`);
-    if (!fs.existsSync(filepath)) return null;
-    return { kind: 'page', collection, filepath, innerSegments: rest };
-  }
-  if (rest.length === 2 && (rest[0] === 'publishers' || rest[0] === 'publications')) {
-    const filepath = path.join(CONTENT_ROOT, collection.folder, rest[0], `${rest[1]}.md`);
-    if (!fs.existsSync(filepath)) return null;
-    return { kind: 'page', collection, filepath, innerSegments: rest };
-  }
-  return null;
 }
 
 function resolveBlogPage(rest: string[]): ResolvedPage | null {
@@ -166,29 +113,20 @@ function resolveReportsPage(rest: string[]): ResolvedPage | null {
   };
 }
 
-function resolveContributingPage(): ResolvedPage | null {
-  const filepath = path.join(CONTENT_ROOT, 'CONTRIBUTING.md');
-  if (!fs.existsSync(filepath)) return null;
-  return {
-    kind: 'page',
-    collection: getCollection('contributing')!,
-    filepath,
-    innerSegments: [],
-  };
-}
-
-function resolveSingleFilePage(
-  collectionName: 'manifesto',
-  relativePath: string,
-): ResolvedPage | null {
-  const filepath = path.join(CONTENT_ROOT, relativePath);
-  if (!fs.existsSync(filepath)) return null;
-  return {
-    kind: 'page',
-    collection: getCollection(collectionName)!,
-    filepath,
-    innerSegments: [],
-  };
+// Plain-page standalones: manifesto at /thinking/manifesto, root CONTRIBUTING.md
+// at /contributing. Both rendered via the PlainPage layout.
+function resolveStandalone(slug: string[]): ResolvedStandalone | null {
+  if (slug.length === 1 && slug[0] === 'contributing') {
+    const filepath = path.join(CONTENT_ROOT, 'CONTRIBUTING.md');
+    if (!fs.existsSync(filepath)) return null;
+    return { kind: 'standalone', filepath, url: '/contributing' };
+  }
+  if (slug.length === 2 && slug[0] === 'thinking' && slug[1] === 'manifesto') {
+    const filepath = path.join(CONTENT_ROOT, 'thinking', 'manifesto.md');
+    if (!fs.existsSync(filepath)) return null;
+    return { kind: 'standalone', filepath, url: '/thinking/manifesto' };
+  }
+  return null;
 }
 
 // Composed pages live in the website repo (not the content submodule), under
@@ -216,15 +154,11 @@ function resolvePage(slug: string[]): ResolvedPage | null {
   if (rest.length === 0) return null; // index, not a page
 
   switch (collection.resolver) {
-    case 'docs-prefixed':
-      return resolveDocsPage(rest);
-    case 'library-nested':
-      return resolveLibraryPage(rest);
     case 'blog-flattened':
       return resolveBlogPage(rest);
     case 'reports-versioned':
       return resolveReportsPage(rest);
-    case 'single-file':
+    case 'pages-transparent':
       return null;
     case 'bare-slug':
     default:
@@ -239,36 +173,11 @@ function resolveIndex(slug: string[]): ResolvedIndex | null {
   if (!matched) return null;
   const { collection, rest } = matched;
 
-  if (collection.resolver === 'single-file' && rest.length === 0) {
-    return null;
-  }
-
   if (rest.length === 0) {
     const folderToCheck = collection.folder || '';
     const dir = folderToCheck ? path.join(CONTENT_ROOT, folderToCheck) : CONTENT_ROOT;
     if (folderToCheck && !fs.existsSync(dir)) return null;
     return { kind: 'index', collection, innerSegments: [] };
-  }
-
-  // /docs/<category> intermediate index
-  if (collection.name === 'docs' && rest.length === 1) {
-    const docsRoot = path.join(CONTENT_ROOT, 'docs');
-    const dir = findEntryWithStrippedPrefix(docsRoot, rest[0], true);
-    if (dir) {
-      return { kind: 'index', collection, innerSegments: rest };
-    }
-  }
-
-  // /library/publishers, /library/publications
-  if (
-    collection.name === 'library' &&
-    rest.length === 1 &&
-    (rest[0] === 'publishers' || rest[0] === 'publications')
-  ) {
-    const subDir = path.join(CONTENT_ROOT, 'library', rest[0]);
-    if (fs.existsSync(subDir) && fs.statSync(subDir).isDirectory()) {
-      return { kind: 'index', collection, innerSegments: rest };
-    }
   }
 
   return null;
@@ -278,14 +187,19 @@ function resolveIndex(slug: string[]): ResolvedIndex | null {
 
 export interface ResolvedUmbrella {
   kind: 'umbrella';
-  name: 'thinking' | 'resources' | 'research';
+  name: 'thinking' | 'resources' | 'research' | 'docs' | 'library';
 }
 
 function resolveUmbrella(slug: string[]): ResolvedUmbrella | null {
-  if (slug.length !== 1) return null;
-  if (slug[0] === 'thinking') return { kind: 'umbrella', name: 'thinking' };
-  if (slug[0] === 'resources') return { kind: 'umbrella', name: 'resources' };
-  if (slug[0] === 'research') return { kind: 'umbrella', name: 'research' };
+  if (slug.length === 1) {
+    if (slug[0] === 'thinking') return { kind: 'umbrella', name: 'thinking' };
+    if (slug[0] === 'resources') return { kind: 'umbrella', name: 'resources' };
+    if (slug[0] === 'research') return { kind: 'umbrella', name: 'research' };
+    if (slug[0] === 'docs') return { kind: 'umbrella', name: 'docs' };
+  }
+  if (slug.length === 2 && slug[0] === 'resources' && slug[1] === 'library') {
+    return { kind: 'umbrella', name: 'library' };
+  }
   return null;
 }
 
@@ -316,20 +230,16 @@ function resolveDerived(slug: string[]): ResolvedDerived | null {
 export type ResolveResult = Resolved | ResolvedUmbrella | ResolvedDerived;
 
 export function resolveUrl(slug: string[]): ResolveResult | null {
+  // Plain-page standalones first — explicit URL routing for manifesto and
+  // root CONTRIBUTING.md, both rendered via the PlainPage layout.
+  const standalone = resolveStandalone(slug);
+  if (standalone) return standalone;
+
   const umbrella = resolveUmbrella(slug);
   if (umbrella) return umbrella;
 
   const derived = resolveDerived(slug);
   if (derived) return derived;
-
-  if (slug.length === 1 && slug[0] === 'contributing') {
-    const page = resolveContributingPage();
-    if (page) return page;
-  }
-  if (slug.length === 2 && slug[0] === 'thinking' && slug[1] === 'manifesto') {
-    const page = resolveSingleFilePage('manifesto', 'thinking/manifesto.md');
-    if (page) return page;
-  }
 
   const page = resolvePage(slug);
   if (page) return page;
@@ -337,7 +247,7 @@ export function resolveUrl(slug: string[]): ResolveResult | null {
   const index = resolveIndex(slug);
   if (index) return index;
 
-  // Fallback: unclaimed single segments map to content/pages/<slug>.md.
+  // Fallback: unclaimed single segments map to pages/<slug>.md (website repo).
   return resolvePagesPage(slug);
 }
 

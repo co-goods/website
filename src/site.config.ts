@@ -18,12 +18,12 @@ const devMode =
 // return 404 (catch-all sees the toggle and rejects). When `devMode` is true,
 // every collection is reachable regardless of these toggles.
 export const enabledCollections = {
+  // Top-level collections
   wiki: false,
   essays: false,
   insights: false,
   observations: false,
   hypotheses: false,
-  library: false,
   glossary: false,
   blog: false,
   people: false,
@@ -31,14 +31,23 @@ export const enabledCollections = {
   tags: false,
   reports: false,
   topics: false,
-  docs: false,
-  contributing: true,
-  manifesto: true,
   pages: true,
-  // Umbrella landings — reachable when devMode or when any child is enabled.
+  // Per-entity library collections (under /resources/library/)
+  books: false,
+  papers: false,
+  publishers: false,
+  publications: false,
+  // Docs collections (under /docs/) and their sub-collections
+  conventions: false,
+  'conventions/naming': false,
+  'conventions/frontmatter': false,
+  schemas: false,
+  contributing: false,
+  // URL groupings — reachable when devMode or when any child is enabled.
   thinking: false,
   resources: false,
   research: false,
+  docs: false,
 };
 
 // Page-level toggles for the hand-written / one-off pages.
