@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { getDocsTree, DocCategory } from './docs';
-import { collections, CollectionName } from './collections';
+import { collections, getCollection, CollectionName } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
@@ -186,8 +186,17 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
     }
     case 'topics':
       return { title: 'Topics', description: 'Cross-collection topic pages.', items: [] };
-    default:
+    default: {
+      // Generic fallback: any bare-slug collection with a non-empty folder
+      // gets a simple listing. Covers the docs collections (conventions,
+      // schemas, contributing) and any future collection registered without
+      // a dedicated case here.
+      const cfg = getCollection(name);
+      if (cfg && cfg.folder && cfg.resolver === 'bare-slug') {
+        return listFolderAsIndex(cfg.folder, cfg.urlPrefix, name);
+      }
       return { title: name, items: [] };
+    }
   }
 }
 
