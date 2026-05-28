@@ -1,4 +1,5 @@
 import NextImage from 'next/image';
+import Attribution from './Attribution';
 
 interface ImageProps {
   src: string;
@@ -8,10 +9,21 @@ interface ImageProps {
   height?: number;
   priority?: boolean;
   aspectRatio?: string;
+  credit?: string;
+  creditUrl?: string;
+  license?: string;
+  licenseUrl?: string;
+  sourceUrl?: string;
 }
 
-// Wraps next/image with caption support. For decorative images, pass alt="".
-// For above-the-fold (hero) images, pass priority for LCP optimization.
+// Wraps next/image with caption + attribution support. For decorative images,
+// pass alt="". For above-the-fold (hero) images, pass priority for LCP.
+// Media should carry a license compatible with the site's CC BY-SA 4.0 —
+// see the credit/license fields.
+//
+// TODO: migrate to Grund — the responsive image + aspect-ratio box belong in
+// a Grund Figure/ResponsiveImage Component (aspect-ratios foundation); the
+// authoring vocabulary and license semantics stay in this block.
 
 export default function Image({
   src,
@@ -21,8 +33,14 @@ export default function Image({
   height,
   priority = false,
   aspectRatio,
+  credit,
+  creditUrl,
+  license,
+  licenseUrl,
+  sourceUrl,
 }: ImageProps) {
   const isRemote = /^https?:\/\//.test(src);
+  const hasAttribution = Boolean(credit || license || sourceUrl);
 
   return (
     <section className="px-4 sm:px-6 lg:px-8 py-8">
@@ -57,9 +75,17 @@ export default function Image({
             </div>
           )}
         </div>
-        {caption && (
+        {(caption || hasAttribution) && (
           <figcaption className="mt-3 text-sm text-gray-600 text-center">
             {caption}
+            {caption && hasAttribution && ' '}
+            <Attribution
+              credit={credit}
+              creditUrl={creditUrl}
+              license={license}
+              licenseUrl={licenseUrl}
+              sourceUrl={sourceUrl}
+            />
           </figcaption>
         )}
       </figure>

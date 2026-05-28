@@ -5,6 +5,8 @@ import Callout from './Callout';
 import CTA from './CTA';
 import EmailSignup from './EmailSignup';
 import Prose from './Prose';
+import Image from './Image';
+import Video from './Video';
 import type { BlockSpecMap } from '@/lib/blockParser';
 
 interface RegistryEntry {
@@ -15,8 +17,7 @@ interface RegistryEntry {
 }
 
 // The authoring vocabulary: maps a fenced block name to its component and
-// whether it consumes a markdown body. (Image is omitted until it's needed
-// from markdown.)
+// whether it consumes a markdown body.
 export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
   hero: { component: Hero, body: false },
   prose: { component: Prose, body: true },
@@ -24,6 +25,8 @@ export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
   callout: { component: Callout, body: true },
   emailsignup: { component: EmailSignup, body: false },
   cta: { component: CTA, body: false },
+  image: { component: Image, body: false },
+  video: { component: Video, body: false },
 };
 
 // Body flags only — handed to the parser, which stays component-agnostic.
