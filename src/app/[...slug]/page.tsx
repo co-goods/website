@@ -1,9 +1,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import fs from 'fs';
 import path from 'path';
 import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
+import { renderPageBlocks } from '@/lib/renderBlocks';
+import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { loadOverlay } from '@/lib/overlays';
 import {
   getCollectionIndex,
@@ -127,6 +130,16 @@ export default async function CatchAll({ params }: PageProps) {
   }
 
   // resolved.kind === 'page'
+
+  // Composed pages (the pages/ namespace) are authored as section blocks,
+  // same as the home page — render them through the block pipeline rather
+  // than as a markdown article.
+  if (resolved.collection.name === 'pages') {
+    const raw = fs.readFileSync(resolved.filepath, 'utf8');
+    const blocks = await renderPageBlocks(raw);
+    return <BlockRenderer blocks={blocks} />;
+  }
+
   const parsed = await readAndRender(resolved.filepath);
 
   // Merge bodyTitle as a frontmatter fallback if frontmatter.title is missing.
