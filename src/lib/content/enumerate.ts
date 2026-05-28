@@ -1,16 +1,16 @@
 import fs from 'fs';
 import path from 'path';
-import { getDocsTree } from './docs';
 import { isCollectionEnabled } from '@/site.config';
-import { collections, getCollection } from './collections';
+import { collections, getCollection, CollectionName } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
 
 function listMdSlugs(folder: string): string[] {
+  if (!folder) return [];
   const dir = path.join(CONTENT_ROOT, folder);
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir)
-    .filter(f => f.endsWith('.md') && !f.startsWith('template-') && !f.startsWith('_'))
+    .filter(f => f.endsWith('.md') && !f.startsWith('template-') && !f.startsWith('_') && f !== 'INDEX.md')
     .map(f => f.replace(/\.md$/, ''));
 }
 
@@ -35,7 +35,7 @@ function listBlogSlugs(): { slug: string }[] {
 }
 
 function listReportPaths(): string[][] {
-  const reportsRoot = path.join(CONTENT_ROOT, 'reports');
+  const reportsRoot = path.join(CONTENT_ROOT, 'research', 'reports');
   if (!fs.existsSync(reportsRoot)) return [];
   const paths: string[][] = [];
 
@@ -54,8 +54,8 @@ function listReportPaths(): string[][] {
   return paths;
 }
 
-// Convert a collection's urlPrefix + slug-segments into the param-array
-// shape that Next.js's [...slug] route expects.
+// Convert a collection's urlPrefix into the param-array shape that Next.js's
+// [...slug] route expects.
 function urlToSlugSegments(url: string): string[] {
   return url.replace(/^\//, '').split('/').filter(Boolean);
 }
@@ -66,33 +66,27 @@ function urlToSlugSegments(url: string): string[] {
 export function enumerateAllParams(): { slug: string[] }[] {
   const params: { slug: string[] }[] = [];
 
-  // Umbrella landings (always reachable when dev mode, or enabled)
-  for (const umbrella of ['thinking', 'resources', 'research']) {
-    if (isCollectionEnabled(umbrella) || isCollectionEnabled('wiki') ||
-        isCollectionEnabled('essays') || isCollectionEnabled('insights')) {
-      // Show umbrella when any child is enabled (or umbrella explicitly enabled)
-      params.push({ slug: [umbrella] });
+  // Umbrella / URL-grouping landings
+  for (const grouping of ['thinking', 'resources', 'research', 'docs']) {
+    if (isCollectionEnabled(grouping)) {
+      params.push({ slug: [grouping] });
     }
   }
-
-  // Docs
-  if (isCollectionEnabled('docs')) {
-    params.push({ slug: ['docs'] });
-    const tree = getDocsTree();
-    for (const category of tree.categories) {
-      params.push({ slug: ['docs', category.name] });
-    }
-    for (const page of tree.flatList) {
-      params.push({ slug: page.url.replace(/^\//, '').split('/') });
-    }
+  if (isCollectionEnabled('books') || isCollectionEnabled('papers') ||
+      isCollectionEnabled('publishers') || isCollectionEnabled('publications')) {
+    params.push({ slug: ['resources', 'library'] });
   }
 
-  // Flat-folder collections — enumerate via their urlPrefix
-  const flatCollections = [
-    'wiki', 'glossary', 'essays', 'insights', 'observations', 'hypotheses',
+  // Bare-slug collections — enumerate each via its urlPrefix + folder
+  const bareSlugCollections: CollectionName[] = [
+    'wiki', 'glossary', 'essays',
+    'observations', 'insights', 'hypotheses',
+    'books', 'papers', 'publishers', 'publications',
+    'conventions', 'conventions/naming', 'conventions/frontmatter',
+    'schemas', 'contributing',
     'people', 'organizations', 'tags',
-  ] as const;
-  for (const name of flatCollections) {
+  ];
+  for (const name of bareSlugCollections) {
     if (!isCollectionEnabled(name)) continue;
     const cfg = getCollection(name);
     if (!cfg) continue;
@@ -103,29 +97,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // Library — nested under /library + sub-indexes
-  if (isCollectionEnabled('library')) {
-    const cfg = collections.library;
-    const prefix = urlToSlugSegments(cfg.urlPrefix);
-    params.push({ slug: prefix });
-    for (const slug of listMdSlugs('library')) {
-      params.push({ slug: [...prefix, slug] });
-    }
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'library', 'publishers'))) {
-      params.push({ slug: [...prefix, 'publishers'] });
-      for (const slug of listMdSlugs('library/publishers')) {
-        params.push({ slug: [...prefix, 'publishers', slug] });
-      }
-    }
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'library', 'publications'))) {
-      params.push({ slug: [...prefix, 'publications'] });
-      for (const slug of listMdSlugs('library/publications')) {
-        params.push({ slug: [...prefix, 'publications', slug] });
-      }
-    }
-  }
-
-  // Blog
+  // Blog (flattened URL)
   if (isCollectionEnabled('blog')) {
     const prefix = urlToSlugSegments(collections.blog.urlPrefix);
     params.push({ slug: prefix });
@@ -134,7 +106,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // Reports
+  // Reports (folder-per-version)
   if (isCollectionEnabled('reports')) {
     const prefix = urlToSlugSegments(collections.reports.urlPrefix);
     params.push({ slug: prefix });
@@ -143,31 +115,30 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
 
-  // Contributing
-  if (isCollectionEnabled('contributing')) {
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'CONTRIBUTING.md'))) {
-      params.push({ slug: ['contributing'] });
-    }
+  // Plain-page standalones (rendered via PlainPage layout, not collection items).
+  if (fs.existsSync(path.join(CONTENT_ROOT, 'CONTRIBUTING.md'))) {
+    params.push({ slug: ['contributing'] });
+  }
+  if (fs.existsSync(path.join(CONTENT_ROOT, 'thinking', 'manifesto.md'))) {
+    params.push({ slug: ['thinking', 'manifesto'] });
   }
 
-  // Manifesto (single-file collection — lives under thinking/)
-  if (isCollectionEnabled('manifesto')) {
-    if (fs.existsSync(path.join(CONTENT_ROOT, 'thinking', 'manifesto.md'))) {
-      params.push({ slug: ['thinking', 'manifesto'] });
-    }
-  }
-
-  // Composed pages — content/pages/<slug>.md served transparently at /<slug>.
+  // Composed pages — website/pages/<slug>.md served transparently at /<slug>.
   // home is excluded; it's served at / by app/page.tsx, not /home.
   if (isCollectionEnabled('pages')) {
-    for (const slug of listMdSlugs('pages')) {
-      if (slug === 'home') continue;
-      params.push({ slug: [slug] });
+    const pagesRoot = path.join(process.cwd(), 'pages');
+    if (fs.existsSync(pagesRoot)) {
+      for (const f of fs.readdirSync(pagesRoot)) {
+        if (!f.endsWith('.md')) continue;
+        const slug = f.replace(/\.md$/, '');
+        if (slug === 'home') continue;
+        params.push({ slug: [slug] });
+      }
     }
   }
 
   // /research/sources, /research/tags, /research/authors derived views
-  if (isCollectionEnabled('research') || isCollectionEnabled('library')) {
+  if (isCollectionEnabled('research') || isCollectionEnabled('books') || isCollectionEnabled('papers')) {
     params.push({ slug: ['research', 'sources'] });
   }
   if (isCollectionEnabled('research') || isCollectionEnabled('tags')) {
@@ -177,7 +148,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
     params.push({ slug: ['research', 'authors'] });
   }
 
-  // /topics — index only
+  // /topics — index only (no items currently)
   if (isCollectionEnabled('topics')) {
     params.push({ slug: ['topics'] });
   }

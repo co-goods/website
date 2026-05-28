@@ -123,26 +123,14 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return listFolderAsIndex(folderOf('organizations'), urlPrefixOf('organizations'), 'Organizations', 'Organisations involved with Co-Goods.');
     case 'tags':
       return listFolderAsIndex(folderOf('tags'), urlPrefixOf('tags'), 'Tags', 'Operational labels.');
-    case 'library': {
-      const libFolder = folderOf('library');
-      const libUrl = urlPrefixOf('library');
-      if (subPath[0] === 'publishers') {
-        return listFolderAsIndex(`${libFolder}/publishers`, `${libUrl}/publishers`, 'Publishers');
-      }
-      if (subPath[0] === 'publications') {
-        return listFolderAsIndex(`${libFolder}/publications`, `${libUrl}/publications`, 'Publications');
-      }
-      // Default library index — filters by is-featured (recommended reading).
-      // /resources/library/<slug> is the canonical detail URL for items;
-      // cited-only entries appear in the derived /research/sources view.
-      return listFolderAsIndex(
-        libFolder,
-        libUrl,
-        'Library',
-        'Recommended reading — books, papers, podcasts, articles, videos, courses.',
-        fm => fm['is-featured'] === true,
-      );
-    }
+    case 'books':
+      return listFolderAsIndex(folderOf('books'), urlPrefixOf('books'), 'Books');
+    case 'papers':
+      return listFolderAsIndex(folderOf('papers'), urlPrefixOf('papers'), 'Papers');
+    case 'publishers':
+      return listFolderAsIndex(folderOf('publishers'), urlPrefixOf('publishers'), 'Publishers');
+    case 'publications':
+      return listFolderAsIndex(folderOf('publications'), urlPrefixOf('publications'), 'Publications');
     case 'blog': {
       const blogRoot = path.join(CONTENT_ROOT, folderOf('blog'));
       const items: IndexItem[] = [];
@@ -220,15 +208,16 @@ export function getResearchAuthorsIndex(): IndexData {
   );
 }
 
-// /research/sources — library entries flagged is-cited: true
+// /research/sources — library entries (books + papers) flagged is-cited: true
 export function getResearchSourcesIndex(): IndexData {
-  return listFolderAsIndex(
-    folderOf('library'),
-    urlPrefixOf('library'),
-    'Sources',
-    'Cited sources used in Co-Goods research.',
-    fm => fm['is-cited'] === true,
-  );
+  const cited = (fm: Record<string, unknown>) => fm['is-cited'] === true;
+  const books = listFolderAsIndex(folderOf('books'), urlPrefixOf('books'), '', '', cited);
+  const papers = listFolderAsIndex(folderOf('papers'), urlPrefixOf('papers'), '', '', cited);
+  return {
+    title: 'Sources',
+    description: 'Cited sources used in Co-Goods research.',
+    items: [...books.items, ...papers.items],
+  };
 }
 
 // /research/tags — tags actually used by any research-collection item
@@ -293,16 +282,41 @@ export interface UmbrellaSection {
 }
 
 export interface UmbrellaIndexData {
-  name: 'thinking' | 'resources' | 'research';
+  name: 'thinking' | 'resources' | 'research' | 'docs' | 'library';
   title: string;
   description: string;
   sections: UmbrellaSection[];
 }
 
 export function getUmbrellaIndex(
-  name: 'thinking' | 'resources' | 'research',
+  name: 'thinking' | 'resources' | 'research' | 'docs' | 'library',
 ): UmbrellaIndexData {
   switch (name) {
+    case 'docs':
+      return {
+        name,
+        title: 'Documentation',
+        description:
+          'How content is organised in this repo — taxonomy, schemas, contributing guides.',
+        sections: [
+          { heading: 'Conventions', url: urlPrefixOf('conventions'), description: 'Taxonomy, frontmatter, file naming, wikilinks.' },
+          { heading: 'Schemas', url: urlPrefixOf('schemas'), description: 'Per-collection schema references.' },
+          { heading: 'Contributing', url: urlPrefixOf('contributing'), description: 'How to contribute content.' },
+        ],
+      };
+    case 'library':
+      return {
+        name,
+        title: 'Library',
+        description:
+          'Bibliographic items — books, papers, publishers, and publications.',
+        sections: [
+          { heading: 'Books', url: urlPrefixOf('books'), description: 'Books in the Co-Goods library.' },
+          { heading: 'Papers', url: urlPrefixOf('papers'), description: 'Papers in the Co-Goods library.' },
+          { heading: 'Publishers', url: urlPrefixOf('publishers'), description: 'Publishers of works in the library.' },
+          { heading: 'Publications', url: urlPrefixOf('publications'), description: 'Journals and channels carrying library items.' },
+        ],
+      };
     case 'thinking':
       return {
         name,
@@ -323,7 +337,7 @@ export function getUmbrellaIndex(
         sections: [
           { heading: 'Wiki', url: urlPrefixOf('wiki'), description: 'Concept reference, neutral and encyclopedic.' },
           { heading: 'Glossary', url: urlPrefixOf('glossary'), description: 'Definitions of terms used across the site.' },
-          { heading: 'Library', url: urlPrefixOf('library'), description: 'Recommended reading and reference.' },
+          { heading: 'Library', url: '/resources/library', description: 'Recommended reading and reference.' },
         ],
       };
     case 'research':

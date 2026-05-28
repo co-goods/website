@@ -89,7 +89,8 @@ export function CollectionRefList({
   slugs,
 }: {
   label: string;
-  collection: CollectionName;
+  // Accepts `'library'` as a virtual lookup across books/papers/publishers/publications.
+  collection: CollectionName | 'library';
   slugs?: unknown;
 }) {
   if (!Array.isArray(slugs) || slugs.length === 0) return null;

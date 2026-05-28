@@ -17,7 +17,10 @@ import type { RenderedBlock } from '@/components/blocks/BlockRenderer';
 // reach its component. This reuses the page-block vocabulary verbatim; there is
 // no second authoring mechanism.
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+// Overlays live in the website repo (not the content submodule), under
+// `overlays/<source-folder>/<slug>.md` mirroring the source content's path
+// inside the content repo.
+const OVERLAYS_ROOT = path.join(process.cwd(), 'overlays');
 
 type Region = 'top' | 'body' | 'sidebar' | 'bottom';
 const REGIONS: Region[] = ['top', 'body', 'sidebar', 'bottom'];
@@ -64,7 +67,7 @@ export async function loadOverlay(
   collectionFolder: string,
   slug: string,
 ): Promise<OverlaySlots | null> {
-  const filepath = path.join(CONTENT_ROOT, 'overlays', collectionFolder, `${slug}.md`);
+  const filepath = path.join(OVERLAYS_ROOT, collectionFolder, `${slug}.md`);
   if (!fs.existsSync(filepath)) return null;
 
   const { content } = matter(fs.readFileSync(filepath, 'utf8'));

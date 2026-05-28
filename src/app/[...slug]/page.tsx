@@ -5,18 +5,14 @@ import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
 import { loadOverlay } from '@/lib/overlays';
-import { getDocsTree, findDocByUrl, findPrevNext } from '@/lib/content/docs';
 import {
   getCollectionIndex,
-  getDocsCategoryIndex,
   getResearchAuthorsIndex,
   getResearchSourcesIndex,
   getResearchTagsIndex,
   getUmbrellaIndex,
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
-import DocLayout from '@/components/layouts/DocLayout';
-import DocsIndexLayout from '@/components/layouts/DocsIndexLayout';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
 import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
@@ -54,20 +50,39 @@ export default async function CatchAll({ params }: PageProps) {
   const resolved = resolveUrl(slug);
   if (!resolved) notFound();
 
-  // Umbrella landings — /thinking, /resources, /research
+  // Plain-page standalones (manifesto, root CONTRIBUTING.md). Rendered via
+  // ArticleLayout for now; a dedicated PlainPage layout lands in a follow-up.
+  if (resolved.kind === 'standalone') {
+    const parsed = await readAndRender(resolved.filepath);
+    const mergedFrontmatter =
+      parsed.bodyTitle && !parsed.frontmatter.title
+        ? { ...parsed.frontmatter, title: parsed.bodyTitle }
+        : parsed.frontmatter;
+    return (
+      <ArticleLayout
+        collection="standalone"
+        segments={[]}
+        frontmatter={mergedFrontmatter}
+        html={parsed.rendered.html}
+        toc={parsed.rendered.toc}
+      />
+    );
+  }
+
+  // Umbrella landings — /thinking, /resources, /research, /docs, /resources/library
   if (resolved.kind === 'umbrella') {
     const data = getUmbrellaIndex(resolved.name);
     return <UmbrellaLandingLayout name={resolved.name} data={data} />;
   }
 
-  // Derived filter views — /research/sources, /research/tags
+  // Derived filter views — /research/sources, /research/tags, /research/authors
   if (resolved.kind === 'derived') {
     if (resolved.view === 'research-sources') {
       const data = getResearchSourcesIndex();
       return (
         <CollectionIndexLayout
           data={data}
-          collectionName="library"
+          collectionName="books"
           segments={['research', 'sources']}
         />
       );
@@ -101,23 +116,11 @@ export default async function CatchAll({ params }: PageProps) {
   }
 
   if (resolved.kind === 'index') {
-    const collectionName = resolved.collection.name;
-
-    if (collectionName === 'docs') {
-      const tree = getDocsTree();
-      if (resolved.innerSegments.length === 0) {
-        return <DocsIndexLayout tree={tree} />;
-      }
-      const { category } = getDocsCategoryIndex(resolved.innerSegments[0]);
-      if (!category) notFound();
-      return <DocsIndexLayout tree={tree} category={category} />;
-    }
-
-    const data = getCollectionIndex(collectionName, resolved.innerSegments);
+    const data = getCollectionIndex(resolved.collection.name, resolved.innerSegments);
     return (
       <CollectionIndexLayout
         data={data}
-        collectionName={collectionName}
+        collectionName={resolved.collection.name}
         segments={resolved.innerSegments}
       />
     );
@@ -125,24 +128,6 @@ export default async function CatchAll({ params }: PageProps) {
 
   // resolved.kind === 'page'
   const parsed = await readAndRender(resolved.filepath);
-
-  if (resolved.collection.name === 'docs') {
-    const url = '/' + slug.join('/');
-    const current = findDocByUrl(url);
-    if (!current) notFound();
-    const tree = getDocsTree();
-    const { prev, next } = findPrevNext(url);
-    return (
-      <DocLayout
-        tree={tree}
-        current={current}
-        prev={prev}
-        next={next}
-        html={parsed.rendered.html}
-        toc={parsed.rendered.toc}
-      />
-    );
-  }
 
   // Merge bodyTitle as a frontmatter fallback if frontmatter.title is missing.
   // This avoids the duplicate-H1 issue: the layout's h1 uses the body's H1
@@ -153,7 +138,7 @@ export default async function CatchAll({ params }: PageProps) {
       : parsed.frontmatter;
 
   // Overlay (splice) sections live parallel to the source at
-  // content/overlays/<collection-folder>/<slug>.md; absent for most pages.
+  // overlays/<collection-folder>/<slug>.md in the website repo; absent for most pages.
   const overlaySlug = path.basename(resolved.filepath, '.md');
   const overlay = await loadOverlay(resolved.collection.folder, overlaySlug);
 
