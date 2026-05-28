@@ -9,6 +9,8 @@ interface PersonProfileProps {
   html: string;
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
+  editUrl?: string;
+  discordUrl?: string;
 }
 
 type Affiliation = 'co-goods-team' | 'depalma-pilot' | 'external-author' | 'unclaimed';
@@ -70,7 +72,7 @@ function ContactLinks({ frontmatter }: { frontmatter: Record<string, unknown> })
   );
 }
 
-export default function PersonProfile({ segments, frontmatter, html, toc, overlay }: PersonProfileProps) {
+export default function PersonProfile({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: PersonProfileProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -85,7 +87,7 @@ export default function PersonProfile({ segments, frontmatter, html, toc, overla
   const aliases = Array.isArray(frontmatter.aliases) ? frontmatter.aliases.filter((a) => typeof a === 'string' && a) : [];
 
   return (
-    <ArticleShell collection="people" segments={segments} toc={toc} overlay={overlay}
+    <ArticleShell collection="people" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-center gap-x-3 text-xs uppercase tracking-wide text-gray-500">

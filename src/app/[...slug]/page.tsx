@@ -16,6 +16,7 @@ import {
   getUmbrellaIndex,
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
+import { editUrlForContentFile } from '@/lib/content/source';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import PlainPageLayout from '@/components/layouts/PlainPageLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
@@ -66,6 +67,8 @@ export default async function CatchAll({ params }: PageProps) {
       <PlainPageLayout
         frontmatter={mergedFrontmatter}
         html={parsed.rendered.html}
+        editUrl={editUrlForContentFile(resolved.filepath)}
+        discordUrl={typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined}
       />
     );
   }
@@ -159,6 +162,10 @@ export default async function CatchAll({ params }: PageProps) {
     html: parsed.rendered.html,
     toc: parsed.rendered.toc,
     overlay,
+    // Collection items are content-repo files — offer the edit + discuss links.
+    editUrl: editUrlForContentFile(resolved.filepath),
+    discordUrl:
+      typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined,
   };
 
   switch (resolved.collection.layout) {
