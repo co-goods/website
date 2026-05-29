@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { getDocsTree, DocCategory } from './docs';
 import { collections, getCollection, CollectionName } from './collections';
 
 const CONTENT_ROOT = path.join(process.cwd(), 'content');
@@ -81,16 +80,6 @@ function urlPrefixOf(name: CollectionName): string {
 
 function folderOf(name: CollectionName): string {
   return collections[name].folder;
-}
-
-export function getDocsRootIndex() {
-  return getDocsTree();
-}
-
-export function getDocsCategoryIndex(category: string): { category: DocCategory | null } {
-  const tree = getDocsTree();
-  const cat = tree.categories.find(c => c.name === category) ?? null;
-  return { category: cat };
 }
 
 export function getCollectionIndex(name: string, subPath: string[]): IndexData {
