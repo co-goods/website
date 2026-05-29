@@ -18,17 +18,17 @@ interface EssayDetailProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
-export default function EssayDetail({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: EssayDetailProps) {
+export default function EssayDetail({ segments, frontmatter, html, toc, overlay, editUrl, discord }: EssayDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Essay';
 
   return (
-    <ArticleShell collection="essays" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="essays" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <FrontmatterMeta collection="essays" frontmatter={frontmatter} />

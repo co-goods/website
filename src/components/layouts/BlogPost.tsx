@@ -17,10 +17,10 @@ interface BlogPostProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
-export default function BlogPost({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: BlogPostProps) {
+export default function BlogPost({ segments, frontmatter, html, toc, overlay, editUrl, discord }: BlogPostProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -35,7 +35,7 @@ export default function BlogPost({ segments, frontmatter, html, toc, overlay, ed
     : null;
 
   return (
-    <ArticleShell collection="blog" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="blog" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">

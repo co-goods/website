@@ -17,17 +17,17 @@ interface WikiArticleProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
-export default function WikiArticle({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: WikiArticleProps) {
+export default function WikiArticle({ segments, frontmatter, html, toc, overlay, editUrl, discord }: WikiArticleProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Wiki article';
 
   return (
-    <ArticleShell collection="wiki" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="wiki" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <FrontmatterMeta collection="wiki" frontmatter={frontmatter} />

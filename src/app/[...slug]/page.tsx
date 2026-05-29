@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import fs from 'fs';
 import path from 'path';
 import { resolveUrl } from '@/lib/content/resolver';
-import { isCollectionEnabled, isIndexable } from '@/site.config';
+import { isCollectionEnabled, isIndexable, discordKeyForArea } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
 import { renderPageBlocks } from '@/lib/renderBlocks';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
@@ -68,7 +68,7 @@ export default async function CatchAll({ params }: PageProps) {
         frontmatter={mergedFrontmatter}
         html={parsed.rendered.html}
         editUrl={editUrlForContentFile(resolved.filepath)}
-        discordUrl={typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined}
+        discord={(typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined) ?? discordKeyForArea(slug[0])}
       />
     );
   }
@@ -164,8 +164,9 @@ export default async function CatchAll({ params }: PageProps) {
     overlay,
     // Collection items are content-repo files — offer the edit + discuss links.
     editUrl: editUrlForContentFile(resolved.filepath),
-    discordUrl:
-      typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined,
+    discord:
+      (typeof mergedFrontmatter.discord === 'string' ? mergedFrontmatter.discord : undefined) ??
+      discordKeyForArea(slug[0]),
   };
 
   switch (resolved.collection.layout) {

@@ -80,9 +80,49 @@ export function isIndexable(path: string): boolean {
   return indexablePaths.has(path);
 }
 
+// External links, grouped by platform. Env-backed so values (e.g. a rotating
+// Discord invite) change per environment without code edits; the defaults keep
+// local + unset builds working. Convention: NEXT_PUBLIC_<PLATFORM>_<PURPOSE>.
+// These are inlined at build (client-readable) — public URLs only, no secrets.
+export const links = {
+  discord: {
+    invite:    process.env.NEXT_PUBLIC_DISCORD_INVITE    ?? 'https://discord.gg/2V8DuCeBWz',
+    research:  process.env.NEXT_PUBLIC_DISCORD_RESEARCH   ?? 'https://discord.gg/8asdWDW5QY',
+    calls:     process.env.NEXT_PUBLIC_DISCORD_CALLS      ?? 'https://discord.gg/Zes4pNuCPb',
+    thinking:  process.env.NEXT_PUBLIC_DISCORD_THINKING   ?? 'https://discord.gg/eRHtnj7nhw',
+    resources: process.env.NEXT_PUBLIC_DISCORD_RESOURCES  ?? 'https://discord.gg/h5Fh3Pzq26',
+  } as Record<string, string>,
+  github: {
+    org: process.env.NEXT_PUBLIC_GITHUB_ORG ?? 'https://github.com/co-goods',
+  } as Record<string, string>,
+};
+
+// Resolve a Discord reference to a URL. A full URL is used as-is; a bare key
+// (e.g. "invite", "research") maps to links.discord[key]; anything missing or
+// unknown falls back to the general invite, so there's always a link.
+export function resolveDiscord(value?: string): string {
+  if (value && /^https?:\/\//.test(value)) return value;
+  if (value && links.discord[value]) return links.discord[value];
+  return links.discord.invite;
+}
+
+// Per-area Discord fallback: a page's URL area (first path segment) picks a
+// channel when the item declares no discord: of its own. Areas outside this
+// map (docs, blog, people, …) fall through to the general invite.
+const DISCORD_BY_AREA: Record<string, string> = {
+  thinking: 'thinking',
+  resources: 'resources',
+  research: 'research',
+};
+
+export function discordKeyForArea(area?: string): string | undefined {
+  return area ? DISCORD_BY_AREA[area] : undefined;
+}
+
 export const siteConfig = {
   devMode,
   enabledCollections,
   enabledPages,
   indexablePaths,
+  links,
 } as const;

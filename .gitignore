@@ -31,14 +31,30 @@
 ehthumbs.db
 Thumbs.db
 
+# IDE and editor files
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+*.swp
+*.swo
+.*.swp
+
+# Obsidian
+.obsidian/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — real values stay local (.env.local); .env.example is committed
+# as the template contributors copy
+.env
+.env.*
+!.env.example
+!.env.template
 
 # vercel
 .vercel
