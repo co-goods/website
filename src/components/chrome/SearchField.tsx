@@ -1,13 +1,13 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import MiniSearch from 'minisearch';
 
-// Placeholder search: a header field that lazy-loads the static search index
-// on first focus, builds a MiniSearch index in the browser, and shows matches
-// in a dropdown. No server, no per-query cost. Styling is deliberately minimal
-// — this is a functional placeholder until the search UI gets a design pass.
+// The search field + results, rendered inside the header's slide-down search
+// panel (opened by the magnifying-glass toggle). Lazy-loads the static index
+// on mount, builds a MiniSearch index in the browser, queries as you type.
+// No server, no per-query cost. Placeholder styling pending the design pass.
 
 interface SearchDoc {
   id: string;
@@ -21,12 +21,12 @@ interface SearchDoc {
 
 type Hit = Pick<SearchDoc, 'url' | 'title' | 'collection' | 'summary'>;
 
-export default function SearchBox() {
+export default function SearchField({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Hit[]>([]);
-  const [open, setOpen] = useState(false);
   const miniRef = useRef<MiniSearch<SearchDoc> | null>(null);
   const loadingRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const ensureIndex = useCallback(async () => {
     if (miniRef.current || loadingRef.current) return;
@@ -46,6 +46,12 @@ export default function SearchBox() {
     }
   }, []);
 
+  // Focus the input and warm the index as soon as the panel opens.
+  useEffect(() => {
+    inputRef.current?.focus();
+    ensureIndex();
+  }, [ensureIndex]);
+
   const onChange = useCallback(
     async (value: string) => {
       setQuery(value);
@@ -61,36 +67,46 @@ export default function SearchBox() {
   );
 
   return (
-    <div className="relative">
-      <input
-        type="search"
-        value={query}
-        placeholder="Search…"
-        aria-label="Search the site"
-        onFocus={() => {
-          ensureIndex();
-          setOpen(true);
-        }}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-        onChange={e => onChange(e.target.value)}
-        className="w-40 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder:text-gray-400 focus:w-56 focus:border-gray-400 focus:outline-none transition-[width]"
-      />
-      {open && query.trim() && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg z-50">
+    <div className="py-4">
+      <div className="flex items-center gap-3 border-b border-gray-300 pb-2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-gray-400 shrink-0"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          placeholder="Search the site…"
+          aria-label="Search the site"
+          onChange={e => onChange(e.target.value)}
+          className="flex-1 bg-transparent text-base text-gray-900 placeholder:text-gray-400 focus:outline-none"
+        />
+      </div>
+
+      {query.trim() && (
+        <div className="mt-3 max-h-80 overflow-y-auto">
           {results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-500">No results</p>
+            <p className="text-sm text-gray-500">No results</p>
           ) : (
-            <ul className="py-1">
+            <ul className="divide-y divide-gray-100">
               {results.map(r => (
                 <li key={r.url}>
                   <Link
                     href={r.url}
-                    className="block px-4 py-2 hover:bg-gray-50"
-                    onMouseDown={e => e.preventDefault()}
-                    onClick={() => {
-                      setOpen(false);
-                      setQuery('');
-                    }}
+                    className="block py-2 hover:bg-gray-50"
+                    onClick={onClose}
                   >
                     <span className="block text-sm font-medium text-gray-900">{r.title}</span>
                     {r.collection && (

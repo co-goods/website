@@ -5,7 +5,7 @@ import { resolveUrl } from '@/lib/content/resolver';
 
 // Build-time search index. A force-static route handler: Next prerenders it to
 // a flat /search-index.json at build, so search costs nothing at runtime — the
-// client fetches this once and queries it in the browser (see SearchBox).
+// client fetches this once and queries it in the browser (see SearchField).
 //
 // We index every page backed by a single source file (collection items +
 // plain-page standalones), reusing the same URL enumeration the catch-all
