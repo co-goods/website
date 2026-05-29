@@ -2,6 +2,7 @@ import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
 import type { OverlaySlots } from '@/lib/overlays';
 import { CollectionRefList, ExampleBanner, TagList } from './atoms';
+import { siteConfig } from '@/site.config';
 
 interface PersonProfileProps {
   segments: string[];
@@ -10,7 +11,7 @@ interface PersonProfileProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
 type Affiliation = 'co-goods-team' | 'depalma-pilot' | 'external-author' | 'unclaimed';
@@ -72,7 +73,7 @@ function ContactLinks({ frontmatter }: { frontmatter: Record<string, unknown> })
   );
 }
 
-export default function PersonProfile({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: PersonProfileProps) {
+export default function PersonProfile({ segments, frontmatter, html, toc, overlay, editUrl, discord }: PersonProfileProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -87,7 +88,7 @@ export default function PersonProfile({ segments, frontmatter, html, toc, overla
   const aliases = Array.isArray(frontmatter.aliases) ? frontmatter.aliases.filter((a) => typeof a === 'string' && a) : [];
 
   return (
-    <ArticleShell collection="people" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="people" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-center gap-x-3 text-xs uppercase tracking-wide text-gray-500">
@@ -183,7 +184,7 @@ function ClaimProfileCTA({ name }: { name: string }) {
           Open an issue on GitHub
         </a>
         <a
-          href="https://discord.gg/8asdWDW5QY"
+          href={siteConfig.links.discord.invite}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-md border border-indigo-300 px-3 py-1.5 text-indigo-700 hover:bg-indigo-100"

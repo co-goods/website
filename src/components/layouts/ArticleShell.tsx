@@ -2,7 +2,7 @@ import Toc from '@/components/docs/Toc';
 import { TocEntry } from '@/lib/markdown';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import type { OverlaySlots } from '@/lib/overlays';
-import PageActions from './PageActions';
+import ContributeCallout from '@/components/blocks/ContributeCallout';
 
 // Two-column shell: main column for header + body, optional right rail for TOC.
 // All per-collection layouts compose this.
@@ -19,7 +19,7 @@ export default function ArticleShell({
   toc,
   overlay,
   editUrl,
-  discordUrl,
+  discord,
 }: {
   collection: string;
   segments: string[];
@@ -28,7 +28,7 @@ export default function ArticleShell({
   toc?: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }) {
   const showToc = toc && toc.length > 0;
   const showSidebarOverlay = overlay && overlay.sidebar.length > 0;
@@ -49,7 +49,7 @@ export default function ArticleShell({
           {overlay && overlay.bodyBefore.length > 0 && <BlockRenderer blocks={overlay.bodyBefore} />}
           {children}
           {overlay && overlay.bodyAfter.length > 0 && <BlockRenderer blocks={overlay.bodyAfter} />}
-          <PageActions editUrl={editUrl} discordUrl={discordUrl} />
+          <ContributeCallout editUrl={editUrl} discord={discord} />
         </article>
         {(showToc || showSidebarOverlay) && (
           <aside className="hidden lg:block lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto">

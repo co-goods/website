@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { FaGithub, FaDiscord, FaLinkedin } from 'react-icons/fa';
 import { EmailSignup } from '@/components/blocks';
+import { siteConfig } from '@/site.config';
 
-const GITHUB_URL = 'https://github.com/co-goods';
-const DISCORD_URL = 'https://discord.gg/8asdWDW5QY';
+const GITHUB_URL = siteConfig.links.github.org;
+const DISCORD_URL = siteConfig.links.discord.invite;
 const LINKEDIN_URL = 'https://linkedin.com/company/co-goods';
 
 interface FooterLink {

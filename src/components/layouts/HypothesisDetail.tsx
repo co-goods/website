@@ -18,7 +18,7 @@ interface HypothesisDetailProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
 type ValidationStatus = 'pending' | 'validated' | 'invalidated' | 'revised';
@@ -39,7 +39,7 @@ function ValidationBadge({ status }: { status: string }) {
   );
 }
 
-export default function HypothesisDetail({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: HypothesisDetailProps) {
+export default function HypothesisDetail({ segments, frontmatter, html, toc, overlay, editUrl, discord }: HypothesisDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -53,7 +53,7 @@ export default function HypothesisDetail({ segments, frontmatter, html, toc, ove
     : null;
 
   return (
-    <ArticleShell collection="hypotheses" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="hypotheses" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <div className="not-prose mb-3 flex flex-wrap items-center gap-x-3 text-xs uppercase tracking-wide text-gray-500">

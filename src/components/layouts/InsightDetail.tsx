@@ -20,7 +20,7 @@ interface InsightDetailProps {
   toc: TocEntry[];
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
 function BulletSection({
@@ -43,14 +43,14 @@ function BulletSection({
   );
 }
 
-export default function InsightDetail({ segments, frontmatter, html, toc, overlay, editUrl, discordUrl }: InsightDetailProps) {
+export default function InsightDetail({ segments, frontmatter, html, toc, overlay, editUrl, discord }: InsightDetailProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
     'Insight';
 
   return (
-    <ArticleShell collection="insights" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discordUrl={discordUrl}
+    <ArticleShell collection="insights" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
           <FrontmatterMeta collection="insights" frontmatter={frontmatter} />

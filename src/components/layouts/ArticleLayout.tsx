@@ -1,6 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import type { OverlaySlots } from '@/lib/overlays';
-import PageActions from './PageActions';
+import ContributeCallout from '@/components/blocks/ContributeCallout';
 
 interface ArticleLayoutProps {
   collection: string;
@@ -12,7 +12,7 @@ interface ArticleLayoutProps {
   // placeholder yet.
   overlay?: OverlaySlots | null;
   editUrl?: string;
-  discordUrl?: string;
+  discord?: string;
 }
 
 // Minimal placeholder layout used for collections that don't yet have a
@@ -21,7 +21,7 @@ interface ArticleLayoutProps {
 // verify the catch-all routing while later sessions build out the real
 // per-collection layouts.
 export default function ArticleLayout({
-  collection, segments, frontmatter, html, editUrl, discordUrl,
+  collection, segments, frontmatter, html, editUrl, discord,
 }: ArticleLayoutProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -39,7 +39,7 @@ export default function ArticleLayout({
         className="prose prose-slate max-w-none"
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      <PageActions editUrl={editUrl} discordUrl={discordUrl} />
+      <ContributeCallout editUrl={editUrl} discord={discord} />
     </div>
   );
 }
