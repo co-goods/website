@@ -1,102 +1,150 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { collections, CollectionConfig } from './collections';
 
-const DOCS_ROOT = path.join(process.cwd(), 'content', 'docs');
+// Docs navigation tree, derived from the collection registry (not the folder
+// layout). The docs area is every collection whose URL sits under /docs:
+// top-level groups (conventions, schemas, contributing) plus any sub-collections
+// they declare via `parent`. Items sort by their frontmatter `order:`.
 
-export interface DocPage {
-  url: string;          // /docs/<category>/<slug>
+const CONTENT_ROOT = path.join(process.cwd(), 'content');
+const DOCS_PREFIX = '/docs';
+
+export interface DocItem {
+  url: string;
   filepath: string;
-  category: string;     // bare category slug (prefix stripped)
-  slug: string;         // bare doc slug (prefix stripped)
-  order: number;
-  categoryOrder: number;
   title: string;
+  order: number;
 }
 
-export interface DocCategory {
-  name: string;         // bare category slug
-  order: number;
-  pages: DocPage[];
+export interface DocGroup {
+  name: string;        // collection name, e.g. "conventions" or "conventions/naming"
+  title: string;       // display title, e.g. "Conventions", "Naming"
+  url: string;         // the group's index URL
+  items: DocItem[];
+  subgroups: DocGroup[];
 }
 
 export interface DocsTree {
-  categories: DocCategory[];
-  flatList: DocPage[];  // categories then pages, ordered for prev/next traversal
+  groups: DocGroup[];
+  flatList: DocItem[]; // depth-first display order, for prev/next traversal
 }
 
-function parsePrefix(name: string): { order: number; bare: string } {
-  const m = name.match(/^(\d+)-(.+)$/);
-  if (m) return { order: parseInt(m[1], 10), bare: m[2] };
-  return { order: 9999, bare: name };
+function titleCase(leaf: string): string {
+  return leaf
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
-function readTitle(filepath: string): string {
-  const raw = fs.readFileSync(filepath, 'utf8');
-  const { data, content } = matter(raw);
-  if (typeof data.title === 'string' && data.title.trim()) return data.title.trim();
-  const h1 = content.split('\n').find(l => l.startsWith('# '));
-  if (h1) return h1.replace(/^#\s+/, '').trim();
-  return path.basename(filepath, '.md');
+function readMeta(filepath: string): { title: string; order: number } {
+  const { data, content } = matter(fs.readFileSync(filepath, 'utf8'));
+  const title =
+    (typeof data.title === 'string' && data.title.trim()) ||
+    content.split('\n').find(l => l.startsWith('# '))?.replace(/^#\s+/, '').trim() ||
+    path.basename(filepath, '.md');
+  const order = typeof data.order === 'number' ? data.order : 9999;
+  return { title, order };
 }
 
-function buildTree(): DocsTree {
-  const categories: DocCategory[] = [];
+function readItems(cfg: CollectionConfig): DocItem[] {
+  const dir = path.join(CONTENT_ROOT, cfg.folder);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter(f => f.endsWith('.md') && !f.startsWith('template-') && !f.startsWith('_') && f !== 'INDEX.md')
+    .map(f => {
+      const filepath = path.join(dir, f);
+      const slug = f.replace(/\.md$/, '');
+      const { title, order } = readMeta(filepath);
+      return { url: `${cfg.urlPrefix}/${slug}`, filepath, title, order };
+    })
+    .sort((a, b) => a.order - b.order);
+}
 
-  if (!fs.existsSync(DOCS_ROOT)) {
-    return { categories: [], flatList: [] };
+function isDocsCollection(cfg: CollectionConfig): boolean {
+  return cfg.urlPrefix === DOCS_PREFIX || cfg.urlPrefix.startsWith(DOCS_PREFIX + '/');
+}
+
+function buildGroup(cfg: CollectionConfig): DocGroup {
+  const subgroups = Object.values(collections)
+    .filter(c => c.parent === cfg.name && isDocsCollection(c))
+    .map(buildGroup)
+    .filter(g => g.items.length > 0 || g.subgroups.length > 0);
+
+  return {
+    name: cfg.name,
+    title: titleCase(cfg.name.split('/').pop() as string),
+    url: cfg.urlPrefix,
+    items: readItems(cfg),
+    subgroups,
+  };
+}
+
+function flatten(groups: DocGroup[]): DocItem[] {
+  const out: DocItem[] = [];
+  for (const g of groups) {
+    out.push(...g.items);
+    out.push(...flatten(g.subgroups));
   }
-
-  for (const entry of fs.readdirSync(DOCS_ROOT)) {
-    const entryPath = path.join(DOCS_ROOT, entry);
-    if (!fs.statSync(entryPath).isDirectory()) continue;
-
-    const { order: categoryOrder, bare: categoryName } = parsePrefix(entry);
-    const pages: DocPage[] = [];
-
-    for (const file of fs.readdirSync(entryPath)) {
-      if (!file.endsWith('.md')) continue;
-      const filepath = path.join(entryPath, file);
-      const { order, bare } = parsePrefix(file.replace(/\.md$/, ''));
-      pages.push({
-        url: `/docs/${categoryName}/${bare}`,
-        filepath,
-        category: categoryName,
-        slug: bare,
-        order,
-        categoryOrder,
-        title: readTitle(filepath),
-      });
-    }
-
-    pages.sort((a, b) => a.order - b.order);
-    categories.push({ name: categoryName, order: categoryOrder, pages });
-  }
-
-  categories.sort((a, b) => a.order - b.order);
-
-  const flatList = categories.flatMap(c => c.pages);
-  return { categories, flatList };
+  return out;
 }
 
 let cached: DocsTree | null = null;
 
 export function getDocsTree(): DocsTree {
-  if (!cached) cached = buildTree();
+  if (cached) return cached;
+  const groups = Object.values(collections)
+    .filter(c => isDocsCollection(c) && !c.parent)
+    .map(buildGroup)
+    .filter(g => g.items.length > 0 || g.subgroups.length > 0);
+  cached = { groups, flatList: flatten(groups) };
   return cached;
 }
 
-export function findDocByUrl(url: string): DocPage | null {
-  const tree = getDocsTree();
-  return tree.flatList.find(p => p.url === url) ?? null;
+export function findDocByUrl(url: string): DocItem | null {
+  return getDocsTree().flatList.find(p => p.url === url) ?? null;
 }
 
-export function findPrevNext(url: string): { prev: DocPage | null; next: DocPage | null } {
-  const tree = getDocsTree();
-  const idx = tree.flatList.findIndex(p => p.url === url);
+// Find a group or sub-group by its collection name (e.g. "conventions" or
+// "conventions/naming").
+export function findGroup(name: string): DocGroup | null {
+  for (const g of getDocsTree().groups) {
+    if (g.name === name) return g;
+    const sub = g.subgroups.find(s => s.name === name);
+    if (sub) return sub;
+  }
+  return null;
+}
+
+export function findPrevNext(url: string): { prev: DocItem | null; next: DocItem | null } {
+  const { flatList } = getDocsTree();
+  const idx = flatList.findIndex(p => p.url === url);
   if (idx === -1) return { prev: null, next: null };
   return {
-    prev: idx > 0 ? tree.flatList[idx - 1] : null,
-    next: idx < tree.flatList.length - 1 ? tree.flatList[idx + 1] : null,
+    prev: idx > 0 ? flatList[idx - 1] : null,
+    next: idx < flatList.length - 1 ? flatList[idx + 1] : null,
   };
+}
+
+// Breadcrumb trail (Docs → Group → [Subgroup] → current) for a doc URL.
+export function docCrumbs(url: string): { label: string; href?: string }[] {
+  const tree = getDocsTree();
+  const crumbs: { label: string; href?: string }[] = [{ label: 'Docs', href: '/docs' }];
+  for (const g of tree.groups) {
+    if (g.items.some(i => i.url === url)) {
+      crumbs.push({ label: g.title, href: g.url });
+      break;
+    }
+    const sub = g.subgroups.find(s => s.items.some(i => i.url === url));
+    if (sub) {
+      crumbs.push({ label: g.title, href: g.url });
+      crumbs.push({ label: sub.title, href: sub.url });
+      break;
+    }
+  }
+  const current = findDocByUrl(url);
+  if (current) crumbs.push({ label: current.title });
+  return crumbs;
 }

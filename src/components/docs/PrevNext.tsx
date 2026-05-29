@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { DocPage } from '@/lib/content/docs';
+import { DocItem } from '@/lib/content/docs';
 
 interface PrevNextProps {
-  prev: DocPage | null;
-  next: DocPage | null;
+  prev: DocItem | null;
+  next: DocItem | null;
 }
 
 export default function PrevNext({ prev, next }: PrevNextProps) {

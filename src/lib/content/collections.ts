@@ -22,10 +22,8 @@ export type CollectionName =
   | 'papers'
   | 'publishers'
   | 'publications'
-  // Docs collections (siblings under /docs/) and their sub-collections
+  // Docs collections (siblings under /docs/)
   | 'conventions'
-  | 'conventions/naming'
-  | 'conventions/frontmatter'
   | 'schemas'
   | 'contributing'
   // Top-level (no enclosing URL grouping)
@@ -72,10 +70,12 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   hypotheses:   { name: 'hypotheses',   folder: 'research/hypotheses',   urlPrefix: '/research/hypotheses',   resolver: 'bare-slug', layout: 'HypothesisDetail' },
   reports:      { name: 'reports',      folder: 'research/reports',      urlPrefix: '/research/reports',      resolver: 'reports-versioned', layout: 'ArticleLayout' },
 
-  // /docs — top-level docs collections + nested sub-collections
+  // /docs — top-level docs collections. (Nested sub-collections are supported
+  // by the model + layout, but none exist yet; declare them here only once
+  // real nested content lands, and avoid colliding a sub-collection URL with a
+  // flat doc slug — e.g. a `conventions/frontmatter` sub-collection would
+  // shadow the flat `frontmatter` doc.)
   conventions:                 { name: 'conventions',                folder: 'docs/conventions',                urlPrefix: '/docs/conventions',                resolver: 'bare-slug', layout: 'ArticleLayout' },
-  'conventions/naming':        { name: 'conventions/naming',         folder: 'docs/conventions/naming',         urlPrefix: '/docs/conventions/naming',         resolver: 'bare-slug', layout: 'ArticleLayout', parent: 'conventions' },
-  'conventions/frontmatter':   { name: 'conventions/frontmatter',    folder: 'docs/conventions/frontmatter',    urlPrefix: '/docs/conventions/frontmatter',    resolver: 'bare-slug', layout: 'ArticleLayout', parent: 'conventions' },
   schemas:                     { name: 'schemas',                    folder: 'docs/schemas',                    urlPrefix: '/docs/schemas',                    resolver: 'bare-slug', layout: 'ArticleLayout' },
   contributing:                { name: 'contributing',               folder: 'docs/contributing',               urlPrefix: '/docs/contributing',               resolver: 'bare-slug', layout: 'ArticleLayout' },
 

@@ -17,7 +17,10 @@ import {
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import { editUrlForContentFile } from '@/lib/content/source';
+import { getDocsTree, findPrevNext, docCrumbs, findGroup } from '@/lib/content/docs';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
+import DocLayout from '@/components/layouts/DocLayout';
+import DocListing, { DocSection } from '@/components/docs/DocListing';
 import PlainPageLayout from '@/components/layouts/PlainPageLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
 import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
@@ -73,7 +76,26 @@ export default async function CatchAll({ params }: PageProps) {
     );
   }
 
-  // Umbrella landings — /thinking, /resources, /research, /docs, /resources/library
+  // Docs root — render in the docs shell (sidebar tree + index listing).
+  if (resolved.kind === 'umbrella' && resolved.name === 'docs') {
+    const tree = getDocsTree();
+    const sections: DocSection[] = tree.groups.map(g => ({
+      title: g.title,
+      url: g.url,
+      items: g.items,
+    }));
+    return (
+      <DocLayout tree={tree} currentUrl="/docs">
+        <DocListing
+          title="Documentation"
+          description="How content is organised, and how to contribute."
+          sections={sections}
+        />
+      </DocLayout>
+    );
+  }
+
+  // Umbrella landings — /thinking, /resources, /research, /resources/library
   if (resolved.kind === 'umbrella') {
     const data = getUmbrellaIndex(resolved.name);
     return <UmbrellaLandingLayout name={resolved.name} data={data} />;
@@ -120,6 +142,22 @@ export default async function CatchAll({ params }: PageProps) {
   }
 
   if (resolved.kind === 'index') {
+    // Docs collection / sub-collection index — docs shell + its listing.
+    if (resolved.collection.urlPrefix.startsWith('/docs')) {
+      const tree = getDocsTree();
+      const group = findGroup(resolved.collection.name);
+      const sections: DocSection[] = group
+        ? [
+            { items: group.items },
+            ...group.subgroups.map(s => ({ title: s.title, url: s.url, items: s.items })),
+          ]
+        : [];
+      return (
+        <DocLayout tree={tree} currentUrl={resolved.collection.urlPrefix}>
+          <DocListing title={group?.title ?? resolved.collection.name} sections={sections} />
+        </DocLayout>
+      );
+    }
     const data = getCollectionIndex(resolved.collection.name, resolved.innerSegments);
     return (
       <CollectionIndexLayout
@@ -150,6 +188,34 @@ export default async function CatchAll({ params }: PageProps) {
     parsed.bodyTitle && !parsed.frontmatter.title
       ? { ...parsed.frontmatter, title: parsed.bodyTitle }
       : parsed.frontmatter;
+
+  // Docs article — the docs shell (sidebar tree, breadcrumbs, prev/next, TOC)
+  // around the prose body.
+  if (resolved.collection.urlPrefix.startsWith('/docs')) {
+    const tree = getDocsTree();
+    const url = '/' + slug.join('/');
+    const title =
+      (typeof mergedFrontmatter.title === 'string' && mergedFrontmatter.title) ||
+      resolved.innerSegments[resolved.innerSegments.length - 1] ||
+      'Doc';
+    const { prev, next } = findPrevNext(url);
+    return (
+      <DocLayout
+        tree={tree}
+        currentUrl={url}
+        crumbs={docCrumbs(url)}
+        toc={parsed.rendered.toc}
+        prev={prev}
+        next={next}
+      >
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">{title}</h1>
+        <div
+          className="prose prose-slate max-w-none"
+          dangerouslySetInnerHTML={{ __html: parsed.rendered.html }}
+        />
+      </DocLayout>
+    );
+  }
 
   // Overlay (splice) sections live parallel to the source at
   // overlays/<collection-folder>/<slug>.md in the website repo; absent for most pages.

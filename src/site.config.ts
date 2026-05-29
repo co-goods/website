@@ -39,8 +39,6 @@ export const enabledCollections = {
   publications: false,
   // Docs collections (under /docs/) and their sub-collections
   conventions: false,
-  'conventions/naming': false,
-  'conventions/frontmatter': false,
   schemas: false,
   contributing: false,
   // URL groupings — reachable when devMode or when any child is enabled.

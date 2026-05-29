@@ -82,8 +82,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
     'wiki', 'glossary', 'essays',
     'observations', 'insights', 'hypotheses',
     'books', 'papers', 'publishers', 'publications',
-    'conventions', 'conventions/naming', 'conventions/frontmatter',
-    'schemas', 'contributing',
+    'conventions', 'schemas', 'contributing',
     'people', 'organizations', 'tags',
   ];
   for (const name of bareSlugCollections) {
