@@ -5,6 +5,7 @@ import Header from "@/components/chrome/Header";
 import Footer from "@/components/chrome/Footer";
 import { Analytics } from "@vercel/analytics/react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import WikilinkHoverCard from "@/components/WikilinkHoverCard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <WikilinkHoverCard />
         <Analytics />
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GA_ID} />
