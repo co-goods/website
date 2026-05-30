@@ -108,6 +108,6 @@ The production build currently has TypeScript errors due to union type handling 
 
 ## License
 
-All rights reserved. This work is currently proprietary and confidential.
+The code in this repository is licensed under the **MIT License** — see [`LICENSE`](./LICENSE).
 
-**Future Licensing**: We plan to release this research under a Creative Commons license once the whitepaper is complete, allowing broader access while maintaining appropriate attribution and use guidelines.
+Content is licensed separately: the research and other content (served from the content repository) defaults to **CC BY-SA 4.0**, with per-item and per-media exceptions. Code licensing and content licensing are independent.
