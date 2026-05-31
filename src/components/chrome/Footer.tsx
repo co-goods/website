@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { FaGithub, FaDiscord, FaLinkedin } from 'react-icons/fa';
 import { EmailSignup } from '@/components/blocks';
-import { siteConfig } from '@/site.config';
+import { siteConfig, tagline } from '@/site.config';
 
 const GITHUB_URL = siteConfig.links.github.org;
 const DISCORD_URL = siteConfig.links.discord.invite;
@@ -27,13 +27,14 @@ const INITIATIVE: FooterColumn = {
   ],
 };
 
-const CONTRIBUTE: FooterColumn = {
-  heading: 'Contribute',
+const COMMUNITY: FooterColumn = {
+  heading: 'Community',
   links: [
+    { label: 'Get involved', href: '/community' },
     { label: 'Contributing', href: '/contributing' },
     { label: 'Docs', href: '/docs' },
-    { label: 'Code & content on GitHub', href: GITHUB_URL, external: true },
-    { label: 'Chat on Discord', href: DISCORD_URL, external: true },
+    { label: 'Conversations on Discord', href: DISCORD_URL, external: true },
+    { label: 'Code & Content on GitHub', href: GITHUB_URL, external: true },
   ],
 };
 
@@ -47,21 +48,8 @@ export default function Footer() {
             <Link href="/" className="text-lg font-bold text-gray-900">
               Co-Goods
             </Link>
-            <p className="mt-2 text-sm text-gray-600">
-              A protocol for co-created and networked physical products that
-              become more valuable through shared use and collaborative
-              ownership.
-            </p>
+            <p className="mt-2 text-sm text-gray-600">{tagline}</p>
             <div className="mt-4 flex items-center gap-4">
-              <Link
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-500 hover:text-gray-900 transition-colors"
-                aria-label="Co-Goods on GitHub"
-              >
-                <FaGithub className="w-6 h-6" />
-              </Link>
               <Link
                 href={DISCORD_URL}
                 target="_blank"
@@ -70,6 +58,15 @@ export default function Footer() {
                 aria-label="Co-Goods on Discord"
               >
                 <FaDiscord className="w-6 h-6" />
+              </Link>
+              <Link
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-gray-900 transition-colors"
+                aria-label="Co-Goods on GitHub"
+              >
+                <FaGithub className="w-6 h-6" />
               </Link>
               <Link
                 href={LINKEDIN_URL}
@@ -83,7 +80,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {[INITIATIVE, CONTRIBUTE].map(col => (
+          {[INITIATIVE, COMMUNITY].map(col => (
             <nav key={col.heading} aria-label={col.heading}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
                 {col.heading}
