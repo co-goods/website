@@ -130,16 +130,22 @@ function resolveStandalone(slug: string[]): ResolvedStandalone | null {
 }
 
 // Composed pages live in the website repo (not the content submodule), under
-// `pages/`. A single-segment URL maps to pages/<slug>.md. `home` is excluded —
+// `pages/`. The URL path maps to the file path, at any depth
+// (pages/community/events.md → /community/events). `home` is excluded —
 // pages/home.md is served at / by app/page.tsx, not /home. Runs as a fallback
 // after prefixed collections so /blog, /people, /tags, etc. keep priority;
-// only unclaimed single segments fall through to pages/.
+// only unclaimed segments fall through to pages/.
 const PAGES_ROOT = path.join(process.cwd(), 'pages');
 
 function resolvePagesPage(slug: string[]): ResolvedPage | null {
-  if (slug.length !== 1 || slug[0] === 'home') return null;
+  if (!slug.length) return null;
+  if (slug.length === 1 && slug[0] === 'home') return null;
+  // Reject dotfiles and any traversal so the URL can't escape pages/.
+  if (slug.some(s => !s || s.startsWith('.') || s.includes('/') || s.includes('\\'))) {
+    return null;
+  }
   const collection = getCollection('pages')!;
-  const filepath = path.join(PAGES_ROOT, `${slug[0]}.md`);
+  const filepath = path.join(PAGES_ROOT, ...slug) + '.md';
   if (!fs.existsSync(filepath)) return null;
   return { kind: 'page', collection, filepath, innerSegments: [] };
 }

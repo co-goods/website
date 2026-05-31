@@ -15,25 +15,32 @@ interface NavItem {
 const PUBLIC_NAV: NavItem[] = [];
 
 // Full nav shown when devMode is on (locally + preview deploys).
-// Audience-first ordering: Thinking (our voice) → Resources (practical) →
-// Research (rigor) → Blog (narrative) → About.
+// Three audience-first content pillars — Thinking (our voice) → Resources
+// (practical) → Research (rigor). Blog and About live in the footer.
 const DEV_NAV: NavItem[] = [
   { label: 'Thinking', href: '/thinking' },
   { label: 'Resources', href: '/resources' },
   { label: 'Research', href: '/research' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'About', href: '/about' },
 ];
+
+// The participation doorway, rendered as a CTA button (not a plain link) and
+// kept visible at all widths. Routes to the community surface.
+const GET_INVOLVED: NavItem = { label: 'Get Involved', href: '/community' };
 
 function navItems(): NavItem[] {
   return siteConfig.devMode ? DEV_NAV : PUBLIC_NAV;
 }
 
+function ctaItem(): NavItem | null {
+  return siteConfig.devMode ? GET_INVOLVED : null;
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const items = navItems();
+  const cta = ctaItem();
 
   // Close menu + search on route change.
   useEffect(() => {
@@ -133,6 +140,15 @@ export default function Header() {
                     );
                   })}
                 </ul>
+
+                {cta && (
+                  <Link
+                    href={cta.href}
+                    className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    {cta.label}
+                  </Link>
+                )}
 
                 <button
                   type="button"

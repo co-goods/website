@@ -8,7 +8,7 @@ interface ProseProps {
 // system.
 export default function Prose({ children }: ProseProps) {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-12">
+    <section className="px-4 sm:px-6 lg:px-8 py-8">
       <div className="mx-auto max-w-3xl prose prose-gray">{children}</div>
     </section>
   );

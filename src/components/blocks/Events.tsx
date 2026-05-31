@@ -70,7 +70,7 @@ export default function Events({ filter = 'upcoming', limit, heading }: EventsPr
   if (typeof limit === 'number') events = events.slice(0, limit);
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-12">
+    <section className="px-4 sm:px-6 lg:px-8 py-8">
       <div className="mx-auto max-w-3xl">
         {heading && (
           <h2 className="text-2xl font-bold text-gray-900 mb-6">{heading}</h2>

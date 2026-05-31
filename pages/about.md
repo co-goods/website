@@ -8,7 +8,7 @@ title: About Co-Goods
 variant: default
 eyebrow: About
 title: About Co-Goods
-subtitle: Research into protocols and tokens for co-created and networked physical products.
+subtitle: An open-innovation initiative researching how to leverage network effects as a force for good.
 ```
 
 ```prose

@@ -62,7 +62,7 @@ export default function ContributeCallout({
           className="inline-flex items-center gap-2 rounded-md border border-indigo-200 bg-white px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
         >
           <FaDiscord className="h-4 w-4" aria-hidden="true" />
-          Join the discussion
+          Join the conversation
         </a>
       </div>
     </aside>

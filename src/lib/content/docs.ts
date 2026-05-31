@@ -15,6 +15,7 @@ export interface DocItem {
   url: string;
   filepath: string;
   title: string;
+  description?: string;
   order: number;
 }
 
@@ -22,6 +23,7 @@ export interface DocGroup {
   name: string;        // collection name, e.g. "conventions" or "conventions/naming"
   title: string;       // display title, e.g. "Conventions", "Naming"
   url: string;         // the group's index URL
+  description?: string; // one-line summary from the registry
   items: DocItem[];
   subgroups: DocGroup[];
 }
@@ -38,14 +40,18 @@ function titleCase(leaf: string): string {
     .join(' ');
 }
 
-function readMeta(filepath: string): { title: string; order: number } {
+function readMeta(filepath: string): { title: string; description?: string; order: number } {
   const { data, content } = matter(fs.readFileSync(filepath, 'utf8'));
   const title =
     (typeof data.title === 'string' && data.title.trim()) ||
     content.split('\n').find(l => l.startsWith('# '))?.replace(/^#\s+/, '').trim() ||
     path.basename(filepath, '.md');
+  const description =
+    typeof data.description === 'string' && data.description.trim()
+      ? data.description.trim()
+      : undefined;
   const order = typeof data.order === 'number' ? data.order : 9999;
-  return { title, order };
+  return { title, description, order };
 }
 
 function readItems(cfg: CollectionConfig): DocItem[] {
@@ -57,8 +63,8 @@ function readItems(cfg: CollectionConfig): DocItem[] {
     .map(f => {
       const filepath = path.join(dir, f);
       const slug = f.replace(/\.md$/, '');
-      const { title, order } = readMeta(filepath);
-      return { url: `${cfg.urlPrefix}/${slug}`, filepath, title, order };
+      const { title, description, order } = readMeta(filepath);
+      return { url: `${cfg.urlPrefix}/${slug}`, filepath, title, description, order };
     })
     .sort((a, b) => a.order - b.order);
 }
@@ -77,6 +83,7 @@ function buildGroup(cfg: CollectionConfig): DocGroup {
     name: cfg.name,
     title: titleCase(cfg.name.split('/').pop() as string),
     url: cfg.urlPrefix,
+    description: cfg.description,
     items: readItems(cfg),
     subgroups,
   };
@@ -116,6 +123,25 @@ export function findGroup(name: string): DocGroup | null {
     if (sub) return sub;
   }
   return null;
+}
+
+// Breadcrumb trail for a group index page (Docs → [parent group] → group).
+// The last crumb is the current group (no href).
+export function groupCrumbs(name: string): { label: string; href?: string }[] {
+  const crumbs: { label: string; href?: string }[] = [{ label: 'Docs', href: '/docs' }];
+  for (const g of getDocsTree().groups) {
+    if (g.name === name) {
+      crumbs.push({ label: g.title });
+      return crumbs;
+    }
+    const sub = g.subgroups.find(s => s.name === name);
+    if (sub) {
+      crumbs.push({ label: g.title, href: g.url });
+      crumbs.push({ label: sub.title });
+      return crumbs;
+    }
+  }
+  return crumbs;
 }
 
 export function findPrevNext(url: string): { prev: DocItem | null; next: DocItem | null } {

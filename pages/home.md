@@ -9,7 +9,7 @@ variant: gradient
 backgroundYouTube: dQw4w9WgXcQ
 eyebrow: Open-innovation research
 title: Co-Goods
-subtitle: A protocol for co-created and networked physical products that become more valuable through shared use and collaborative ownership.
+subtitle: An open-innovation initiative researching how to leverage network effects as a force for good.
 cta:
   label: Stay in the loop
   href: "#signup"

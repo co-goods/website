@@ -122,18 +122,25 @@ export function enumerateAllParams(): { slug: string[] }[] {
     params.push({ slug: ['thinking', 'manifesto'] });
   }
 
-  // Composed pages — website/pages/<slug>.md served transparently at /<slug>.
-  // home is excluded; it's served at / by app/page.tsx, not /home.
+  // Composed pages — website/pages/**/<slug>.md served transparently, folder
+  // path = URL path (pages/community/events.md → /community/events). home is
+  // excluded; it's served at / by app/page.tsx, not /home.
   if (isCollectionEnabled('pages')) {
     const pagesRoot = path.join(process.cwd(), 'pages');
-    if (fs.existsSync(pagesRoot)) {
-      for (const f of fs.readdirSync(pagesRoot)) {
-        if (!f.endsWith('.md')) continue;
-        const slug = f.replace(/\.md$/, '');
-        if (slug === 'home') continue;
-        params.push({ slug: [slug] });
+    const walkPages = (dir: string, prefix: string[]) => {
+      if (!fs.existsSync(dir)) return;
+      for (const f of fs.readdirSync(dir)) {
+        const full = path.join(dir, f);
+        if (fs.statSync(full).isDirectory()) {
+          walkPages(full, [...prefix, f]);
+        } else if (f.endsWith('.md')) {
+          const segments = [...prefix, f.replace(/\.md$/, '')];
+          if (segments.length === 1 && segments[0] === 'home') continue;
+          params.push({ slug: segments });
+        }
       }
-    }
+    };
+    walkPages(pagesRoot, []);
   }
 
   // /research/sources, /research/tags, /research/authors derived views

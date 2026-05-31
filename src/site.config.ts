@@ -117,10 +117,18 @@ export function discordKeyForArea(area?: string): string | undefined {
   return area ? DISCORD_BY_AREA[area] : undefined;
 }
 
+// One-line positioning statement. Canonical copy lives here; the footer reads
+// it directly. The home/about hero subtitles repeat it in markdown (block
+// frontmatter can't read this constant) — keep them in sync by hand.
+// Placeholder phrasing, expected to evolve.
+export const tagline =
+  'An open-innovation initiative researching how to leverage network effects as a force for good.';
+
 export const siteConfig = {
   devMode,
   enabledCollections,
   enabledPages,
   indexablePaths,
   links,
+  tagline,
 } as const;

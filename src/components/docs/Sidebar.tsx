@@ -1,34 +1,54 @@
 import Link from 'next/link';
-import { DocsTree, DocGroup, DocItem } from '@/lib/content/docs';
+import { DocsTree, DocGroup } from '@/lib/content/docs';
 
-function ItemLinks({ items, currentUrl }: { items: DocItem[]; currentUrl: string }) {
-  if (!items.length) return null;
+interface LinkEntry {
+  url: string;
+  title: string;
+  active: boolean;
+}
+
+function LinkList({ entries }: { entries: LinkEntry[] }) {
+  if (!entries.length) return null;
   return (
     <ul className="space-y-1 border-l border-gray-200">
-      {items.map(item => {
-        const isActive = item.url === currentUrl;
-        return (
-          <li key={item.url}>
-            <Link
-              href={item.url}
-              aria-current={isActive ? 'page' : undefined}
-              className={
-                '-ml-px block border-l pl-3 py-1 transition-colors ' +
-                (isActive
-                  ? 'border-indigo-600 text-indigo-700 font-medium'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300')
-              }
-            >
-              {item.title}
-            </Link>
-          </li>
-        );
-      })}
+      {entries.map(e => (
+        <li key={e.url}>
+          <Link
+            href={e.url}
+            aria-current={e.active ? 'page' : undefined}
+            className={
+              '-ml-px block border-l pl-3 py-1 transition-colors ' +
+              (e.active
+                ? 'border-indigo-600 text-indigo-700 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300')
+            }
+          >
+            {e.title}
+          </Link>
+        </li>
+      ))}
     </ul>
   );
 }
 
+// The sidebar shows two levels: a group, and — at one level of indent — its
+// direct docs together with its sub-collections as sibling links. A sub-
+// collection links to its own index page (cards + breadcrumbs carry you
+// deeper); the sidebar deliberately does not expand a sub-collection's docs,
+// so it never nests past two levels.
 function GroupBlock({ group, currentUrl }: { group: DocGroup; currentUrl: string }) {
+  const entries: LinkEntry[] = [
+    ...group.items.map(it => ({
+      url: it.url,
+      title: it.title,
+      active: it.url === currentUrl,
+    })),
+    ...group.subgroups.map(sub => ({
+      url: sub.url,
+      title: sub.title,
+      active: currentUrl === sub.url || currentUrl.startsWith(sub.url + '/'),
+    })),
+  ];
   return (
     <li>
       <Link
@@ -37,22 +57,7 @@ function GroupBlock({ group, currentUrl }: { group: DocGroup; currentUrl: string
       >
         {group.title}
       </Link>
-      <ItemLinks items={group.items} currentUrl={currentUrl} />
-      {group.subgroups.length > 0 && (
-        <ul className="mt-3 space-y-3 pl-3">
-          {group.subgroups.map(sub => (
-            <li key={sub.name}>
-              <Link
-                href={sub.url}
-                className="block font-medium text-gray-700 text-xs mb-1 hover:text-indigo-700"
-              >
-                {sub.title}
-              </Link>
-              <ItemLinks items={sub.items} currentUrl={currentUrl} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <LinkList entries={entries} />
     </li>
   );
 }
