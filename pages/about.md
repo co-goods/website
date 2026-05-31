@@ -39,6 +39,18 @@ Our research combines theoretical analysis with empirical investigation. We syst
 
 This research database serves as both a working tool for our investigation and a resource for others interested in cooperative economics and networked physical goods.
 
+```team
+heading: Core team
+filter: co-goods-team
+columns: 2
+link: true
+cta:
+  heading: Is this you?
+  body: We're a small team and growing. If this work is yours — or you think it should be — we'd love to talk.
+  label: Get in touch
+  href: /community
+```
+
 ```cta
 heading: Get in touch
 description: This research is led by Pontus Karlsson with contributors across economics, computer science, and cooperative studies. For questions or collaboration, reach out through our GitHub organization.
