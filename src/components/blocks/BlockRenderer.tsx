@@ -40,7 +40,8 @@ export function BlockRenderer({ blocks }: { blocks: RenderedBlock[] }) {
         );
 
         return id ? (
-          <div id={String(id)} key={index}>
+          // scroll-mt offsets the sticky header when linked to via #id.
+          <div id={String(id)} className="scroll-mt-20" key={index}>
             {node}
           </div>
         ) : (

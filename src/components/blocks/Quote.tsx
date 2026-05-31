@@ -6,7 +6,7 @@ interface QuoteProps {
 
 export default function Quote({ cite, role, children }: QuoteProps) {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-12">
+    <section className="px-4 sm:px-6 lg:px-8 py-8">
       <figure className="mx-auto max-w-3xl">
         <blockquote className="text-2xl sm:text-3xl font-light italic leading-relaxed text-gray-900">
           <span aria-hidden="true" className="select-none text-indigo-300 mr-1">“</span>

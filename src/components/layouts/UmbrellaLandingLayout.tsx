@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Card from '@/components/blocks/Card';
 import { UmbrellaIndexData } from '@/lib/content/index-data';
 
 interface UmbrellaLandingLayoutProps {
@@ -6,7 +7,16 @@ interface UmbrellaLandingLayoutProps {
   data: UmbrellaIndexData;
 }
 
-export default function UmbrellaLandingLayout({ data }: UmbrellaLandingLayoutProps) {
+// The three content pillars each invite participation, deep-linked to the
+// matching section on the community page. docs/library have no such anchor.
+const GET_INVOLVED_AREA: Partial<Record<UmbrellaLandingLayoutProps['name'], string>> = {
+  thinking: 'our thinking',
+  resources: 'resources',
+  research: 'research',
+};
+
+export default function UmbrellaLandingLayout({ name, data }: UmbrellaLandingLayoutProps) {
+  const involvedArea = GET_INVOLVED_AREA[name];
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12">
       <header className="mb-10">
@@ -14,24 +24,35 @@ export default function UmbrellaLandingLayout({ data }: UmbrellaLandingLayoutPro
         <p className="mt-3 text-lg text-gray-600 leading-relaxed">{data.description}</p>
       </header>
 
-      <ul className="space-y-6">
+      <div className="grid gap-6 sm:grid-cols-2">
         {data.sections.map(section => (
-          <li
+          <Card
             key={section.url}
-            className="rounded-lg border border-gray-200 bg-white p-6 hover:border-indigo-300 transition-colors"
-          >
-            <Link href={section.url} className="group block">
-              <h2 className="text-xl font-semibold text-gray-900 group-hover:text-indigo-700">
-                {section.heading} <span aria-hidden="true" className="ml-1">→</span>
-              </h2>
-              {section.description && (
-                <p className="mt-2 text-sm text-gray-600">{section.description}</p>
-              )}
-              <p className="mt-2 text-xs font-mono text-gray-400">{section.url}</p>
-            </Link>
-          </li>
+            title={section.heading}
+            body={section.description}
+            href={section.url}
+          />
         ))}
-      </ul>
+      </div>
+
+      {involvedArea && (
+        <aside className="mt-12 rounded-lg border border-indigo-200 bg-indigo-50 p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-indigo-900">
+              Want to contribute to {involvedArea}?
+            </h2>
+            <p className="mt-1 text-sm text-indigo-700">
+              Co-Goods is open research — help shape this work.
+            </p>
+          </div>
+          <Link
+            href={`/community#${name}`}
+            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Get involved
+          </Link>
+        </aside>
+      )}
     </div>
   );
 }

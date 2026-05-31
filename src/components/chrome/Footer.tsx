@@ -23,6 +23,7 @@ const INITIATIVE: FooterColumn = {
   links: [
     { label: 'About', href: '/about' },
     { label: 'Manifesto', href: '/thinking/manifesto' },
+    { label: 'Roadmap', href: '/roadmap' },
     { label: 'Blog', href: '/blog' },
   ],
 };
@@ -31,10 +32,11 @@ const COMMUNITY: FooterColumn = {
   heading: 'Community',
   links: [
     { label: 'Get involved', href: '/community' },
-    { label: 'Contributing', href: '/contributing' },
+    { label: 'Events', href: '/community/events' },
+    { label: 'Conversations on Discord', href: '/community/discord' },
+    { label: 'Code & Content on GitHub', href: '/community/github' },
+    { label: 'Contributing', href: '/community/contributing' },
     { label: 'Docs', href: '/docs' },
-    { label: 'Conversations on Discord', href: DISCORD_URL, external: true },
-    { label: 'Code & Content on GitHub', href: GITHUB_URL, external: true },
   ],
 };
 
