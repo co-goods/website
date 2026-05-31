@@ -17,10 +17,10 @@ import {
 } from '@/lib/content/index-data';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import { editUrlForContentFile } from '@/lib/content/source';
-import { getDocsTree, findPrevNext, docCrumbs, findGroup } from '@/lib/content/docs';
+import { getDocsTree, findPrevNext, docCrumbs, groupCrumbs, findGroup } from '@/lib/content/docs';
 import ArticleLayout from '@/components/layouts/ArticleLayout';
 import DocLayout from '@/components/layouts/DocLayout';
-import DocListing, { DocSection } from '@/components/docs/DocListing';
+import DocCardListing from '@/components/docs/DocCardListing';
 import PlainPageLayout from '@/components/layouts/PlainPageLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
 import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
@@ -79,17 +79,18 @@ export default async function CatchAll({ params }: PageProps) {
   // Docs root — render in the docs shell (sidebar tree + index listing).
   if (resolved.kind === 'umbrella' && resolved.name === 'docs') {
     const tree = getDocsTree();
-    const sections: DocSection[] = tree.groups.map(g => ({
+    const cards = tree.groups.map(g => ({
       title: g.title,
-      url: g.url,
-      items: g.items,
+      href: g.url,
+      body: g.description ?? `${g.items.length} ${g.items.length === 1 ? 'document' : 'documents'}`,
+      cta: 'Browse',
     }));
     return (
-      <DocLayout tree={tree} currentUrl="/docs">
-        <DocListing
+      <DocLayout tree={tree} currentUrl="/docs" crumbs={[{ label: 'Docs' }]}>
+        <DocCardListing
           title="Documentation"
           description="How content is organised, and how to contribute."
-          sections={sections}
+          cards={cards}
         />
       </DocLayout>
     );
@@ -146,15 +147,28 @@ export default async function CatchAll({ params }: PageProps) {
     if (resolved.collection.urlPrefix.startsWith('/docs')) {
       const tree = getDocsTree();
       const group = findGroup(resolved.collection.name);
-      const sections: DocSection[] = group
+      const cards = group
         ? [
-            { items: group.items },
-            ...group.subgroups.map(s => ({ title: s.title, url: s.url, items: s.items })),
+            ...group.items.map(it => ({ title: it.title, href: it.url, body: it.description })),
+            ...group.subgroups.map(s => ({
+              title: s.title,
+              href: s.url,
+              body: s.description ?? `${s.items.length} documents`,
+              cta: 'Browse',
+            })),
           ]
         : [];
       return (
-        <DocLayout tree={tree} currentUrl={resolved.collection.urlPrefix}>
-          <DocListing title={group?.title ?? resolved.collection.name} sections={sections} />
+        <DocLayout
+          tree={tree}
+          currentUrl={resolved.collection.urlPrefix}
+          crumbs={groupCrumbs(resolved.collection.name)}
+        >
+          <DocCardListing
+            title={group?.title ?? resolved.collection.name}
+            description={group?.description}
+            cards={cards}
+          />
         </DocLayout>
       );
     }

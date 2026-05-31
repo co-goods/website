@@ -48,6 +48,7 @@ export interface CollectionConfig {
   resolver: ResolverKind;
   layout: string;            // Layout component name (dispatched in the catch-all)
   parent?: CollectionName;   // For sub-collections of a nested collection
+  description?: string;      // One-line summary, shown on area-overview cards
 }
 
 export const collections: Record<CollectionName, CollectionConfig> = {
@@ -75,9 +76,9 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   // real nested content lands, and avoid colliding a sub-collection URL with a
   // flat doc slug — e.g. a `conventions/frontmatter` sub-collection would
   // shadow the flat `frontmatter` doc.)
-  conventions:                 { name: 'conventions',                folder: 'docs/conventions',                urlPrefix: '/docs/conventions',                resolver: 'bare-slug', layout: 'ArticleLayout' },
-  schemas:                     { name: 'schemas',                    folder: 'docs/schemas',                    urlPrefix: '/docs/schemas',                    resolver: 'bare-slug', layout: 'ArticleLayout' },
-  contributing:                { name: 'contributing',               folder: 'docs/contributing',               urlPrefix: '/docs/contributing',               resolver: 'bare-slug', layout: 'ArticleLayout' },
+  conventions:                 { name: 'conventions',                folder: 'docs/conventions',                urlPrefix: '/docs/conventions',                resolver: 'bare-slug', layout: 'ArticleLayout', description: 'How content is organised — taxonomy, templates, frontmatter, naming, wikilinks, and licensing.' },
+  schemas:                     { name: 'schemas',                    folder: 'docs/schemas',                    urlPrefix: '/docs/schemas',                    resolver: 'bare-slug', layout: 'ArticleLayout', description: 'The data shapes behind the content — frontmatter contracts per content type.' },
+  contributing:                { name: 'contributing',               folder: 'docs/contributing',               urlPrefix: '/docs/contributing',               resolver: 'bare-slug', layout: 'ArticleLayout', description: 'Step-by-step guides for adding and editing content.' },
 
   // Top-level (no enclosing URL grouping)
   blog:          { name: 'blog',          folder: 'blog',          urlPrefix: '/blog',          resolver: 'blog-flattened', layout: 'BlogPost' },
