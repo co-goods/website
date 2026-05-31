@@ -10,6 +10,7 @@ import Video from './Video';
 import Events from './Events';
 import ContributeCallout from './ContributeCallout';
 import CardGrid from './CardGrid';
+import Team from './Team';
 import type { BlockSpecMap } from '@/lib/blockParser';
 
 interface RegistryEntry {
@@ -33,6 +34,7 @@ export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
   events: { component: Events, body: false },
   contribute: { component: ContributeCallout, body: false },
   cardgrid: { component: CardGrid, body: false },
+  team: { component: Team, body: false },
 };
 
 // Body flags only — handed to the parser, which stays component-agnostic.
