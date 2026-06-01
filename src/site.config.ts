@@ -89,6 +89,10 @@ export const links = {
     calls:     process.env.NEXT_PUBLIC_DISCORD_CALLS      ?? 'https://discord.com/channels/1241649853658824776/1511030216833634416',
     thinking:  process.env.NEXT_PUBLIC_DISCORD_THINKING   ?? 'https://discord.com/channels/1241649853658824776/1510977349728866375',
     resources: process.env.NEXT_PUBLIC_DISCORD_RESOURCES  ?? 'https://discord.com/channels/1241649853658824776/1510979331546026054',
+    // Tech channel (website, apps, tools, tech in general).
+    tech:      process.env.NEXT_PUBLIC_DISCORD_TECH       ?? 'https://discord.com/channels/1241649853658824776/1511072225082736640',
+    // Help-wanted forum — concrete tasks to pick up.
+    helpWanted: process.env.NEXT_PUBLIC_DISCORD_HELP_WANTED ?? 'https://discord.com/channels/1241649853658824776/1511094479745188054',
   } as Record<string, string>,
   github: {
     org: process.env.NEXT_PUBLIC_GITHUB_ORG ?? 'https://github.com/co-goods',
@@ -102,6 +106,14 @@ export function resolveDiscord(value?: string): string {
   if (value && /^https?:\/\//.test(value)) return value;
   if (value && links.discord[value]) return links.discord[value];
   return links.discord.invite;
+}
+
+// Resolve a GitHub reference the same way: a full URL is used as-is; a key
+// (e.g. "org") maps to links.github[key]; otherwise fall back to the org.
+export function resolveGithub(value?: string): string {
+  if (value && /^https?:\/\//.test(value)) return value;
+  if (value && links.github[value]) return links.github[value];
+  return links.github.org;
 }
 
 // Per-area Discord fallback: a page's URL area (first path segment) picks a

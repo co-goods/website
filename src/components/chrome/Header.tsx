@@ -25,7 +25,7 @@ const DEV_NAV: NavItem[] = [
 
 // The participation doorway, rendered as a CTA button (not a plain link) and
 // kept visible at all widths. Routes to the community surface.
-const GET_INVOLVED: NavItem = { label: 'Get Involved', href: '/community' };
+const GET_INVOLVED: NavItem = { label: 'Get involved', href: '/community' };
 
 function navItems(): NavItem[] {
   return siteConfig.devMode ? DEV_NAV : PUBLIC_NAV;

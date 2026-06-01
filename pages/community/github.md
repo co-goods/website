@@ -26,6 +26,6 @@ You can read everything, fork it, or propose a change. Spot a typo, a broken lin
 heading: Browse the code & content
 description: Both repositories live in the Co-Goods organization on GitHub — read anything, fork it, or open a pull request.
 label: Visit the GitHub organization
-href: https://github.com/co-goods
+href: github:org
 variant: primary
 ```

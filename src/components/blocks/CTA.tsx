@@ -1,13 +1,24 @@
 import Link from 'next/link';
-import { resolveDiscord } from '@/site.config';
+import { FaDiscord, FaGithub } from 'react-icons/fa';
+import { resolveDiscord, resolveGithub } from '@/site.config';
 
 type CTAVariant = 'primary' | 'secondary';
 
-// An href of `discord:<key>` (e.g. `discord:invite`, `discord:research`)
-// resolves to the configured Discord URL — sourced from env vars, never
-// hardcoded — so invite links live in one place. Other hrefs pass through.
+// Discord/GitHub CTAs carry the platform logo, matched on the href scheme.
+function schemeIcon(href: string) {
+  if (href.startsWith('discord:')) return <FaDiscord className="h-4 w-4" aria-hidden="true" />;
+  if (href.startsWith('github:')) return <FaGithub className="h-4 w-4" aria-hidden="true" />;
+  return null;
+}
+
+// An href of `discord:<key>` or `github:<key>` (e.g. `discord:invite`,
+// `discord:research`, `github:org`) resolves to the configured URL — sourced
+// from env vars, never hardcoded — so links live in one place. Other hrefs
+// pass through.
 function resolveHref(href: string): string {
-  return href.startsWith('discord:') ? resolveDiscord(href.slice('discord:'.length)) : href;
+  if (href.startsWith('discord:')) return resolveDiscord(href.slice('discord:'.length));
+  if (href.startsWith('github:')) return resolveGithub(href.slice('github:'.length));
+  return href;
 }
 
 interface CTAProps {
@@ -32,8 +43,12 @@ export default function CTA({
   description,
   heading,
 }: CTAProps) {
+  // A bare button (no heading/description) is a section affordance — keep it
+  // tight to whatever it follows. A full CTA (with heading/description) gets
+  // roomy standalone spacing.
+  const compact = !heading && !description;
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-10">
+    <section className={`px-4 sm:px-6 lg:px-8 ${compact ? 'py-3' : 'py-10'}`}>
       <div className="mx-auto max-w-3xl text-center">
         {heading && (
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
@@ -43,11 +58,12 @@ export default function CTA({
         {description && (
           <p className="mt-3 text-base text-gray-600">{description}</p>
         )}
-        <div className="mt-6">
+        <div className={compact ? '' : 'mt-6'}>
           <Link
             href={resolveHref(href)}
-            className={`inline-block rounded-md px-5 py-3 text-sm font-semibold ${VARIANT_STYLES[variant]}`}
+            className={`inline-flex items-center gap-2 rounded-md px-5 py-3 text-sm font-semibold ${VARIANT_STYLES[variant]}`}
           >
+            {schemeIcon(href)}
             {label}
           </Link>
         </div>
