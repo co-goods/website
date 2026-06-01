@@ -7,7 +7,7 @@ title: Get involved
 ```hero
 variant: gradient
 eyebrow: Get involved
-title: Build co-goods with us
+title: Build Co-Goods with us
 subtitle: Co-Goods is developed in the open — anyone can read it, discuss it, and help shape it. Here's how to take part.
 ```
 
@@ -20,13 +20,13 @@ Our research and the website's code live in the open on GitHub. Read it, fork it
 ```prose
 id: discuss
 ```
-## Discuss
+## Join the conversation
 
 The fastest way in. Most of the day-to-day happens on Discord — questions, ideas, and our community calls. We also post **what we need help with** there, so it's the best place to find something to pick up.
 
 ```cta
 description: Say hello, ask a question, or jump into a working session. No commitment — just come and talk.
-label: Join the conversation
+label: Join our Discord
 href: discord:invite
 variant: primary
 ```
@@ -56,11 +56,19 @@ cards:
     body: "Shape our point of view — essays and the manifesto."
     href: "/community/contributing#thinking"
     cta: How to contribute
-  - id: website
-    title: "Website & tech"
-    body: "Improve the site and the tooling behind it — it's all open on GitHub."
-    href: "/community/contributing#website"
+  - id: tech
+    title: Tech
+    body: "Website, apps, tools — and the tooling behind it all. It's open on GitHub."
+    href: "/community/contributing#tech"
     cta: How to contribute
+```
+
+```cta
+heading: Not sure what's needed?
+description: The help-wanted channel on Discord is our go-to place for what to pick up — each ask is a post you can claim.
+label: See help-wanted
+href: discord:helpWanted
+variant: secondary
 ```
 
 ```prose
@@ -68,23 +76,15 @@ id: events
 ```
 ## Events
 
-Calls, working sessions, and the occasional in-person meetup — online and IRL.
-
-```callout
-type: info
-title: Weekly community call — Wednesdays, 5:00 PM UTC
-```
-Our standing call, open to anyone, held on Discord. Drop in to hear what's shipped, what's next, and bring your own questions.
+Our weekly community call, plus the occasional meetup — online and IRL.
 
 ```events
-heading: Upcoming
-filter: upcoming
-limit: 4
+filter: recurring
 ```
 
 ```cta
 heading: All events
-description: See everything coming up, plus past sessions.
+description: See the call schedule, plus any upcoming and past sessions.
 label: View all events
 href: /community/events
 variant: secondary

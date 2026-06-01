@@ -12,12 +12,13 @@ export type EventKind = 'irl' | 'video-call' | 'discord-call';
 
 export interface CoGoodsEvent {
   title: string;
-  start: string;
+  start?: string;       // dated one-off events; absent for recurring
   end?: string;
   kind: EventKind;
   location?: string;
   url?: string;
   summary?: string;
+  recurrence?: string;  // a human schedule string marks a recurring event
 }
 
 export function loadEvents(): CoGoodsEvent[] {
@@ -26,11 +27,14 @@ export function loadEvents(): CoGoodsEvent[] {
   // them into Date objects.
   const parsed = yaml.load(fs.readFileSync(EVENTS_FILE, 'utf8'), { schema: yaml.JSON_SCHEMA });
   if (!Array.isArray(parsed)) return [];
+  // Keep an entry if it has a title and is either dated (start) or recurring
+  // (recurrence).
   return parsed.filter(
     (e): e is CoGoodsEvent =>
       !!e &&
       typeof e === 'object' &&
       typeof (e as CoGoodsEvent).title === 'string' &&
-      typeof (e as CoGoodsEvent).start === 'string',
+      (typeof (e as CoGoodsEvent).start === 'string' ||
+        typeof (e as CoGoodsEvent).recurrence === 'string'),
   );
 }

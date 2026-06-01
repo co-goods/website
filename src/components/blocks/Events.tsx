@@ -15,7 +15,7 @@ import { loadEvents, type CoGoodsEvent, type EventKind } from '@/lib/events';
 // TODO: migrate to Grund — the event card is a candidate Grund Component once
 // the design system covers cards.
 
-type EventFilter = 'upcoming' | 'past' | 'all';
+type EventFilter = 'upcoming' | 'past' | 'all' | 'recurring';
 
 interface EventsProps {
   filter?: EventFilter;
@@ -57,15 +57,18 @@ function formatWhen(start: string, end?: string): string {
 
 export default function Events({ filter = 'upcoming', limit, heading }: EventsProps) {
   const now = Date.now();
-  const refTime = (e: CoGoodsEvent) => Date.parse(e.end ?? e.start);
+  const refTime = (e: CoGoodsEvent) => Date.parse(e.end ?? e.start ?? '');
+  const startMs = (e: CoGoodsEvent) => Date.parse(e.start ?? '');
 
   let events = loadEvents();
-  if (filter === 'upcoming') {
-    events = events.filter(e => refTime(e) >= now).sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  if (filter === 'recurring') {
+    events = events.filter(e => e.recurrence);
+  } else if (filter === 'upcoming') {
+    events = events.filter(e => e.start && refTime(e) >= now).sort((a, b) => startMs(a) - startMs(b));
   } else if (filter === 'past') {
-    events = events.filter(e => refTime(e) < now).sort((a, b) => Date.parse(b.start) - Date.parse(a.start));
+    events = events.filter(e => e.start && refTime(e) < now).sort((a, b) => startMs(b) - startMs(a));
   } else {
-    events = events.sort((a, b) => Date.parse(b.start) - Date.parse(a.start));
+    events = events.filter(e => e.start).sort((a, b) => startMs(b) - startMs(a));
   }
   if (typeof limit === 'number') events = events.slice(0, limit);
 
@@ -77,7 +80,11 @@ export default function Events({ filter = 'upcoming', limit, heading }: EventsPr
         )}
         {events.length === 0 ? (
           <p className="text-gray-500">
-            {filter === 'past' ? 'No past events yet.' : 'No upcoming events scheduled — check back soon.'}
+            {filter === 'recurring'
+              ? 'No recurring sessions yet.'
+              : filter === 'past'
+                ? 'No past events yet.'
+                : 'No upcoming events scheduled — check back soon.'}
           </p>
         ) : (
           <ul className="space-y-4">
@@ -92,7 +99,7 @@ export default function Events({ filter = 'upcoming', limit, heading }: EventsPr
                   >
                     {KIND_LABEL[e.kind] ?? e.kind}
                   </span>
-                  <span className="text-sm text-gray-500">{formatWhen(e.start, e.end)}</span>
+                  <span className="text-sm text-gray-500">{e.recurrence ?? formatWhen(e.start ?? '', e.end)}</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {e.url ? (

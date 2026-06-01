@@ -11,11 +11,21 @@ title: Events
 subtitle: Calls, working sessions, and in-person meetups — online and IRL.
 ```
 
-```callout
-type: info
-title: Weekly community call — Wednesdays, 5:00 PM UTC
+```prose
 ```
-Our standing call, open to anyone, held on Discord. The dated sessions below are one-off events on top of that.
+## Recurring
+
+Our standing call. The dated sessions below are one-off events on top of it. New here? Join our Discord first — the call link opens inside the server.
+
+```events
+filter: recurring
+```
+
+```cta
+label: Join our Discord
+href: discord:invite
+variant: primary
+```
 
 ```events
 heading: Upcoming
