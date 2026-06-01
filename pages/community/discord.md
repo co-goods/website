@@ -34,6 +34,6 @@ Open to anyone. Drop in to hear what's shipped, what's next, and bring your own 
 heading: Come say hello
 description: New faces welcome — introduce yourself and tell us what brought you here.
 label: Join the conversation
-href: https://discord.gg/2V8DuCeBWz
+href: discord:invite
 variant: primary
 ```

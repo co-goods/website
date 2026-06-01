@@ -57,6 +57,6 @@ The code lives in the [GitHub organization](https://github.com/co-goods) — ope
 heading: Not sure where to start?
 description: Come say hello on Discord — we'll point you at something that fits.
 label: Ask on Discord
-href: https://discord.gg/2V8DuCeBWz
+href: discord:invite
 variant: secondary
 ```
