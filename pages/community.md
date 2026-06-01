@@ -27,7 +27,7 @@ The fastest way in. Most of the day-to-day happens on Discord — questions, ide
 ```cta
 description: Say hello, ask a question, or jump into a working session. No commitment — just come and talk.
 label: Join the conversation
-href: https://discord.gg/2V8DuCeBWz
+href: discord:invite
 variant: primary
 ```
 
@@ -101,6 +101,6 @@ We're exploring how individuals and organizations can back this work — from sp
 heading: Let's talk
 description: Interested in supporting or sponsoring Co-Goods? Come find us on Discord and start a conversation.
 label: Reach out on Discord
-href: https://discord.gg/2V8DuCeBWz
+href: discord:invite
 variant: secondary
 ```

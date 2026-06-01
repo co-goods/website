@@ -1,6 +1,14 @@
 import Link from 'next/link';
+import { resolveDiscord } from '@/site.config';
 
 type CTAVariant = 'primary' | 'secondary';
+
+// An href of `discord:<key>` (e.g. `discord:invite`, `discord:research`)
+// resolves to the configured Discord URL — sourced from env vars, never
+// hardcoded — so invite links live in one place. Other hrefs pass through.
+function resolveHref(href: string): string {
+  return href.startsWith('discord:') ? resolveDiscord(href.slice('discord:'.length)) : href;
+}
 
 interface CTAProps {
   label: string;
@@ -37,7 +45,7 @@ export default function CTA({
         )}
         <div className="mt-6">
           <Link
-            href={href}
+            href={resolveHref(href)}
             className={`inline-block rounded-md px-5 py-3 text-sm font-semibold ${VARIANT_STYLES[variant]}`}
           >
             {label}

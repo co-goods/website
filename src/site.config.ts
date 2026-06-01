@@ -84,11 +84,11 @@ export function isIndexable(path: string): boolean {
 // These are inlined at build (client-readable) — public URLs only, no secrets.
 export const links = {
   discord: {
-    invite:    process.env.NEXT_PUBLIC_DISCORD_INVITE    ?? 'https://discord.gg/2V8DuCeBWz',
-    research:  process.env.NEXT_PUBLIC_DISCORD_RESEARCH   ?? 'https://discord.gg/8asdWDW5QY',
-    calls:     process.env.NEXT_PUBLIC_DISCORD_CALLS      ?? 'https://discord.gg/Zes4pNuCPb',
-    thinking:  process.env.NEXT_PUBLIC_DISCORD_THINKING   ?? 'https://discord.gg/eRHtnj7nhw',
-    resources: process.env.NEXT_PUBLIC_DISCORD_RESOURCES  ?? 'https://discord.gg/h5Fh3Pzq26',
+    invite:    process.env.NEXT_PUBLIC_DISCORD_INVITE    ?? 'https://discord.gg/yDTZF8Umet',
+    research:  process.env.NEXT_PUBLIC_DISCORD_RESEARCH   ?? 'https://discord.com/channels/1241649853658824776/1510981288381911101',
+    calls:     process.env.NEXT_PUBLIC_DISCORD_CALLS      ?? 'https://discord.com/channels/1241649853658824776/1511030216833634416',
+    thinking:  process.env.NEXT_PUBLIC_DISCORD_THINKING   ?? 'https://discord.com/channels/1241649853658824776/1510977349728866375',
+    resources: process.env.NEXT_PUBLIC_DISCORD_RESOURCES  ?? 'https://discord.com/channels/1241649853658824776/1510979331546026054',
   } as Record<string, string>,
   github: {
     org: process.env.NEXT_PUBLIC_GITHUB_ORG ?? 'https://github.com/co-goods',
