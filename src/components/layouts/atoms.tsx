@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { resolveRef, resolveQualifiedRef, ResolvedRef } from '@/lib/content/refs';
 import { CollectionName } from '@/lib/content/collections';
+import LicenseBadge from '@/components/LicenseBadge';
 
 // ---------- DraftBanner ----------
 
@@ -139,21 +140,32 @@ function RefRow({ label, refs }: { label: string; refs: ResolvedRef[] }) {
 
 // Compact metadata row for the article header: type, updated date, status.
 export function FrontmatterMeta({
-  collection,
   frontmatter,
 }: {
-  collection: string;
   frontmatter: Record<string, unknown>;
 }) {
-  const type = typeof frontmatter.type === 'string' ? frontmatter.type : collection;
   const updated = typeof frontmatter.updated === 'string' ? frontmatter.updated.slice(0, 10) : null;
   const published = typeof frontmatter.publishedAt === 'string' ? frontmatter.publishedAt.slice(0, 10) : null;
+  // The collection label is already shown by ArticleShell's eyebrow; this line
+  // is just the date (the `type` field was retired in taxonomy v1).
+  if (!published && !updated) return null;
 
   return (
     <div className="not-prose mb-3 flex flex-wrap items-baseline gap-x-3 text-xs uppercase tracking-wide text-gray-500">
-      <span>{type}</span>
-      {published && <span>· Published {published}</span>}
-      {!published && updated && <span>· Updated {updated}</span>}
+      {published ? <span>Published {published}</span> : <span>Updated {updated}</span>}
+    </div>
+  );
+}
+
+// ---------- LicenseLine ----------
+
+// Renders an item's per-item `license:` override (an SPDX id) as a linked
+// badge. Absent license = nothing (the item inherits the collection default).
+export function LicenseLine({ license, url }: { license?: unknown; url?: unknown }) {
+  if (typeof license !== 'string' || !license.trim()) return null;
+  return (
+    <div className="not-prose mt-3">
+      <LicenseBadge spdx={license} url={typeof url === 'string' ? url : undefined} label="Licensed" />
     </div>
   );
 }

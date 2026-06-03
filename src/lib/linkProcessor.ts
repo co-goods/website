@@ -34,6 +34,7 @@
  */
 
 import { collections, CollectionName } from './content/collections';
+import { resolveLicense, licenseSentinel } from './licenses';
 
 // First-segment vocabulary recognised in qualified wikilinks. Umbrellas
 // + top-level collections.
@@ -81,6 +82,15 @@ function withCodeRegionsMasked(content: string, transform: (s: string) => string
 }
 
 function transformWikilinks(content: string): string {
+  // 0. Inline license reference: [[license:CC-BY-4.0]] → an inline license chip.
+  //    Emits a sentinel (swapped for chip HTML after sanitization — see
+  //    licenses.ts). Runs first; the generic handlers below only match lowercase,
+  //    slash-only paths, so a license token (colon + uppercase) never reaches them.
+  content = content.replace(
+    /\[\[license:\s*([A-Za-z0-9.+-]+)(?:\|[^\]]+)?\]\]/g,
+    (_match, id) => (resolveLicense(id) ? licenseSentinel(id) : id),
+  );
+
   // 1. Wikilink with display text: [[path|Display]]
   content = content.replace(
     /\[\[([a-z0-9\-/]+)\|([^\]]+)\]\]/g,

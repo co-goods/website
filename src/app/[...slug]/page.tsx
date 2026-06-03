@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import fs from 'fs';
 import path from 'path';
+import matter from 'gray-matter';
 import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable, discordKeyForArea } from '@/site.config';
 import { readAndRender } from '@/lib/markdown';
@@ -24,6 +25,7 @@ import DocLayout from '@/components/layouts/DocLayout';
 import DocCardListing from '@/components/docs/DocCardListing';
 import PlainPageLayout from '@/components/layouts/PlainPageLayout';
 import CollectionIndexLayout from '@/components/layouts/CollectionIndexLayout';
+import LicenseBadge from '@/components/LicenseBadge';
 import UmbrellaLandingLayout from '@/components/layouts/UmbrellaLandingLayout';
 import WikiArticle from '@/components/layouts/WikiArticle';
 import EssayDetail from '@/components/layouts/EssayDetail';
@@ -192,7 +194,19 @@ export default async function CatchAll({ params }: PageProps) {
   if (resolved.collection.name === 'pages') {
     const raw = fs.readFileSync(resolved.filepath, 'utf8');
     const blocks = await renderPageBlocks(raw);
-    return <BlockRenderer blocks={blocks} />;
+    const pageLicense = matter(raw).data.license;
+    return (
+      <>
+        <BlockRenderer blocks={blocks} />
+        {typeof pageLicense === 'string' && pageLicense.trim() && (
+          <div className="px-4 sm:px-6 lg:px-8 pb-12">
+            <div className="mx-auto max-w-3xl">
+              <LicenseBadge spdx={pageLicense} label="Page licensed" />
+            </div>
+          </div>
+        )}
+      </>
+    );
   }
 
   const parsed = await readAndRender(resolved.filepath);

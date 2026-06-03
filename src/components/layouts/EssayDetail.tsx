@@ -5,6 +5,7 @@ import {
   DraftBanner,
   ExampleBanner,
   FrontmatterMeta,
+  LicenseLine,
   PeopleList,
   RelatedList,
   Summary,
@@ -31,7 +32,7 @@ export default function EssayDetail({ segments, frontmatter, html, toc, overlay,
     <ArticleShell collection="essays" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
         <>
-          <FrontmatterMeta collection="essays" frontmatter={frontmatter} />
+          <FrontmatterMeta frontmatter={frontmatter} />
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{title as string}</h1>
           <ExampleBanner example={frontmatter.example} />
           <DraftBanner stage={frontmatter.stage} />
@@ -39,6 +40,7 @@ export default function EssayDetail({ segments, frontmatter, html, toc, overlay,
           <PeopleList label="By" slugs={frontmatter.authors} />
           <TagList tags={frontmatter.tags} />
           <RelatedList entries={frontmatter.related} />
+          <LicenseLine license={frontmatter.license} url={frontmatter.license_url} />
         </>
       }
     >

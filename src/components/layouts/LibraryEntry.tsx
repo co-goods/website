@@ -1,5 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
+import LicenseBadge from '@/components/LicenseBadge';
 import type { OverlaySlots } from '@/lib/overlays';
 import {
   DraftBanner,
@@ -75,6 +76,10 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
 
   const keyPoints = Array.isArray(frontmatter.key_points) ? frontmatter.key_points : [];
 
+  // The described work's own license (third-party), distinct from our content's
+  // license. Rendered as an SPDX chip when set; see ADR-035 (library three-layer).
+  const workLicense = typeof frontmatter.work_license === 'string' ? frontmatter.work_license : null;
+
   const isCited = frontmatter['is-cited'] === true;
   const isFeatured = frontmatter['is-featured'] === true;
   const peerReviewed = frontmatter.peer_reviewed === true;
@@ -106,6 +111,11 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
           <dl className="not-prose mt-6 mb-6 border-t border-gray-100">
             {publisher && <MetaRow label="Publisher">{publisher}</MetaRow>}
             {isbn && <MetaRow label="ISBN">{isbn}</MetaRow>}
+            {workLicense && (
+              <MetaRow label="License">
+                <LicenseBadge spdx={workLicense} />
+              </MetaRow>
+            )}
             {url && (
               <MetaRow label="Source">
                 <a href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-700 hover:underline break-all">
