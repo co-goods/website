@@ -107,6 +107,13 @@ export default function FilterableIndex({ items, defaultFilter = 'featured' }: F
                   )}
                 </div>
               </div>
+              {(item.authors?.length || item.venue || item.published) && (
+                <div className="mt-0.5 text-sm text-gray-500">
+                  {[item.authors?.join(', '), item.venue, item.published]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </div>
+              )}
               {item.summary && (
                 <div className="mt-1 text-sm text-gray-600">{item.summary}</div>
               )}
