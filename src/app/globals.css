@@ -25,3 +25,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+/* Tailwind Typography decorates blockquotes with curly quotes via
+   ::before/::after. Authors write their own quotation marks in markdown, so
+   suppress the auto-added pair to avoid doubling (and wrapping the attribution). */
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
+}
