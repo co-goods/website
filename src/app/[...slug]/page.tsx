@@ -10,6 +10,7 @@ import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { loadOverlay } from '@/lib/overlays';
 import {
   getCollectionIndex,
+  getLibraryReadingIndex,
   getResearchAuthorsIndex,
   getResearchSourcesIndex,
   getResearchTagsIndex,
@@ -99,7 +100,8 @@ export default async function CatchAll({ params }: PageProps) {
   // Umbrella landings — /thinking, /resources, /research, /resources/library
   if (resolved.kind === 'umbrella') {
     const data = getUmbrellaIndex(resolved.name);
-    return <UmbrellaLandingLayout name={resolved.name} data={data} />;
+    const reading = resolved.name === 'library' ? getLibraryReadingIndex() : undefined;
+    return <UmbrellaLandingLayout name={resolved.name} data={data} reading={reading} />;
   }
 
   // Derived filter views — /research/sources, /research/tags, /research/authors

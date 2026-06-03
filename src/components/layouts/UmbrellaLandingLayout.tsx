@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import Card from '@/components/blocks/Card';
-import { UmbrellaIndexData } from '@/lib/content/index-data';
+import FilterableIndex from '@/components/FilterableIndex';
+import { IndexData, UmbrellaIndexData } from '@/lib/content/index-data';
 
 interface UmbrellaLandingLayoutProps {
   name: 'thinking' | 'resources' | 'research' | 'docs' | 'library';
   data: UmbrellaIndexData;
+  // Optional combined entry list rendered below the nav cards (library only).
+  reading?: IndexData;
 }
 
 // The three content pillars each invite participation, deep-linked to the
@@ -15,7 +18,7 @@ const GET_INVOLVED_AREA: Partial<Record<UmbrellaLandingLayoutProps['name'], stri
   research: 'research',
 };
 
-export default function UmbrellaLandingLayout({ name, data }: UmbrellaLandingLayoutProps) {
+export default function UmbrellaLandingLayout({ name, data, reading }: UmbrellaLandingLayoutProps) {
   const involvedArea = GET_INVOLVED_AREA[name];
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12">
@@ -34,6 +37,16 @@ export default function UmbrellaLandingLayout({ name, data }: UmbrellaLandingLay
           />
         ))}
       </div>
+
+      {reading && (
+        <section className="mt-14">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">{reading.title}</h2>
+          {reading.description && (
+            <p className="mt-2 mb-6 text-gray-600">{reading.description}</p>
+          )}
+          <FilterableIndex items={reading.items} defaultFilter="featured" />
+        </section>
+      )}
 
       {involvedArea && (
         <aside className="mt-12 rounded-lg border border-indigo-200 bg-indigo-50 p-6 flex flex-wrap items-center justify-between gap-4">

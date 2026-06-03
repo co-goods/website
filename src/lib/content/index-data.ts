@@ -10,6 +10,13 @@ export interface IndexItem {
   title: string;
   summary?: string;
   slug: string;
+  // Bibliographic flags, carried through for client-side filtering of the
+  // library reading list. Presentation-agnostic frontmatter (see ADR-028).
+  isFeatured?: boolean;
+  isCited?: boolean;
+  // Human label for the source collection ("Book", "Paper"), set when items
+  // from several collections are merged into one list.
+  typeLabel?: string;
 }
 
 export interface IndexData {
@@ -67,6 +74,8 @@ function listFolderAsIndex(
       slug,
       title: meta.title,
       summary: meta.summary,
+      isFeatured: meta.frontmatter['is-featured'] === true,
+      isCited: meta.frontmatter['is-cited'] === true,
     });
   }
 
@@ -215,6 +224,29 @@ export function getResearchSourcesIndex(): IndexData {
     title: 'Sources',
     description: 'Cited sources used in Co-Goods research.',
     items: [...books.items, ...papers.items],
+  };
+}
+
+// /resources/library — the combined reading list shown beneath the umbrella
+// cards. All entries from every reading collection, unfiltered; the Featured /
+// All / Cited filtering happens client-side. Add a collection here to include
+// its (published) items in the list — no other change needed.
+const LIBRARY_READING: { name: CollectionName; label: string }[] = [
+  { name: 'books', label: 'Book' },
+  { name: 'papers', label: 'Paper' },
+];
+
+export function getLibraryReadingIndex(): IndexData {
+  const items: IndexItem[] = [];
+  for (const { name, label } of LIBRARY_READING) {
+    const list = listFolderAsIndex(folderOf(name), urlPrefixOf(name), '');
+    for (const item of list.items) items.push({ ...item, typeLabel: label });
+  }
+  items.sort((a, b) => a.title.localeCompare(b.title));
+  return {
+    title: 'All library entries',
+    description: 'Books and papers in the Co-Goods library.',
+    items,
   };
 }
 
