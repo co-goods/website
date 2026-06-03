@@ -9,7 +9,7 @@ variant: gradient
 backgroundYouTube: dQw4w9WgXcQ
 eyebrow: Open-innovation research
 title: Co-Goods
-subtitle: An open-innovation initiative researching how to leverage network effects as a force for good.
+subtitle: Researching how to leverage network effects as a force for good.
 cta:
   label: Stay in the loop
   href: "#signup"
