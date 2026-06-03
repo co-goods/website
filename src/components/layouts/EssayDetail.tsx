@@ -5,6 +5,7 @@ import {
   DraftBanner,
   ExampleBanner,
   FrontmatterMeta,
+  LicenseLine,
   PeopleList,
   RelatedList,
   Summary,
@@ -39,6 +40,7 @@ export default function EssayDetail({ segments, frontmatter, html, toc, overlay,
           <PeopleList label="By" slugs={frontmatter.authors} />
           <TagList tags={frontmatter.tags} />
           <RelatedList entries={frontmatter.related} />
+          <LicenseLine license={frontmatter.license} url={frontmatter.license_url} />
         </>
       }
     >

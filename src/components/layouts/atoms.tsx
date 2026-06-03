@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { resolveRef, resolveQualifiedRef, ResolvedRef } from '@/lib/content/refs';
 import { CollectionName } from '@/lib/content/collections';
+import LicenseBadge from '@/components/LicenseBadge';
 
 // ---------- DraftBanner ----------
 
@@ -154,6 +155,19 @@ export function FrontmatterMeta({
       <span>{type}</span>
       {published && <span>· Published {published}</span>}
       {!published && updated && <span>· Updated {updated}</span>}
+    </div>
+  );
+}
+
+// ---------- LicenseLine ----------
+
+// Renders an item's per-item `license:` override (an SPDX id) as a linked
+// badge. Absent license = nothing (the item inherits the collection default).
+export function LicenseLine({ license, url }: { license?: unknown; url?: unknown }) {
+  if (typeof license !== 'string' || !license.trim()) return null;
+  return (
+    <div className="not-prose mt-3">
+      <LicenseBadge spdx={license} url={typeof url === 'string' ? url : undefined} label="Licensed" />
     </div>
   );
 }

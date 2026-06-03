@@ -5,6 +5,7 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import { ContentType, ContentWithContent } from '@/types/content';
 import { processObsidianLinks } from './linkProcessor';
+import { renderLicenseSentinels } from './licenses';
 
 const contentPath = path.join(process.cwd(), 'content');
 
@@ -72,7 +73,7 @@ export async function renderMarkdown(rawMarkdown: string): Promise<RenderResult>
   const linked = processObsidianLinks(rawMarkdown);
   const processed = await remark().use(html).process(linked);
   const withIds = injectHeadingIds(processed.toString());
-  return { html: withIds, toc };
+  return { html: renderLicenseSentinels(withIds), toc };
 }
 
 // If the first non-blank line of the body is an H1 (`# Title`), extract its
