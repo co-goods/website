@@ -17,6 +17,11 @@ export interface IndexItem {
   // Human label for the source collection ("Book", "Paper"), set when items
   // from several collections are merged into one list.
   typeLabel?: string;
+  // Bibliographic display fields for the library reading list. Slugs are
+  // resolved to display names at build time; absent fields are omitted.
+  authors?: string[];
+  venue?: string;
+  published?: string;
 }
 
 export interface IndexData {
@@ -236,11 +241,67 @@ const LIBRARY_READING: { name: CollectionName; label: string }[] = [
   { name: 'papers', label: 'Paper' },
 ];
 
+// Turn a slug into a fallback display label ("example-press" -> "Example Press").
+function humanizeSlug(slug: string): string {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Resolve a referenced entity's slug to its display name by reading the target
+// collection's file; falls back to a humanized slug if the file is absent.
+function displayName(collection: CollectionName, slug: string): string {
+  const filepath = path.join(CONTENT_ROOT, folderOf(collection), `${slug}.md`);
+  if (fs.existsSync(filepath)) {
+    const { data } = matter(fs.readFileSync(filepath, 'utf8'));
+    const name =
+      (typeof data.title === 'string' && data.title.trim()) ||
+      (typeof data.name === 'string' && data.name.trim());
+    if (name) return name;
+  }
+  return humanizeSlug(slug);
+}
+
 export function getLibraryReadingIndex(): IndexData {
   const items: IndexItem[] = [];
   for (const { name, label } of LIBRARY_READING) {
-    const list = listFolderAsIndex(folderOf(name), urlPrefixOf(name), '');
-    for (const item of list.items) items.push({ ...item, typeLabel: label });
+    const dir = path.join(CONTENT_ROOT, folderOf(name));
+    if (!fs.existsSync(dir)) continue;
+    for (const file of fs.readdirSync(dir)) {
+      if (!file.endsWith('.md') || file.startsWith('template-') || file.startsWith('_')) continue;
+      if (file === 'INDEX.md') continue;
+      const slug = file.replace(/\.md$/, '');
+      const meta = readMeta(path.join(dir, file));
+      const fm = meta.frontmatter;
+
+      const authors = (Array.isArray(fm.authors) ? fm.authors : [])
+        .filter((a): a is string => typeof a === 'string')
+        .map(a => displayName('people', a));
+
+      // Prefer the journal/publication; fall back to the publisher for books.
+      const venue =
+        (typeof fm.publication === 'string' && displayName('publications', fm.publication)) ||
+        (typeof fm.publisher === 'string' && displayName('publishers', fm.publisher)) ||
+        undefined;
+
+      const published =
+        fm.year != null
+          ? String(fm.year)
+          : typeof fm.publication_date === 'string'
+            ? fm.publication_date.slice(0, 4)
+            : undefined;
+
+      items.push({
+        url: `${urlPrefixOf(name)}/${slug}`,
+        slug,
+        title: meta.title,
+        summary: meta.summary,
+        isFeatured: fm['is-featured'] === true,
+        isCited: fm['is-cited'] === true,
+        typeLabel: label,
+        authors: authors.length ? authors : undefined,
+        venue,
+        published,
+      });
+    }
   }
   items.sort((a, b) => a.title.localeCompare(b.title));
   return {
