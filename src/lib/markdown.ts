@@ -3,11 +3,9 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
-import { ContentType, ContentWithContent } from '@/types/content';
 import { processObsidianLinks } from './linkProcessor';
 import { renderLicenseSentinels } from './licenses';
 
-const contentPath = path.join(process.cwd(), 'content');
 
 export interface TocEntry {
   level: 2 | 3 | 4;
@@ -99,112 +97,4 @@ export async function readAndRender(filepath: string): Promise<ParsedDoc> {
   const { bodyTitle, stripped } = extractAndStripBodyTitle(content);
   const rendered = await renderMarkdown(stripped);
   return { frontmatter: data, body: stripped, rendered, bodyTitle };
-}
-
-// Helper function to normalize dates in frontmatter
-function normalizeDates(data: Record<string, unknown>): Record<string, unknown> {
-  const normalized = { ...data };
-
-  for (const key in normalized) {
-    if (normalized[key] instanceof Date) {
-      normalized[key] = (normalized[key] as Date).toISOString();
-    }
-  }
-
-  return normalized;
-}
-
-export async function getContentByType(type: string): Promise<ContentWithContent[]> {
-  const contentDir = getContentDirectory(type);
-
-  if (!fs.existsSync(contentDir)) {
-    return [];
-  }
-
-  const files = fs.readdirSync(contentDir)
-    .filter(file => file.endsWith('.md') && !file.startsWith('template-'));
-
-  const content = await Promise.all(
-    files.map(async (file) => {
-      const slug = file.replace(/\.md$/, '');
-      const fullPath = path.join(contentDir, file);
-      const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const { data, content } = matter(fileContents);
-
-      const normalizedData = normalizeDates(data);
-      const processedObsidianContent = processObsidianLinks(content);
-
-      const processedContent = await remark()
-        .use(html)
-        .process(processedObsidianContent);
-
-      return {
-        frontmatter: normalizedData as ContentType,
-        content: processedContent.toString(),
-        slug,
-      };
-    })
-  );
-
-  return content.filter(item => item.frontmatter.status === 'active');
-}
-
-export async function getContentBySlug(type: string, slug: string): Promise<ContentWithContent | null> {
-  const contentDir = getContentDirectory(type);
-  const fullPath = path.join(contentDir, `${slug}.md`);
-
-  if (!fs.existsSync(fullPath)) {
-    return null;
-  }
-
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
-
-  const normalizedData = normalizeDates(data);
-  const processedObsidianContent = processObsidianLinks(content);
-
-  const processedContent = await remark()
-    .use(html)
-    .process(processedObsidianContent);
-
-  return {
-    frontmatter: normalizedData as ContentType,
-    content: processedContent.toString(),
-    slug,
-  };
-}
-
-export function getAllSlugs(type: string): string[] {
-  const contentDir = getContentDirectory(type);
-
-  if (!fs.existsSync(contentDir)) {
-    return [];
-  }
-
-  return fs.readdirSync(contentDir)
-    .filter(file => file.endsWith('.md') && !file.startsWith('template-'))
-    .map(file => file.replace(/\.md$/, ''));
-}
-
-function getContentDirectory(type: string): string {
-  switch (type) {
-    case 'insights':
-      return path.join(contentPath, 'insights');
-    case 'sources':
-      return path.join(contentPath, 'sources');
-    case 'authors':
-      return path.join(contentPath, 'authors');
-    case 'tags':
-      return path.join(contentPath, 'tags');
-    case 'contributors':
-      return path.join(contentPath, 'contributors');
-    case 'pages':
-      return contentPath;
-    default:
-      throw new Error(`Unknown content type: ${type}`);
-  }
-}
-
-export async function getContributors(): Promise<ContentWithContent[]> {
-  return getContentByType('contributors');
 }
