@@ -73,7 +73,8 @@ export function enumerateAllParams(): { slug: string[] }[] {
     }
   }
   if (isCollectionEnabled('books') || isCollectionEnabled('papers') ||
-      isCollectionEnabled('publishers') || isCollectionEnabled('publications')) {
+      isCollectionEnabled('publishers') || isCollectionEnabled('publications') ||
+      isCollectionEnabled('standards')) {
     params.push({ slug: ['resources', 'library'] });
   }
 
@@ -81,7 +82,7 @@ export function enumerateAllParams(): { slug: string[] }[] {
   const bareSlugCollections: CollectionName[] = [
     'wiki', 'glossary', 'essays',
     'observations', 'insights', 'hypotheses',
-    'books', 'papers', 'publishers', 'publications',
+    'books', 'papers', 'publishers', 'publications', 'standards',
     'conventions', 'schemas', 'contributing',
     'people', 'organizations', 'tags',
   ];

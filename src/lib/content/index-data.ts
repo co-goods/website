@@ -134,6 +134,8 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return listFolderAsIndex(folderOf('publishers'), urlPrefixOf('publishers'), 'Publishers');
     case 'publications':
       return listFolderAsIndex(folderOf('publications'), urlPrefixOf('publications'), 'Publications');
+    case 'standards':
+      return listFolderAsIndex(folderOf('standards'), urlPrefixOf('standards'), 'Standards');
     case 'blog': {
       const blogRoot = path.join(CONTENT_ROOT, folderOf('blog'));
       const items: IndexItem[] = [];
@@ -239,6 +241,7 @@ export function getResearchSourcesIndex(): IndexData {
 const LIBRARY_READING: { name: CollectionName; label: string }[] = [
   { name: 'books', label: 'Book' },
   { name: 'papers', label: 'Paper' },
+  { name: 'standards', label: 'Standard' },
 ];
 
 // Turn a slug into a fallback display label ("example-press" -> "Example Press").
@@ -306,7 +309,7 @@ export function getLibraryReadingIndex(): IndexData {
   items.sort((a, b) => a.title.localeCompare(b.title));
   return {
     title: 'All library entries',
-    description: 'Books and papers in the Co-Goods library.',
+    description: 'Books, papers, and standards in the Co-Goods library.',
     items,
   };
 }
@@ -400,10 +403,11 @@ export function getUmbrellaIndex(
         name,
         title: 'Library',
         description:
-          'Bibliographic items — books, papers, publishers, and publications.',
+          'Bibliographic items — books, papers, standards, publishers, and publications.',
         sections: [
           { heading: 'Books', url: urlPrefixOf('books'), description: 'Books in the Co-Goods library.' },
           { heading: 'Papers', url: urlPrefixOf('papers'), description: 'Papers in the Co-Goods library.' },
+          { heading: 'Standards', url: urlPrefixOf('standards'), description: 'Standards and specifications we reference.' },
           { heading: 'Publishers', url: urlPrefixOf('publishers'), description: 'Publishers of works in the library.' },
           { heading: 'Publications', url: urlPrefixOf('publications'), description: 'Journals and channels carrying library items.' },
         ],

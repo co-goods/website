@@ -17,6 +17,7 @@ const KNOWN: Record<string, { label: string; url: string }> = {
   'CC-BY-4.0': { label: 'CC BY 4.0', url: 'https://creativecommons.org/licenses/by/4.0/' },
   'CC0-1.0': { label: 'CC0 1.0', url: 'https://creativecommons.org/publicdomain/zero/1.0/' },
   'MIT': { label: 'MIT', url: 'https://opensource.org/license/mit' },
+  'Community-Spec-1.0': { label: 'Community Spec 1.0', url: 'https://spdx.org/licenses/Community-Spec-1.0.html' },
 };
 
 /**

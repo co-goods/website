@@ -22,6 +22,7 @@ interface LibraryEntryProps {
 const KNOWN_TYPES: Record<string, string> = {
   book: 'Book',
   paper: 'Paper',
+  standard: 'Standard',
   podcast: 'Podcast',
   'podcast-episode': 'Podcast episode',
   article: 'Article',
@@ -61,7 +62,12 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
     segments[segments.length - 1] ||
     'Library entry';
 
-  const type = typeof frontmatter.type === 'string' ? frontmatter.type : 'item';
+  // Taxonomy v1 retired `type:` in favour of `template:`; fall back to it so the
+  // eyebrow reads "Book"/"Paper"/"Standard" rather than "item".
+  const type =
+    (typeof frontmatter.type === 'string' && frontmatter.type) ||
+    (typeof frontmatter.template === 'string' && frontmatter.template) ||
+    'item';
   const typeLabel = KNOWN_TYPES[type] || type;
 
   const publisher = typeof frontmatter.publisher === 'string' ? frontmatter.publisher : null;
