@@ -48,7 +48,7 @@ const groups: NavGroup[] = [
     links: [
       { label: 'Home (/)', href: '/' },
       { label: 'About', href: '/about' },
-      { label: 'Contributing (/contributing)', href: '/contributing' },
+      { label: 'Contribute (/community/contributing)', href: '/community/contributing' },
     ],
   },
 ];

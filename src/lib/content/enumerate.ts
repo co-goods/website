@@ -116,9 +116,8 @@ export function enumerateAllParams(): { slug: string[] }[] {
   }
 
   // Plain-page standalones (rendered via PlainPage layout, not collection items).
-  if (fs.existsSync(path.join(CONTENT_ROOT, 'CONTRIBUTING.md'))) {
-    params.push({ slug: ['contributing'] });
-  }
+  // The repo CONTRIBUTING.md is GitHub-only; the contribution entry is the
+  // curated /community/contributing composed page.
   if (fs.existsSync(path.join(CONTENT_ROOT, 'thinking', 'manifesto.md'))) {
     params.push({ slug: ['thinking', 'manifesto'] });
   }

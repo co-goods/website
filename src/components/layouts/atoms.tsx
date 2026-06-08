@@ -5,18 +5,29 @@ import LicenseBadge from '@/components/LicenseBadge';
 
 // ---------- DraftBanner ----------
 
-// Render a visible WIP indicator when `stage: draft`. URLs stay stable across
-// the draft → published transition; the banner is the only presentation
-// difference.
+// Render a maturity indicator for early-stage content. The stage ladder is
+// stub → draft → published (published shows nothing). URLs stay stable across
+// stage transitions; the banner is the only presentation difference.
 export function DraftBanner({ stage }: { stage?: unknown }) {
-  if (stage !== 'draft') return null;
-  return (
-    <div className="mb-6 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      <span className="font-semibold">Draft</span>
-      <span className="mx-1">·</span>
-      <span>Work in progress. Open for feedback and contributions.</span>
-    </div>
-  );
+  if (stage === 'stub') {
+    return (
+      <div className="mb-6 rounded border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+        <span className="font-semibold">Stub</span>
+        <span className="mx-1">·</span>
+        <span>Outline only — this page is a placeholder for work that&apos;s coming.</span>
+      </div>
+    );
+  }
+  if (stage === 'draft') {
+    return (
+      <div className="mb-6 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <span className="font-semibold">Draft</span>
+        <span className="mx-1">·</span>
+        <span>Work in progress. Open for feedback and contributions.</span>
+      </div>
+    );
+  }
+  return null;
 }
 
 // ---------- ExampleBanner ----------

@@ -49,6 +49,6 @@ source: home
 heading: Contribute
 description: Co-Goods is open-innovation research. The protocol evolves through community contribution. Issues, pull requests, and discussion are welcome.
 label: See how to contribute
-href: /contributing
+href: /community/contributing
 variant: secondary
 ```
