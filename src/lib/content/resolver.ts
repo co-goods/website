@@ -113,14 +113,10 @@ function resolveReportsPage(rest: string[]): ResolvedPage | null {
   };
 }
 
-// Plain-page standalones: manifesto at /thinking/manifesto, root CONTRIBUTING.md
-// at /contributing. Both rendered via the PlainPage layout.
+// Plain-page standalones: manifesto at /thinking/manifesto, rendered via the
+// PlainPage layout. (The repo CONTRIBUTING.md is GitHub-only and not rendered on
+// the site; the contribution entry is the curated /community/contributing page.)
 function resolveStandalone(slug: string[]): ResolvedStandalone | null {
-  if (slug.length === 1 && slug[0] === 'contributing') {
-    const filepath = path.join(CONTENT_ROOT, 'CONTRIBUTING.md');
-    if (!fs.existsSync(filepath)) return null;
-    return { kind: 'standalone', filepath, url: '/contributing' };
-  }
   if (slug.length === 2 && slug[0] === 'thinking' && slug[1] === 'manifesto') {
     const filepath = path.join(CONTENT_ROOT, 'thinking', 'manifesto.md');
     if (!fs.existsSync(filepath)) return null;
