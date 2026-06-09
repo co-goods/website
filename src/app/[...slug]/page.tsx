@@ -5,7 +5,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable, discordKeyForArea } from '@/site.config';
-import { readAndRender } from '@/lib/markdown';
+import { readAndRender, renderMarkdown } from '@/lib/markdown';
 import { renderPageBlocks } from '@/lib/renderBlocks';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import { loadOverlay } from '@/lib/overlays';
@@ -253,7 +253,9 @@ export default async function CatchAll({ params }: PageProps) {
   const overlay = await loadOverlay(resolved.collection.folder, overlaySlug);
 
   const articleProps = {
-    segments: resolved.innerSegments,
+    // Full URL path (incl. the slug) so layouts can render a breadcrumb; the
+    // title fallback still uses the last segment (the slug).
+    segments: slug,
     frontmatter: mergedFrontmatter,
     html: parsed.rendered.html,
     toc: parsed.rendered.toc,
@@ -265,13 +267,22 @@ export default async function CatchAll({ params }: PageProps) {
       discordKeyForArea(slug[0]),
   };
 
+  // Render the frontmatter `relevance` (why this node matters to us) through the
+  // markdown pipeline so emphasis and wikilinks resolve; layouts show it under a
+  // "Relevance to Co-Goods" heading. Only the layouts where relevance applies
+  // (wiki, library, person) receive it.
+  const relevanceHtml =
+    typeof mergedFrontmatter.relevance === 'string' && mergedFrontmatter.relevance.trim()
+      ? (await renderMarkdown(mergedFrontmatter.relevance)).html
+      : undefined;
+
   switch (resolved.collection.layout) {
     case 'WikiArticle':
-      return <WikiArticle {...articleProps} />;
+      return <WikiArticle {...articleProps} relevanceHtml={relevanceHtml} />;
     case 'EssayDetail':
       return <EssayDetail {...articleProps} />;
     case 'LibraryEntry':
-      return <LibraryEntry {...articleProps} />;
+      return <LibraryEntry {...articleProps} relevanceHtml={relevanceHtml} />;
     case 'InsightDetail':
       return <InsightDetail {...articleProps} />;
     case 'ObservationDetail':
@@ -279,7 +290,7 @@ export default async function CatchAll({ params }: PageProps) {
     case 'HypothesisDetail':
       return <HypothesisDetail {...articleProps} />;
     case 'PersonProfile':
-      return <PersonProfile {...articleProps} />;
+      return <PersonProfile {...articleProps} relevanceHtml={relevanceHtml} />;
     case 'GlossaryTerm':
       return <GlossaryTerm {...articleProps} />;
     case 'BlogPost':

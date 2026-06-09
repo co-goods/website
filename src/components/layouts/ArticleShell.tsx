@@ -3,6 +3,7 @@ import { TocEntry } from '@/lib/markdown';
 import { BlockRenderer } from '@/components/blocks/BlockRenderer';
 import type { OverlaySlots } from '@/lib/overlays';
 import ContributeCallout from '@/components/blocks/ContributeCallout';
+import { Breadcrumb } from './atoms';
 
 // Two-column shell: main column for header + body, optional right rail for TOC.
 // All per-collection layouts compose this.
@@ -12,7 +13,6 @@ import ContributeCallout from '@/components/blocks/ContributeCallout';
 // full-width zones above/below the article; `bodyBefore`/`bodyAfter` bracket the
 // page's own body; `sidebar` sits under the TOC. Absent overlay = no-op.
 export default function ArticleShell({
-  collection,
   segments,
   header,
   children,
@@ -41,10 +41,7 @@ export default function ArticleShell({
           : 'mx-auto max-w-3xl'
       }>
         <article className="min-w-0">
-          <div className="mb-2 text-xs text-gray-500 uppercase tracking-wide">
-            {collection}
-            {segments.length > 1 && ' / ' + segments.slice(0, -1).join(' / ')}
-          </div>
+          <Breadcrumb segments={segments} />
           {header}
           {overlay && overlay.bodyBefore.length > 0 && <BlockRenderer blocks={overlay.bodyBefore} />}
           {children}

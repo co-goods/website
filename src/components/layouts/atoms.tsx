@@ -187,3 +187,74 @@ export function Summary({ summary }: { summary?: unknown }) {
   if (typeof summary !== 'string' || !summary.trim()) return null;
   return <p className="not-prose mb-6 text-lg text-gray-700">{summary}</p>;
 }
+
+// ---------- Breadcrumb ----------
+
+// A clickable trail derived from the page's URL path. `segments` is the full
+// path including the current slug; the trail is every segment *except* the last
+// (the current page), each linking to its cumulative path
+// (e.g. Resources › Library › Papers).
+export function Breadcrumb({ segments }: { segments: string[] }) {
+  const crumbs = segments.slice(0, -1);
+  if (crumbs.length === 0) return null;
+  const humanize = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return (
+    <nav className="not-prose mb-3 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-500">
+      {crumbs.map((seg, i) => {
+        const href = '/' + crumbs.slice(0, i + 1).join('/');
+        return (
+          <span key={href} className="flex items-center gap-x-1.5">
+            {i > 0 && <span className="text-gray-300">›</span>}
+            <Link href={href} className="hover:text-indigo-700 hover:underline">
+              {humanize(seg)}
+            </Link>
+          </span>
+        );
+      })}
+    </nav>
+  );
+}
+
+// ---------- RelevanceSection ----------
+
+// The node's "why it matters to us", authored in the `relevance:` frontmatter
+// and pre-rendered through markdown (so emphasis and wikilinks resolve). Shown
+// under a labelled heading that matches the body's section headings (it lives in
+// the same `prose` context); the frontmatter is the single source of truth.
+export function RelevanceSection({ html }: { html?: string }) {
+  if (!html || !html.trim()) return null;
+  return (
+    <section className="prose prose-slate max-w-none mt-8">
+      <h2>Relevance to Co-Goods</h2>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </section>
+  );
+}
+
+// ---------- RelatedSection ----------
+
+// Full-width "Related" section at the foot of a page, built from the `related:`
+// frontmatter. The heading matches the body's section headings; the links are
+// styled (unresolved links show muted + italic).
+export function RelatedSection({ entries }: { entries?: unknown }) {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const refs = entries.map((e) => resolveQualifiedRef(String(e)));
+  return (
+    <section className="prose prose-slate max-w-none mt-8">
+      <h2>Related</h2>
+      <ul className="not-prose space-y-1">
+        {refs.map((r) => (
+          <li key={r.url}>
+            <Link
+              href={r.url}
+              className={r.exists ? 'text-indigo-700 hover:underline' : 'text-gray-500 italic hover:underline'}
+              title={r.exists ? undefined : 'Unresolved link'}
+            >
+              {r.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}

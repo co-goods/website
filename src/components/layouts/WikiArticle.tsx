@@ -5,7 +5,8 @@ import {
   DraftBanner,
   ExampleBanner,
   FrontmatterMeta,
-  RelatedList,
+  RelatedSection,
+  RelevanceSection,
   Summary,
   TagList,
 } from './atoms';
@@ -18,9 +19,10 @@ interface WikiArticleProps {
   overlay?: OverlaySlots | null;
   editUrl?: string;
   discord?: string;
+  relevanceHtml?: string;
 }
 
-export default function WikiArticle({ segments, frontmatter, html, toc, overlay, editUrl, discord }: WikiArticleProps) {
+export default function WikiArticle({ segments, frontmatter, html, toc, overlay, editUrl, discord, relevanceHtml }: WikiArticleProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -36,11 +38,12 @@ export default function WikiArticle({ segments, frontmatter, html, toc, overlay,
           <DraftBanner stage={frontmatter.stage} />
           <Summary summary={frontmatter.summary} />
           <TagList tags={frontmatter.tags} />
-          <RelatedList entries={frontmatter.related} />
         </>
       }
     >
       <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
+      <RelevanceSection html={relevanceHtml} />
+      <RelatedSection entries={frontmatter.related} />
     </ArticleShell>
   );
 }
