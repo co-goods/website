@@ -6,6 +6,8 @@ import {
   DraftBanner,
   ExampleBanner,
   PeopleList,
+  RelatedSection,
+  RelevanceSection,
   TagList,
 } from './atoms';
 
@@ -17,6 +19,7 @@ interface LibraryEntryProps {
   overlay?: OverlaySlots | null;
   editUrl?: string;
   discord?: string;
+  relevanceHtml?: string;
 }
 
 const KNOWN_TYPES: Record<string, string> = {
@@ -56,7 +59,7 @@ function MetaRow({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-export default function LibraryEntry({ segments, frontmatter, html, toc, overlay, editUrl, discord }: LibraryEntryProps) {
+export default function LibraryEntry({ segments, frontmatter, html, toc, overlay, editUrl, discord, relevanceHtml }: LibraryEntryProps) {
   const title =
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
     segments[segments.length - 1] ||
@@ -77,13 +80,11 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
   const serial = typeof frontmatter.serial === 'string' ? frontmatter.serial : null;
   const lang = typeof frontmatter.language === 'string' ? frontmatter.language : null;
   const methodology = typeof frontmatter.methodology === 'string' ? frontmatter.methodology : null;
-  const relevance = typeof frontmatter.relevance_to_project === 'string' ? frontmatter.relevance_to_project : null;
-  const ourTake = typeof frontmatter.our_take === 'string' ? frontmatter.our_take : null;
 
   const keyPoints = Array.isArray(frontmatter.key_points) ? frontmatter.key_points : [];
 
   // The described work's own license (third-party), distinct from our content's
-  // license. Rendered as an SPDX chip when set; see ADR-035 (library three-layer).
+  // license. Rendered as an SPDX chip when set (the library three-layer model).
   const workLicense = typeof frontmatter.work_license === 'string' ? frontmatter.work_license : null;
 
   const isCited = frontmatter['is-cited'] === true;
@@ -130,7 +131,6 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
               </MetaRow>
             )}
             {methodology && <MetaRow label="Methodology">{methodology}</MetaRow>}
-            {relevance && <MetaRow label="Relevance">{relevance}</MetaRow>}
           </dl>
 
           <TagList tags={frontmatter.tags} />
@@ -144,20 +144,14 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
             </section>
           )}
 
-          {ourTake && ourTake.trim() && (
-            <section className="mt-6 rounded border border-indigo-200 bg-indigo-50 p-4">
-              <h2 className="text-sm font-semibold text-indigo-900 uppercase tracking-wide mb-1">
-                Our take
-              </h2>
-              <p className="text-gray-800 m-0">{ourTake}</p>
-            </section>
-          )}
         </>
       }
     >
       {html.trim() && (
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+      <RelevanceSection html={relevanceHtml} />
+      <RelatedSection entries={frontmatter.related} />
     </ArticleShell>
   );
 }

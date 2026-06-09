@@ -23,6 +23,7 @@ export type CollectionName =
   | 'publishers'
   | 'publications'
   | 'standards'
+  | 'articles'
   // Docs collections (siblings under /docs/)
   | 'conventions'
   | 'schemas'
@@ -66,6 +67,7 @@ export const collections: Record<CollectionName, CollectionConfig> = {
   publishers:   { name: 'publishers',   folder: 'resources/library/publishers',   urlPrefix: '/resources/library/publishers',   resolver: 'bare-slug', layout: 'ArticleLayout' },
   publications: { name: 'publications', folder: 'resources/library/publications', urlPrefix: '/resources/library/publications', resolver: 'bare-slug', layout: 'ArticleLayout' },
   standards:    { name: 'standards',    folder: 'resources/library/standards',    urlPrefix: '/resources/library/standards',    resolver: 'bare-slug', layout: 'LibraryEntry' },
+  articles:     { name: 'articles',     folder: 'resources/library/articles',     urlPrefix: '/resources/library/articles',     resolver: 'bare-slug', layout: 'LibraryEntry' },
 
   // /research
   observations: { name: 'observations', folder: 'research/observations', urlPrefix: '/research/observations', resolver: 'bare-slug', layout: 'ObservationDetail' },

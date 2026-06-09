@@ -1,7 +1,7 @@
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
 import type { OverlaySlots } from '@/lib/overlays';
-import { CollectionRefList, ExampleBanner, TagList } from './atoms';
+import { CollectionRefList, ExampleBanner, RelevanceSection, TagList } from './atoms';
 import { siteConfig } from '@/site.config';
 
 interface PersonProfileProps {
@@ -12,6 +12,7 @@ interface PersonProfileProps {
   overlay?: OverlaySlots | null;
   editUrl?: string;
   discord?: string;
+  relevanceHtml?: string;
 }
 
 type Affiliation = 'co-goods-team' | 'depalma-pilot' | 'external-author' | 'unclaimed';
@@ -73,7 +74,7 @@ function ContactLinks({ frontmatter }: { frontmatter: Record<string, unknown> })
   );
 }
 
-export default function PersonProfile({ segments, frontmatter, html, toc, overlay, editUrl, discord }: PersonProfileProps) {
+export default function PersonProfile({ segments, frontmatter, html, toc, overlay, editUrl, discord, relevanceHtml }: PersonProfileProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -159,6 +160,7 @@ export default function PersonProfile({ segments, frontmatter, html, toc, overla
       {html.trim() && (
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+      <RelevanceSection html={relevanceHtml} />
     </ArticleShell>
   );
 }

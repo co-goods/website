@@ -1,6 +1,7 @@
 import { TocEntry } from '@/lib/markdown';
 import type { OverlaySlots } from '@/lib/overlays';
 import ContributeCallout from '@/components/blocks/ContributeCallout';
+import { Breadcrumb } from './atoms';
 
 interface ArticleLayoutProps {
   collection: string;
@@ -30,10 +31,7 @@ export default function ArticleLayout({
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-6 text-xs text-gray-500 uppercase tracking-wide">
-        {collection}
-        {segments.length > 0 && ' / ' + segments.join(' / ')}
-      </div>
+      <Breadcrumb segments={segments} />
       <h1 className="text-3xl font-bold text-gray-900 mb-6">{title as string}</h1>
       <div
         className="prose prose-slate max-w-none"
