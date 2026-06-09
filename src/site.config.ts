@@ -38,6 +38,7 @@ export const enabledCollections = {
   publishers: false,
   publications: false,
   standards: false,
+  articles: false,
   // Docs collections (under /docs/) and their sub-collections
   conventions: false,
   schemas: false,
