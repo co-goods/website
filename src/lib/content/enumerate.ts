@@ -3,7 +3,8 @@ import path from 'path';
 import { isCollectionEnabled } from '@/site.config';
 import { collections, getCollection, CollectionName } from './collections';
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
+import { allGlossaryEntries, allTags, allTopics } from './glossary';
 
 function listMdSlugs(folder: string): string[] {
   if (!folder) return [];
@@ -80,11 +81,11 @@ export function enumerateAllParams(): { slug: string[] }[] {
 
   // Bare-slug collections — enumerate each via its urlPrefix + folder
   const bareSlugCollections: CollectionName[] = [
-    'wiki', 'glossary', 'essays',
+    'wiki', 'essays',
     'observations', 'insights', 'hypotheses',
     'books', 'papers', 'publishers', 'publications', 'standards', 'articles',
     'conventions', 'schemas', 'contributing',
-    'people', 'organizations', 'tags',
+    'people', 'organizations',
   ];
   for (const name of bareSlugCollections) {
     if (!isCollectionEnabled(name)) continue;
@@ -94,6 +95,15 @@ export function enumerateAllParams(): { slug: string[] }[] {
     params.push({ slug: prefixSegments });
     for (const slug of listMdSlugs(cfg.folder)) {
       params.push({ slug: [...prefixSegments, slug] });
+    }
+  }
+
+  // Glossary — letter-folders on disk, flat URLs.
+  if (isCollectionEnabled('glossary')) {
+    const prefix = urlToSlugSegments(collections.glossary.urlPrefix);
+    params.push({ slug: prefix });
+    for (const entry of allGlossaryEntries()) {
+      params.push({ slug: [...prefix, entry.slug] });
     }
   }
 
@@ -154,9 +164,16 @@ export function enumerateAllParams(): { slug: string[] }[] {
     params.push({ slug: ['research', 'authors'] });
   }
 
-  // /topics — index only (no items currently)
+  // /tags + /tags/<slug> — derived from glossary entries flagged tag: true
+  if (isCollectionEnabled('tags')) {
+    params.push({ slug: ['tags'] });
+    for (const e of allTags()) params.push({ slug: ['tags', e.slug] });
+  }
+
+  // /topics + /topics/<slug> — derived from glossary entries flagged topic: true
   if (isCollectionEnabled('topics')) {
     params.push({ slug: ['topics'] });
+    for (const e of allTopics()) params.push({ slug: ['topics', e.slug] });
   }
 
   return params;

@@ -56,7 +56,11 @@ export default function WikilinkHoverCard() {
       if (cancelled) return;
       // Let the route's DOM settle before querying.
       const tid = window.setTimeout(() => {
-        const links = document.querySelectorAll<HTMLAnchorElement>('.prose a[href^="/"]');
+        // Body prose links, plus any container opted in with `data-hovercard`
+        // (related terms, tag pills, concept facets, listing rows).
+        const links = document.querySelectorAll<HTMLAnchorElement>(
+          '.prose a[href^="/"], [data-hovercard] a[href^="/"]',
+        );
         links.forEach(link => {
           const raw = link.getAttribute('href');
           if (!raw) return;

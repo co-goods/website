@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FaGithub, FaDiscord, FaLinkedin } from 'react-icons/fa';
 import { EmailSignup } from '@/components/blocks';
+import LicenseBadge from '@/components/LicenseBadge';
 import { siteConfig, tagline } from '@/site.config';
 
 const GITHUB_URL = siteConfig.links.github.org;
@@ -120,7 +121,11 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-gray-100 text-xs text-gray-500 space-y-1">
           <p>© {year} DePalma Workwear Limited and contributors</p>
-          <p>Content licensed CC BY-SA 4.0 unless otherwise noted</p>
+          <p className="flex flex-wrap items-center gap-1.5">
+            <span>Content licensed</span>
+            <LicenseBadge spdx="CC-BY-SA-4.0" />
+            <span>unless otherwise noted</span>
+          </p>
         </div>
       </div>
     </footer>

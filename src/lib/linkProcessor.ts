@@ -35,6 +35,7 @@
 
 import { collections, CollectionName } from './content/collections';
 import { resolveLicense, licenseSentinel } from './licenses';
+import { conceptUrl } from './content/glossary';
 
 // First-segment vocabulary recognised in qualified wikilinks. Umbrellas
 // + top-level collections.
@@ -45,7 +46,6 @@ const RECOGNISED_FIRST_SEGMENTS: Set<string> = new Set([
   'blog',
   'people',
   'organizations',
-  'tags',
   'topics',
   'docs',
 ]);
@@ -98,7 +98,10 @@ function transformWikilinks(content: string): string {
       if (isQualified(linkPath)) {
         return `[${display}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      return `[${display}](/topics/${linkPath})`;
+      // Bare slug = a glossary concept: topic hub if topic, else glossary entry
+      // (aliases resolve to their host). Unknown concepts fall through to the
+      // glossary URL (which 404s) and are caught by the build-time link check.
+      return `[${display}](${conceptUrl(linkPath) ?? `/resources/glossary/${linkPath}`})`;
     },
   );
 
@@ -110,7 +113,7 @@ function transformWikilinks(content: string): string {
         const lastSegment = linkPath.split('/').pop();
         return `[${lastSegment}](${buildUrlFromQualifiedPath(linkPath)})`;
       }
-      return `[${linkPath}](/topics/${linkPath})`;
+      return `[${linkPath}](${conceptUrl(linkPath) ?? `/resources/glossary/${linkPath}`})`;
     },
   );
 

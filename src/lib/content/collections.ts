@@ -39,6 +39,7 @@ export type CollectionName =
 
 export type ResolverKind =
   | 'bare-slug'
+  | 'glossary-lettered'
   | 'blog-flattened'
   | 'reports-versioned'
   | 'pages-transparent';
@@ -59,7 +60,7 @@ export const collections: Record<CollectionName, CollectionConfig> = {
 
   // /resources
   wiki:         { name: 'wiki',         folder: 'resources/wiki',        urlPrefix: '/resources/wiki',        resolver: 'bare-slug', layout: 'WikiArticle' },
-  glossary:     { name: 'glossary',     folder: 'resources/glossary',    urlPrefix: '/resources/glossary',    resolver: 'bare-slug', layout: 'GlossaryTerm' },
+  glossary:     { name: 'glossary',     folder: 'resources/glossary',    urlPrefix: '/resources/glossary',    resolver: 'glossary-lettered', layout: 'GlossaryTerm' },
 
   // /resources/library — per-entity sibling collections
   books:        { name: 'books',        folder: 'resources/library/books',        urlPrefix: '/resources/library/books',        resolver: 'bare-slug', layout: 'LibraryEntry' },

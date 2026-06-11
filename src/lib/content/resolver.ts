@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { collections, getCollection, CollectionConfig, CollectionName } from './collections';
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
+import { glossaryFilePath } from './glossary';
 
 export interface ResolvedPage {
   kind: 'page';
@@ -58,6 +59,16 @@ function matchUrlPrefix(slug: string[]): { collection: CollectionConfig; rest: s
 function resolveBareSlugPage(cfg: CollectionConfig, rest: string[]): ResolvedPage | null {
   if (rest.length !== 1) return null;
   const filepath = path.join(CONTENT_ROOT, cfg.folder, `${rest[0]}.md`);
+  if (!fs.existsSync(filepath)) return null;
+  return { kind: 'page', collection: cfg, filepath, innerSegments: rest };
+}
+
+// Glossary entries live in alphabetical letter-folders
+// (resources/glossary/<letter>/<slug>.md) but the URL stays flat
+// (/resources/glossary/<slug>) — the letter is computed from the slug.
+function resolveGlossaryPage(cfg: CollectionConfig, rest: string[]): ResolvedPage | null {
+  if (rest.length !== 1) return null;
+  const filepath = glossaryFilePath(rest[0]);
   if (!fs.existsSync(filepath)) return null;
   return { kind: 'page', collection: cfg, filepath, innerSegments: rest };
 }
@@ -160,6 +171,8 @@ function resolvePage(slug: string[]): ResolvedPage | null {
       return resolveBlogPage(rest);
     case 'reports-versioned':
       return resolveReportsPage(rest);
+    case 'glossary-lettered':
+      return resolveGlossaryPage(collection, rest);
     case 'pages-transparent':
       return null;
     case 'bare-slug':
@@ -207,11 +220,18 @@ function resolveUmbrella(slug: string[]): ResolvedUmbrella | null {
 
 export interface ResolvedDerived {
   kind: 'derived';
-  view: 'research-sources' | 'research-tags' | 'research-authors';
+  view: 'research-sources' | 'research-tags' | 'research-authors'
+    | 'tags-index' | 'tag' | 'topics-index' | 'topic';
   slug?: string;
 }
 
 function resolveDerived(slug: string[]): ResolvedDerived | null {
+  // Tags and topics are glossary roles rendered as derived listings/hubs.
+  if (slug.length === 1 && slug[0] === 'tags') return { kind: 'derived', view: 'tags-index' };
+  if (slug.length === 2 && slug[0] === 'tags') return { kind: 'derived', view: 'tag', slug: slug[1] };
+  if (slug.length === 1 && slug[0] === 'topics') return { kind: 'derived', view: 'topics-index' };
+  if (slug.length === 2 && slug[0] === 'topics') return { kind: 'derived', view: 'topic', slug: slug[1] };
+
   if (slug.length === 2 && slug[0] === 'research' && slug[1] === 'sources') {
     return { kind: 'derived', view: 'research-sources' };
   }

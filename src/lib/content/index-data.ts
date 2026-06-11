@@ -3,7 +3,8 @@ import path from 'path';
 import matter from 'gray-matter';
 import { collections, getCollection, CollectionName } from './collections';
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
+import { allGlossaryEntries, getGlossaryEntry } from './glossary';
 
 export interface IndexItem {
   url: string;
@@ -11,7 +12,7 @@ export interface IndexItem {
   summary?: string;
   slug: string;
   // Bibliographic flags, carried through for client-side filtering of the
-  // library reading list. Presentation-agnostic frontmatter (see ADR-028).
+  // library reading list. Presentation-agnostic frontmatter.
   isFeatured?: boolean;
   isCited?: boolean;
   // Human label for the source collection ("Book", "Paper"), set when items
@@ -28,6 +29,9 @@ export interface IndexData {
   title: string;
   description?: string;
   items: IndexItem[];
+  // Optional anchor link under the description (e.g. a concept hub linking to
+  // its canonical glossary entry).
+  anchor?: { label: string; url: string };
 }
 
 function readMeta(filepath: string): {
@@ -108,8 +112,17 @@ export function getCollectionIndex(name: string, subPath: string[]): IndexData {
       return listFolderAsIndex(folderOf('observations'), urlPrefixOf('observations'), 'Observations', 'External signals from the world.');
     case 'hypotheses':
       return listFolderAsIndex(folderOf('hypotheses'), urlPrefixOf('hypotheses'), 'Hypotheses', 'Testable predictions.');
-    case 'glossary':
-      return listFolderAsIndex(folderOf('glossary'), urlPrefixOf('glossary'), 'Glossary', 'Term definitions.');
+    case 'glossary': {
+      // Glossary lives in letter-folders; read it through the index, not a flat dir.
+      const items: IndexItem[] = allGlossaryEntries().map(e => ({
+        url: `${urlPrefixOf('glossary')}/${e.slug}`,
+        slug: e.slug,
+        title: e.title,
+        summary: e.definition,
+        typeLabel: e.type ? e.type[0].toUpperCase() + e.type.slice(1) : undefined,
+      }));
+      return { title: 'Glossary', description: 'Term definitions — the canonical anchor for every concept.', items };
+    }
     case 'people':
       // Hide cited-author / external-author profiles from the People index.
       return listFolderAsIndex(
@@ -340,26 +353,15 @@ export function getResearchTagsIndex(): IndexData {
     }
   }
 
-  // Read each tag's frontmatter (if it exists in content/tags/) for the title.
+  // Resolve each used tag's title from its glossary anchor.
   const items: IndexItem[] = [];
   for (const tag of usedTags) {
-    const filepath = path.join(CONTENT_ROOT, folderOf('tags'), `${tag}.md`);
-    if (fs.existsSync(filepath)) {
-      const meta = readMeta(filepath);
-      items.push({
-        url: `${urlPrefixOf('tags')}/${tag}`,
-        slug: tag,
-        title: meta.title,
-        summary: meta.summary,
-      });
-    } else {
-      // Tag file doesn't exist but the slug is used; emit a stub entry
-      items.push({
-        url: `${urlPrefixOf('tags')}/${tag}`,
-        slug: tag,
-        title: tag,
-      });
-    }
+    const entry = getGlossaryEntry(tag);
+    items.push({
+      url: `/tags/${tag}`,
+      slug: tag,
+      title: entry?.title ?? tag,
+    });
   }
 
   items.sort((a, b) => a.title.localeCompare(b.title));
