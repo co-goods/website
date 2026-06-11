@@ -17,6 +17,7 @@ import {
   getResearchTagsIndex,
   getUmbrellaIndex,
 } from '@/lib/content/index-data';
+import { getTagsIndex, getTopicsIndex, getTagListing, getTopicHub, getGlossaryFacets } from '@/lib/content/concepts';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import { editUrlForContentFile } from '@/lib/content/source';
 import { getDocsTree, findPrevNext, docCrumbs, groupCrumbs, findGroup } from '@/lib/content/docs';
@@ -138,6 +139,22 @@ export default async function CatchAll({ params }: PageProps) {
         />
       );
     }
+    if (resolved.view === 'tags-index') {
+      return <CollectionIndexLayout data={getTagsIndex()} segments={['tags']} />;
+    }
+    if (resolved.view === 'topics-index') {
+      return <CollectionIndexLayout data={getTopicsIndex()} segments={['topics']} />;
+    }
+    if (resolved.view === 'tag') {
+      const data = getTagListing(resolved.slug!);
+      if (!data) notFound();
+      return <CollectionIndexLayout data={data} segments={['tags', resolved.slug!]} groupByType />;
+    }
+    if (resolved.view === 'topic') {
+      const data = getTopicHub(resolved.slug!);
+      if (!data) notFound();
+      return <CollectionIndexLayout data={data} segments={['topics', resolved.slug!]} groupByType />;
+    }
     notFound(); // exhaustive over derived views; also narrows `resolved` below
   }
 
@@ -177,11 +194,11 @@ export default async function CatchAll({ params }: PageProps) {
       );
     }
     const data = getCollectionIndex(resolved.collection.name, resolved.innerSegments);
+    const prefixSegments = resolved.collection.urlPrefix.replace(/^\//, '').split('/').filter(Boolean);
     return (
       <CollectionIndexLayout
         data={data}
-        collectionName={resolved.collection.name}
-        segments={resolved.innerSegments}
+        segments={[...prefixSegments, ...resolved.innerSegments]}
       />
     );
   }
@@ -292,7 +309,7 @@ export default async function CatchAll({ params }: PageProps) {
     case 'PersonProfile':
       return <PersonProfile {...articleProps} relevanceHtml={relevanceHtml} />;
     case 'GlossaryTerm':
-      return <GlossaryTerm {...articleProps} />;
+      return <GlossaryTerm {...articleProps} facets={getGlossaryFacets(slug[slug.length - 1])} />;
     case 'BlogPost':
       return <BlogPost {...articleProps} />;
     default:

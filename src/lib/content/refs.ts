@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { CollectionName, collections, getCollection } from './collections';
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
 
 export interface ResolvedRef {
   url: string;

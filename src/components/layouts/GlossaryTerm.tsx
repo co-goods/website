@@ -1,8 +1,10 @@
-import { TocEntry } from '@/lib/markdown';
+import Link from 'next/link';
+import { TocEntry, renderMarkdown } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
 import type { OverlaySlots } from '@/lib/overlays';
+import type { GlossaryFacets } from '@/lib/content/concepts';
+import { conceptUrl, getGlossaryEntry } from '@/lib/content/glossary';
 import {
-  CollectionRefList,
   DraftBanner,
   ExampleBanner,
   SourceList,
@@ -16,6 +18,84 @@ interface GlossaryTermProps {
   overlay?: OverlaySlots | null;
   editUrl?: string;
   discord?: string;
+  facets?: GlossaryFacets | null;
+}
+
+// The "portal": below the definition, surface the roles this concept plays —
+// a topic hub, a tag listing, a long-form wiki facet, a catalogued library
+// work. All render in one consistent style: a label, the linked item(s), and
+// an optional "see all" when there are more than the preview shows.
+function FacetSection({
+  label, items, seeAll,
+}: {
+  label: string;
+  items: { title: string; url: string }[];
+  seeAll?: { url: string; count: number; cta: string };
+}) {
+  return (
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-indigo-700 mb-1">{label}</div>
+      {items.length > 0 ? (
+        <ul className="space-y-1">
+          {items.map(it => (
+            <li key={it.url}>
+              <Link href={it.url} className="text-gray-800 hover:text-indigo-700 hover:underline">{it.title}</Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-gray-500 italic">No items yet.</p>
+      )}
+      {seeAll && (
+        <Link href={seeAll.url} className="inline-block mt-1 text-sm text-indigo-700 hover:underline">
+          {seeAll.cta}{seeAll.count > items.length ? ` (${seeAll.count})` : ''} →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// Two distinct kinds of cross-link:
+//   FORMS  — the same concept in another collection (wiki article, library work).
+//            "This concept, elsewhere."
+//   ROLES  — the concept used to organise other content (topic hub, tag listing).
+//            "Browse other content by this concept."
+function FacetPortal({ facets }: { facets: GlossaryFacets }) {
+  const hasForms = facets.wiki || facets.library;
+  const hasRoles = facets.about || facets.tagged;
+  if (!hasForms && !hasRoles) return null;
+  return (
+    <section className="not-prose mt-10 border-t border-gray-200 pt-6" data-hovercard>
+      {hasForms && (
+        <div className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">This concept, elsewhere</h2>
+          <div className="space-y-5">
+            {facets.wiki && <FacetSection label="Wiki article" items={[facets.wiki]} />}
+            {facets.library && (
+              <FacetSection
+                label={facets.library.typeLabel ? `In the library · ${facets.library.typeLabel}` : 'In the library'}
+                items={[{ title: facets.library.title, url: facets.library.url }]} />
+            )}
+          </div>
+        </div>
+      )}
+      {hasRoles && (
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Browse by this concept</h2>
+          <div className="space-y-5">
+            {facets.about && (
+              <FacetSection label="As a topic" items={facets.about.preview}
+                seeAll={{ url: facets.about.url, count: facets.about.count, cta: 'See the topic hub' }} />
+            )}
+            {facets.tagged && (
+              <FacetSection label="As a tag" items={facets.tagged.preview}
+                seeAll={{ url: facets.tagged.url, count: facets.tagged.count, cta: 'See all tagged' }} />
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 // Dictionary Schema class-entry shape:
@@ -23,13 +103,16 @@ interface GlossaryTermProps {
 interface ClassEntry {
   type?: string;
   definitions?: string[];
+  // Definitions pre-rendered to HTML (so inline markdown — code, emphasis —
+  // resolves rather than showing as literal source).
+  definitionsHtml?: string[];
   forms?: Record<string, string>;
   examples?: string[];
 }
 
 function ClassBlock({ entry }: { entry: ClassEntry }) {
   const type = entry.type || 'term';
-  const defs = Array.isArray(entry.definitions) ? entry.definitions : [];
+  const defs = Array.isArray(entry.definitionsHtml) ? entry.definitionsHtml : [];
   const forms = entry.forms && typeof entry.forms === 'object' ? entry.forms : null;
   const examples = Array.isArray(entry.examples) ? entry.examples : [];
 
@@ -39,8 +122,8 @@ function ClassBlock({ entry }: { entry: ClassEntry }) {
         {type}
       </h2>
       {defs.length > 0 && (
-        <ol className="list-decimal pl-5 space-y-1 text-gray-800">
-          {defs.map((d, i) => <li key={i}>{d}</li>)}
+        <ol className="list-decimal pl-5 space-y-1 text-gray-800 [&_p]:inline [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:text-[0.9em]">
+          {defs.map((d, i) => <li key={i} dangerouslySetInnerHTML={{ __html: d }} />)}
         </ol>
       )}
       {forms && Object.keys(forms).length > 0 && (
@@ -62,7 +145,7 @@ function ClassBlock({ entry }: { entry: ClassEntry }) {
   );
 }
 
-export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord }: GlossaryTermProps) {
+export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets }: GlossaryTermProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -70,9 +153,25 @@ export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay
     'Term';
 
   const classes = Array.isArray(frontmatter.classes) ? (frontmatter.classes as ClassEntry[]) : [];
+  // Render each definition's markdown (inline code, emphasis) to HTML.
+  const classesHtml: ClassEntry[] = await Promise.all(
+    classes.map(async c => ({
+      ...c,
+      definitionsHtml: await Promise.all(
+        (Array.isArray(c.definitions) ? c.definitions : []).map(async d => (await renderMarkdown(String(d))).html),
+      ),
+    })),
+  );
 
   const relationships = (frontmatter.relationships as Record<string, unknown>) || {};
   const relatedTerms = Array.isArray(relationships.related_terms) ? relationships.related_terms : [];
+  // Resolve each related concept to its title + canonical URL (topic hub if the
+  // term is a topic, else its glossary entry — same rule as bare body links).
+  const relatedLinks = relatedTerms.map(s => {
+    const slug = String(s);
+    const e = getGlossaryEntry(slug);
+    return { slug, title: e?.title ?? slug, url: conceptUrl(slug) ?? `/resources/glossary/${slug}` };
+  });
 
   const links = Array.isArray(frontmatter.links) ? frontmatter.links : [];
 
@@ -87,13 +186,20 @@ export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay
           <ExampleBanner example={frontmatter.example} />
           <DraftBanner stage={frontmatter.stage} />
 
-          {classes.map((c, i) => <ClassBlock key={i} entry={c} />)}
+          {classesHtml.map((c, i) => <ClassBlock key={i} entry={c} />)}
 
-          <CollectionRefList
-            label="Related terms"
-            collection="glossary"
-            slugs={relatedTerms}
-          />
+          {relatedLinks.length > 0 && (
+            <div className="not-prose my-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-hovercard>
+              <span className="text-xs uppercase tracking-wide text-gray-500">Related terms</span>
+              <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                {relatedLinks.map(r => (
+                  <li key={r.slug}>
+                    <Link href={r.url} className="text-indigo-700 hover:underline">{r.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <SourceList slugs={frontmatter.sources} />
 
@@ -122,6 +228,7 @@ export default function GlossaryTerm({ segments, frontmatter, html, toc, overlay
       {html.trim() && (
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+      {facets && <FacetPortal facets={facets} />}
     </ArticleShell>
   );
 }

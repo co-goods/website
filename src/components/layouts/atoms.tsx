@@ -48,7 +48,7 @@ export function ExampleBanner({ example }: { example?: unknown }) {
 export function TagList({ tags }: { tags?: unknown }) {
   if (!Array.isArray(tags) || tags.length === 0) return null;
   return (
-    <ul className="not-prose flex flex-wrap gap-2 my-3">
+    <ul className="not-prose flex flex-wrap gap-2 my-3" data-hovercard>
       {tags.map((t) => {
         const slug = String(t);
         return (
@@ -195,16 +195,21 @@ export function Summary({ summary }: { summary?: unknown }) {
 // (the current page), each linking to its cumulative path
 // (e.g. Resources › Library › Papers).
 export function Breadcrumb({ segments }: { segments: string[] }) {
+  // Drop the last segment — it's the current page (shown as the H1).
   const crumbs = segments.slice(0, -1);
-  if (crumbs.length === 0) return null;
   const humanize = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   return (
-    <nav className="not-prose mb-3 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-500">
+    <nav className="not-prose mb-3 flex flex-wrap items-center gap-x-1.5 text-sm text-gray-500" aria-label="Breadcrumb">
+      <Link href="/" className="hover:text-indigo-700 inline-flex items-center" aria-label="Home">
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+          <path d="M10.707 2.293a1 1 0 0 0-1.414 0l-7 7A1 1 0 0 0 3 11h1v6a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-3h2v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-6h1a1 1 0 0 0 .707-1.707l-7-7Z" />
+        </svg>
+      </Link>
       {crumbs.map((seg, i) => {
         const href = '/' + crumbs.slice(0, i + 1).join('/');
         return (
           <span key={href} className="flex items-center gap-x-1.5">
-            {i > 0 && <span className="text-gray-300">›</span>}
+            <span className="text-gray-300">›</span>
             <Link href={href} className="hover:text-indigo-700 hover:underline">
               {humanize(seg)}
             </Link>

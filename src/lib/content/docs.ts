@@ -8,7 +8,7 @@ import { collections, CollectionConfig } from './collections';
 // top-level groups (conventions, schemas, contributing) plus any sub-collections
 // they declare via `parent`. Items sort by their frontmatter `order:`.
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
 const DOCS_PREFIX = '/docs';
 
 export interface DocItem {

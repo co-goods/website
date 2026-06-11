@@ -2,6 +2,7 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import { enumerateAllParams } from '@/lib/content/enumerate';
 import { resolveUrl } from '@/lib/content/resolver';
+import { allTags, allTopics } from '@/lib/content/glossary';
 
 // Build-time search index. A force-static route handler: Next prerenders it to
 // a flat /search-index.json at build, so search costs nothing at runtime — the
@@ -66,6 +67,16 @@ export function GET() {
     } catch {
       // Skip anything unreadable rather than failing the whole index.
     }
+  }
+
+  // Derived concept hubs (topics + tags) aren't single-source pages, so they're
+  // not in the loop above — add them so concept links hover-preview and are
+  // searchable. Their preview text is the glossary anchor's definition.
+  for (const e of allTopics()) {
+    docs.push({ id: `/topics/${e.slug}`, url: `/topics/${e.slug}`, title: e.title, collection: 'topic', summary: e.definition, text: e.definition ?? '' });
+  }
+  for (const e of allTags()) {
+    docs.push({ id: `/tags/${e.slug}`, url: `/tags/${e.slug}`, title: e.title, collection: 'tag', summary: e.definition, text: e.definition ?? '' });
   }
 
   return Response.json(docs);

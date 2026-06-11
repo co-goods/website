@@ -5,7 +5,7 @@ import path from 'path';
 // link straight into the web editor (which forks + opens a PR). Composed pages
 // (website repo) and derived/index pages (no single source) get no link.
 
-const CONTENT_ROOT = path.join(process.cwd(), 'content');
+import { CONTENT_ROOT } from './paths';
 const CONTENT_REPO = 'co-goods/content';
 // Contributions target the content repo's default branch, where PRs land.
 const CONTENT_BRANCH = 'staging';
