@@ -145,6 +145,59 @@ function ClassBlock({ entry }: { entry: ClassEntry }) {
   );
 }
 
+// A `type: comparison` entry contrasts two concepts. Instead of grammatical
+// class blocks it carries a `comparison` block: prose `description` paragraphs
+// plus an aspect-by-aspect table (term_a -> terms[0], term_b -> terms[1]).
+interface ComparisonRow {
+  aspect?: string;
+  term_a?: string;
+  term_b?: string;
+}
+
+function ComparisonBlock({
+  termLinks, descriptionHtml, rows,
+}: {
+  termLinks: { slug: string; title: string; url: string }[];
+  descriptionHtml: string[];
+  rows: ComparisonRow[];
+}) {
+  const a = termLinks[0];
+  const b = termLinks[1];
+  return (
+    <section className="not-prose mb-6">
+      {descriptionHtml.length > 0 && (
+        <div className="space-y-3 text-gray-800 [&_p]:m-0 [&_code]:rounded [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:text-[0.9em]">
+          {descriptionHtml.map((d, i) => <div key={i} dangerouslySetInnerHTML={{ __html: d }} />)}
+        </div>
+      )}
+      {rows.length > 0 && a && b && (
+        <table className="mt-4 w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b-2 border-indigo-200 text-left align-bottom">
+              <th className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Aspect</th>
+              <th className="py-2 pr-4 font-semibold text-indigo-700">
+                <Link href={a.url} className="hover:underline">{a.title}</Link>
+              </th>
+              <th className="py-2 font-semibold text-indigo-700">
+                <Link href={b.url} className="hover:underline">{b.title}</Link>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} className="border-b border-gray-100 align-top">
+                <td className="py-2 pr-4 font-medium text-gray-600">{row.aspect}</td>
+                <td className="py-2 pr-4 text-gray-800">{row.term_a}</td>
+                <td className="py-2 text-gray-800">{row.term_b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
 export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets }: GlossaryTermProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
@@ -173,6 +226,32 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
     return { slug, title: e?.title ?? slug, url: conceptUrl(slug) ?? `/resources/glossary/${slug}` };
   });
 
+  // Comparison entries (type: comparison) carry a `comparison` block rather
+  // than grammatical classes; resolve its target terms + render its prose.
+  const comparison =
+    frontmatter.type === 'comparison' && frontmatter.comparison && typeof frontmatter.comparison === 'object'
+      ? (frontmatter.comparison as { terms?: unknown; description?: unknown; detailed_comparison?: unknown })
+      : null;
+  const cmpTermLinks = (Array.isArray(comparison?.terms) ? comparison!.terms : []).map(s => {
+    const slug = String(s);
+    const e = getGlossaryEntry(slug);
+    return { slug, title: e?.title ?? slug, url: conceptUrl(slug) ?? `/resources/glossary/${slug}` };
+  });
+  const cmpDescriptionHtml = await Promise.all(
+    (Array.isArray(comparison?.description) ? comparison!.description : []).map(
+      async d => (await renderMarkdown(String(d))).html,
+    ),
+  );
+  const cmpRows = (Array.isArray(comparison?.detailed_comparison) ? comparison!.detailed_comparison : []) as ComparisonRow[];
+
+  // "Not to be confused with" — sibling concepts this one is conflated with.
+  const ntbcw = Array.isArray(frontmatter.not_to_be_confused_with) ? frontmatter.not_to_be_confused_with : [];
+  const ntbcwLinks = ntbcw.map(s => {
+    const slug = String(s);
+    const e = getGlossaryEntry(slug);
+    return { slug, title: e?.title ?? slug, url: conceptUrl(slug) ?? `/resources/glossary/${slug}` };
+  });
+
   const links = Array.isArray(frontmatter.links) ? frontmatter.links : [];
 
   return (
@@ -187,6 +266,23 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
           <DraftBanner stage={frontmatter.stage} />
 
           {classesHtml.map((c, i) => <ClassBlock key={i} entry={c} />)}
+
+          {comparison && (
+            <ComparisonBlock termLinks={cmpTermLinks} descriptionHtml={cmpDescriptionHtml} rows={cmpRows} />
+          )}
+
+          {ntbcwLinks.length > 0 && (
+            <div className="not-prose my-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-hovercard>
+              <span className="text-xs uppercase tracking-wide text-gray-500">Not to be confused with</span>
+              <ul className="flex flex-wrap gap-x-3 gap-y-1">
+                {ntbcwLinks.map(r => (
+                  <li key={r.slug}>
+                    <Link href={r.url} className="text-indigo-700 hover:underline">{r.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {relatedLinks.length > 0 && (
             <div className="not-prose my-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm" data-hovercard>
