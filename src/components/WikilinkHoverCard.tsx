@@ -71,6 +71,11 @@ export default function WikilinkHoverCard() {
           const show = () => {
             if (hideTimer.current) window.clearTimeout(hideTimer.current);
             showTimer.current = window.setTimeout(() => {
+              // This hover is on the link, not the card. Reset the flag so a
+              // stale `true` (the single portal div is reused/repositioned
+              // across links, so its mouseleave may not fire) can't wedge the
+              // card open — the link-leave path is gated on `!overCard.current`.
+              overCard.current = false;
               const r = link.getBoundingClientRect();
               setCard({ doc, x: r.left, y: r.bottom });
             }, 120);
