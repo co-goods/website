@@ -26,7 +26,7 @@ function readTitle(filepath: string, fallback: string): string {
 // Library is no longer a single collection — `sources:` and friends reference
 // a slug that may live in books, papers, publishers, or publications. This
 // virtual lookup walks the sub-collections in order and returns the first hit.
-const LIBRARY_SUB_COLLECTIONS = ['books', 'papers', 'publishers', 'publications'] as const;
+const LIBRARY_SUB_COLLECTIONS = ['books', 'papers', 'articles', 'standards', 'publishers', 'publications'] as const;
 
 function resolveLibraryRef(slug: string): ResolvedRef {
   for (const sub of LIBRARY_SUB_COLLECTIONS) {

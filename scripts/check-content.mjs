@@ -5,12 +5,17 @@
  * Fails the build when the glossary-anchor model is violated:
  *   - a record's `tags:`  entry has no glossary entry flagged `tag: true`
  *   - a record's `topics:` entry has no glossary entry flagged `topic: true`
- *   - a glossary `related_terms` slug resolves to no glossary entry
+ *   - a glossary `related_terms` / `not_to_be_confused_with` slug has no glossary entry
  *   - a bare wikilink `[[slug]]` names no glossary concept (slug or alias)
  *
+ * and when the qualified-reference graph dangles (create-on-use integrity):
+ *   - `authors:` / `added-by:` slug has no people/ entry
+ *   - `publisher:` / `publication:` slug has no library publisher/publication entry
+ *   - `sources_by_author:` / `key_publications:` slug has no library work
+ *
  * Reads the same CONTENT_ROOT the app uses (honours CONTENT_DIR for local runs).
- * Wired as `prebuild`, so `next build` runs it first. (Full qualified-link
- * checking is the separate broken-link checker — out of scope here.)
+ * Wired as `prebuild`, so `next build` runs it first. (Qualified wikilinks in
+ * bodies are the separate broken-link checker — out of scope here.)
  */
 import fs from 'fs';
 import path from 'path';
@@ -55,7 +60,7 @@ for (const file of walk(GLOSSARY_DIR)) {
   for (const a of Array.isArray(data.aliases) ? data.aliases : []) conceptSlugs.add(aliasKey(String(a)));
 }
 
-// ---- glossary related_terms must resolve ----
+// ---- glossary related_terms + not_to_be_confused_with must resolve ----
 for (const file of walk(GLOSSARY_DIR)) {
   const { data } = matter(fs.readFileSync(file, 'utf8'));
   const terms = data?.relationships?.related_terms;
@@ -64,7 +69,31 @@ for (const file of walk(GLOSSARY_DIR)) {
       errors.push(`${rel(file)}: related_term '${t}' has no glossary entry`);
     }
   }
+  for (const t of Array.isArray(data.not_to_be_confused_with) ? data.not_to_be_confused_with : []) {
+    if (typeof t === 'string' && t.trim() && !conceptSlugs.has(t.trim())) {
+      errors.push(`${rel(file)}: not_to_be_confused_with '${t}' has no glossary entry`);
+    }
+  }
 }
+
+// ---- entity indexes (for the qualified-reference graph) ----
+function slugsIn(relDir) {
+  const set = new Set();
+  for (const file of walk(path.join(CONTENT_ROOT, relDir))) {
+    const { data } = matter(fs.readFileSync(file, 'utf8'));
+    set.add(String(data.slug || path.basename(file, '.md')));
+  }
+  return set;
+}
+const peopleSlugs = slugsIn('people');
+const publisherSlugs = slugsIn('resources/library/publishers');
+const publicationSlugs = slugsIn('resources/library/publications');
+const libraryWorkSlugs = new Set([
+  ...slugsIn('resources/library/books'),
+  ...slugsIn('resources/library/papers'),
+  ...slugsIn('resources/library/articles'),
+  ...slugsIn('resources/library/standards'),
+]);
 
 // ---- records: tags/topics must resolve to flagged entries ----
 const SKIP_DIRS = ['resources/glossary', 'docs', 'templates'];
@@ -80,6 +109,30 @@ for (const file of allMd) {
   for (const t of Array.isArray(data.topics) ? data.topics : []) {
     if (typeof t === 'string' && !topicOk.has(t)) {
       errors.push(`${rel(file)}: topics: '${t}' is not a glossary entry flagged topic: true`);
+    }
+  }
+  // qualified-reference graph — list-valued fields
+  // (key_publications is not validated — its semantics are unsettled; the
+  // example person uses free-text titles, not slugs.)
+  for (const [field, set, label] of [
+    ['authors', peopleSlugs, 'person'],
+    ['sources_by_author', libraryWorkSlugs, 'library work'],
+  ]) {
+    for (const v of Array.isArray(data[field]) ? data[field] : []) {
+      if (typeof v === 'string' && v.trim() && !set.has(v.trim())) {
+        errors.push(`${rel(file)}: ${field}: '${v}' has no ${label} entry`);
+      }
+    }
+  }
+  // qualified-reference graph — single-valued fields (empty string = unspecified, skipped)
+  for (const [field, set, label] of [
+    ['added-by', peopleSlugs, 'person'],
+    ['publisher', publisherSlugs, 'publisher'],
+    ['publication', publicationSlugs, 'publication'],
+  ]) {
+    const v = data[field];
+    if (typeof v === 'string' && v.trim() && !set.has(v.trim())) {
+      errors.push(`${rel(file)}: ${field}: '${v}' has no ${label} entry`);
     }
   }
 }
