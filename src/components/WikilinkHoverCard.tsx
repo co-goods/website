@@ -49,6 +49,18 @@ export default function WikilinkHoverCard() {
   const overCard = useRef(false);
 
   useEffect(() => {
+    // A client navigation keeps this component mounted (it lives in the layout),
+    // so a card left open from the previous page would survive onto the new one.
+    // Clear it (and the over-card flag) whenever the route changes.
+    setCard(null);
+    overCard.current = false;
+
+    // Hover preview is a pointer affordance — skip it on touch devices, where
+    // there's no hover and no reliable close (a tap fires focus; scrolling fires
+    // no mouseleave, so the card would wedge open with no way to dismiss it).
+    // Mobile taps just navigate.
+    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return;
+
     let cancelled = false;
     const cleanups: Array<() => void> = [];
 
@@ -107,10 +119,20 @@ export default function WikilinkHoverCard() {
     };
     document.addEventListener('keydown', onKey);
 
+    // The card is position:fixed at the link's location — close it on scroll so
+    // it can't float away from its anchor (and cancel any pending open).
+    const onScroll = () => {
+      if (showTimer.current) window.clearTimeout(showTimer.current);
+      overCard.current = false;
+      setCard(null);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
     return () => {
       cancelled = true;
       cleanups.forEach(c => c());
       document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll);
       if (showTimer.current) window.clearTimeout(showTimer.current);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
