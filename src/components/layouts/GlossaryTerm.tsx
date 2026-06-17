@@ -7,6 +7,7 @@ import { conceptUrl, getGlossaryEntry } from '@/lib/content/glossary';
 import {
   DraftBanner,
   ExampleBanner,
+  RelevanceSection,
   SourceList,
 } from './atoms';
 
@@ -19,6 +20,7 @@ interface GlossaryTermProps {
   editUrl?: string;
   discord?: string;
   facets?: GlossaryFacets | null;
+  relevanceHtml?: string;
 }
 
 // The "portal": below the definition, surface the roles this concept plays —
@@ -198,7 +200,7 @@ function ComparisonBlock({
   );
 }
 
-export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets }: GlossaryTermProps) {
+export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets, relevanceHtml }: GlossaryTermProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -324,6 +326,7 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
       {html.trim() && (
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+      <RelevanceSection html={relevanceHtml} />
       {facets && <FacetPortal facets={facets} />}
     </ArticleShell>
   );
