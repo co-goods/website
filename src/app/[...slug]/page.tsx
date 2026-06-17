@@ -287,7 +287,7 @@ export default async function CatchAll({ params }: PageProps) {
   // Render the frontmatter `relevance` (why this node matters to us) through the
   // markdown pipeline so emphasis and wikilinks resolve; layouts show it under a
   // "Relevance to Co-Goods" heading. Only the layouts where relevance applies
-  // (wiki, library, person) receive it.
+  // (wiki, library, person, glossary) receive it.
   const relevanceHtml =
     typeof mergedFrontmatter.relevance === 'string' && mergedFrontmatter.relevance.trim()
       ? (await renderMarkdown(mergedFrontmatter.relevance)).html
@@ -309,7 +309,7 @@ export default async function CatchAll({ params }: PageProps) {
     case 'PersonProfile':
       return <PersonProfile {...articleProps} relevanceHtml={relevanceHtml} />;
     case 'GlossaryTerm':
-      return <GlossaryTerm {...articleProps} facets={getGlossaryFacets(slug[slug.length - 1])} />;
+      return <GlossaryTerm {...articleProps} facets={getGlossaryFacets(slug[slug.length - 1])} relevanceHtml={relevanceHtml} />;
     case 'BlogPost':
       return <BlogPost {...articleProps} />;
     default:

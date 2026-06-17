@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { TocEntry } from '@/lib/markdown';
 import ArticleShell from './ArticleShell';
 import LicenseBadge from '@/components/LicenseBadge';
+import { resolveRef } from '@/lib/content/refs';
 import type { OverlaySlots } from '@/lib/overlays';
 import {
   DraftBanner,
@@ -74,6 +76,8 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
   const typeLabel = KNOWN_TYPES[type] || type;
 
   const publisher = typeof frontmatter.publisher === 'string' ? frontmatter.publisher : null;
+  // Resolve the publisher slug to its name + URL (it was rendering as the raw slug).
+  const publisherRef = publisher ? resolveRef('publishers', publisher) : null;
   const year = frontmatter.year != null ? String(frontmatter.year) : null;
   const isbn = typeof frontmatter.isbn === 'string' ? frontmatter.isbn : null;
   const url = typeof frontmatter.url === 'string' ? frontmatter.url : null;
@@ -116,7 +120,15 @@ export default function LibraryEntry({ segments, frontmatter, html, toc, overlay
           <PeopleList label="Authors" slugs={frontmatter.authors} />
 
           <dl className="not-prose mt-6 mb-6 border-t border-gray-100">
-            {publisher && <MetaRow label="Publisher">{publisher}</MetaRow>}
+            {publisherRef && (
+              <MetaRow label="Publisher">
+                {publisherRef.exists ? (
+                  <Link href={publisherRef.url} className="text-indigo-700 hover:underline">{publisherRef.label}</Link>
+                ) : (
+                  publisherRef.label
+                )}
+              </MetaRow>
+            )}
             {isbn && <MetaRow label="ISBN">{isbn}</MetaRow>}
             {workLicense && (
               <MetaRow label="License">

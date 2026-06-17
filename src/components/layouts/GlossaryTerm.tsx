@@ -7,6 +7,7 @@ import { conceptUrl, getGlossaryEntry } from '@/lib/content/glossary';
 import {
   DraftBanner,
   ExampleBanner,
+  RelevanceSection,
   SourceList,
 } from './atoms';
 
@@ -19,6 +20,7 @@ interface GlossaryTermProps {
   editUrl?: string;
   discord?: string;
   facets?: GlossaryFacets | null;
+  relevanceHtml?: string;
 }
 
 // The "portal": below the definition, surface the roles this concept plays —
@@ -198,7 +200,7 @@ function ComparisonBlock({
   );
 }
 
-export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets }: GlossaryTermProps) {
+export default async function GlossaryTerm({ segments, frontmatter, html, toc, overlay, editUrl, discord, facets, relevanceHtml }: GlossaryTermProps) {
   const name =
     (typeof frontmatter.name === 'string' && frontmatter.name) ||
     (typeof frontmatter.title === 'string' && frontmatter.title) ||
@@ -254,6 +256,14 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
 
   const links = Array.isArray(frontmatter.links) ? frontmatter.links : [];
 
+  // Alternate names, surfaced so they're visible (not just used for link
+  // resolution): `aliases` ("also known as") and `expanded_form` (what an
+  // acronym headword stands for).
+  const aliases = Array.isArray(frontmatter.aliases)
+    ? frontmatter.aliases.filter((a): a is string => typeof a === 'string')
+    : [];
+  const expandedForm = typeof frontmatter.expanded_form === 'string' ? frontmatter.expanded_form : null;
+
   return (
     <ArticleShell collection="glossary" segments={segments} toc={toc} overlay={overlay} editUrl={editUrl} discord={discord}
       header={
@@ -264,6 +274,17 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
           <h1 className="text-4xl font-bold text-gray-900 mb-6">{name as string}</h1>
           <ExampleBanner example={frontmatter.example} />
           <DraftBanner stage={frontmatter.stage} />
+
+          {(expandedForm || aliases.length > 0) && (
+            <div className="not-prose mb-6 space-y-1 text-sm text-gray-600">
+              {expandedForm && (
+                <div><span className="uppercase tracking-wide text-xs text-gray-400">Stands for</span> {expandedForm}</div>
+              )}
+              {aliases.length > 0 && (
+                <div><span className="uppercase tracking-wide text-xs text-gray-400">Also known as</span> {aliases.join(', ')}</div>
+              )}
+            </div>
+          )}
 
           {classesHtml.map((c, i) => <ClassBlock key={i} entry={c} />)}
 
@@ -324,6 +345,7 @@ export default async function GlossaryTerm({ segments, frontmatter, html, toc, o
       {html.trim() && (
         <div className="prose prose-slate max-w-none mt-8" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+      <RelevanceSection html={relevanceHtml} />
       {facets && <FacetPortal facets={facets} />}
     </ArticleShell>
   );
