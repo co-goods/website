@@ -1,26 +1,26 @@
 import { Fragment } from 'react';
-import { BLOCK_REGISTRY } from './registry';
+import { SECTION_REGISTRY } from './registry';
 
-export interface RenderedBlock {
+export interface RenderedSection {
   name: string;
   props: Record<string, unknown>;
-  /** Pre-rendered HTML for body-rich blocks; empty for config-only blocks. */
+  /** Pre-rendered HTML for body-rich sections; empty for config-only sections. */
   bodyHtml: string;
 }
 
-// Renders the ordered blocks parsed from a custom page's markdown. A body-rich
-// block receives its rendered markdown as children. A block may declare a
+// Renders the ordered sections parsed from a custom page's markdown. A body-rich
+// section receives its rendered markdown as children. A section may declare a
 // reserved `id` prop, which becomes an anchor wrapper (e.g. for in-page links)
 // without each component needing to know about it.
-export function BlockRenderer({ blocks }: { blocks: RenderedBlock[] }) {
+export function SectionRenderer({ sections }: { sections: RenderedSection[] }) {
   return (
     <>
-      {blocks.map((block, index) => {
-        const entry = BLOCK_REGISTRY[block.name];
+      {sections.map((section, index) => {
+        const entry = SECTION_REGISTRY[section.name];
         if (!entry) return null;
 
         const Component = entry.component;
-        const { id, ...props } = block.props as { id?: string } & Record<
+        const { id, ...props } = section.props as { id?: string } & Record<
           string,
           unknown
         >;
@@ -32,7 +32,7 @@ export function BlockRenderer({ blocks }: { blocks: RenderedBlock[] }) {
                 multi-paragraph bodies still stack as blocks. */}
             <div
               style={{ display: 'contents' }}
-              dangerouslySetInnerHTML={{ __html: block.bodyHtml }}
+              dangerouslySetInnerHTML={{ __html: section.bodyHtml }}
             />
           </Component>
         ) : (

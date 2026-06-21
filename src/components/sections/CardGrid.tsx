@@ -1,8 +1,8 @@
 import Card, { type CardProps } from './Card';
 
 // A responsive grid of cards. Used directly by layouts (children) and as the
-// `cardgrid` composed-page block (via the `cards` prop). Shares the standard
-// contained section width so it lines up with prose/callout/cta blocks.
+// `cardgrid` composed-page section (via the `cards` prop). Shares the standard
+// contained section width so it lines up with prose/callout/cta sections.
 
 const COLS: Record<number, string> = {
   1: 'grid-cols-1',

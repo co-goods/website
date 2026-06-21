@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { FaGithub, FaDiscord, FaLinkedin } from 'react-icons/fa';
-import { EmailSignup } from '@/components/blocks';
+import { EmailSignup } from '@/components/sections';
 import LicenseBadge from '@/components/LicenseBadge';
 import { siteConfig, tagline } from '@/site.config';
 

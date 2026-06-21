@@ -1,6 +1,6 @@
 import { TocEntry } from '@/lib/markdown';
 import type { OverlaySlots } from '@/lib/overlays';
-import ContributeCallout from '@/components/blocks/ContributeCallout';
+import ContributeCallout from '@/components/sections/ContributeCallout';
 import { Breadcrumb } from './atoms';
 
 interface ArticleLayoutProps {

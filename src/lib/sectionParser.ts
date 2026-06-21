@@ -1,23 +1,23 @@
 import matter from 'gray-matter';
 
-// A section block is authored in markdown as a fenced code block whose info
-// string is the block name. The fenced content is the block's YAML props.
-// Body-rich blocks (prose, quote, callout) then consume the readable markdown
-// that follows the fence, up to the next opening block, an explicit close
-// (```/name), or end of file. Config-only blocks (hero, cta, emailsignup)
+// A section is authored in markdown as a fenced code block whose info
+// string is the section name. The fenced content is the section's YAML props.
+// Body-rich sections (prose, quote, callout) then consume the readable markdown
+// that follows the fence, up to the next opening section, an explicit close
+// (```/name), or end of file. Config-only sections (hero, cta, emailsignup)
 // take their content entirely from the YAML props and own no body.
 
-export interface BlockSpec {
-  /** True when the block consumes the markdown that follows its fence. */
+export interface SectionSpec {
+  /** True when the section consumes the markdown that follows its fence. */
   body: boolean;
 }
 
-export type BlockSpecMap = Record<string, BlockSpec>;
+export type SectionSpecMap = Record<string, SectionSpec>;
 
-export interface ParsedBlock {
+export interface ParsedSection {
   name: string;
   props: Record<string, unknown>;
-  /** Raw markdown body for body-rich blocks; empty for config-only blocks. */
+  /** Raw markdown body for body-rich sections; empty for config-only sections. */
   bodyMarkdown: string;
 }
 
@@ -33,21 +33,21 @@ function parseYamlProps(yamlText: string): Record<string, unknown> {
 }
 
 /**
- * Walk markdown and extract the ordered list of section blocks. Real code
+ * Walk markdown and extract the ordered list of sections. Real code
  * blocks (```ts, ```bash, …) are not in the spec map and fall through: they
- * stay part of whatever body-rich block is open, or are skipped when none is.
+ * stay part of whatever body-rich section is open, or are skipped when none is.
  */
-export function parseBlocks(markdown: string, specs: BlockSpecMap): ParsedBlock[] {
+export function parseSections(markdown: string, specs: SectionSpecMap): ParsedSection[] {
   const lines = markdown.split('\n');
-  const blocks: ParsedBlock[] = [];
+  const sections: ParsedSection[] = [];
 
-  let open: ParsedBlock | null = null; // open body-rich block accumulating body
+  let open: ParsedSection | null = null; // open body-rich section accumulating body
   let bodyLines: string[] = [];
 
   const flush = () => {
     if (open) {
       open.bodyMarkdown = bodyLines.join('\n').trim();
-      blocks.push(open);
+      sections.push(open);
       open = null;
       bodyLines = [];
     }
@@ -61,7 +61,7 @@ export function parseBlocks(markdown: string, specs: BlockSpecMap): ParsedBlock[
     if (fence) {
       const info = fence[1].trim();
 
-      // Explicit close: ```/name — ends the current body-rich block.
+      // Explicit close: ```/name — ends the current body-rich section.
       if (info.startsWith('/')) {
         flush();
         i++;
@@ -70,9 +70,9 @@ export function parseBlocks(markdown: string, specs: BlockSpecMap): ParsedBlock[
         continue;
       }
 
-      // Opening fence for a known block.
+      // Opening fence for a known section.
       if (specs[info]) {
-        flush(); // a new block implicitly closes the previous one
+        flush(); // a new section implicitly closes the previous one
         i++;
         const yaml: string[] = [];
         while (i < lines.length && !BARE_FENCE.test(lines[i])) {
@@ -80,21 +80,21 @@ export function parseBlocks(markdown: string, specs: BlockSpecMap): ParsedBlock[
           i++;
         }
         i++; // step past the closing fence
-        const block: ParsedBlock = {
+        const section: ParsedSection = {
           name: info,
           props: parseYamlProps(yaml.join('\n')),
           bodyMarkdown: '',
         };
         if (specs[info].body) {
-          open = block;
+          open = section;
           bodyLines = [];
         } else {
-          blocks.push(block);
+          sections.push(section);
         }
         continue;
       }
 
-      // A real (non-block) code fence. Keep it verbatim inside the open body;
+      // A real (non-section) code fence. Keep it verbatim inside the open body;
       // otherwise skip it.
       if (open) {
         bodyLines.push(line);
@@ -121,5 +121,5 @@ export function parseBlocks(markdown: string, specs: BlockSpecMap): ParsedBlock[
   }
 
   flush();
-  return blocks;
+  return sections;
 }

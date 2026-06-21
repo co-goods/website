@@ -29,7 +29,7 @@ function initials(name: string): string {
 export default function PersonCard({ name, role, bio, github, href }: PersonCardProps) {
   // GitHub serves an avatar at github.com/<user>.png; use it when we have a
   // handle, falling back to an initials chip. unoptimized — same as the Image
-  // block — so no remote-image config is needed.
+  // section — so no remote-image config is needed.
   const photo = github ? `https://github.com/${github}.png?size=160` : undefined;
   return (
     <div className="h-full rounded-lg border border-gray-200 bg-white p-6">

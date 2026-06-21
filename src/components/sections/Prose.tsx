@@ -3,7 +3,7 @@ interface ProseProps {
 }
 
 // Plain-markdown section: the explicit wrapper for ordinary prose on custom
-// pages (which require every chunk of content to live inside a block). Visual
+// pages (which require every chunk of content to live inside a section). Visual
 // treatment is deliberately minimal for now — refined later with the design
 // system.
 export default function Prose({ children }: ProseProps) {

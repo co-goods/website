@@ -5,7 +5,7 @@ type VideoProvider = 'youtube' | 'vimeo' | 'file';
 interface VideoProps {
   provider: VideoProvider;
   // youtube/vimeo: the video id. file: ignored (use src). Named videoId, not
-  // id, because the block renderer reserves `id` for section anchors.
+  // id, because the section renderer reserves `id` for section anchors.
   videoId?: string;
   // file: path to the .mp4 (public/ path or remote URL).
   src?: string;
@@ -28,7 +28,7 @@ interface VideoProps {
 //
 // TODO: migrate to Grund — the responsive aspect-ratio frame belongs in a
 // Grund Component (aspect-ratios foundation); provider handling and license
-// semantics stay in this block.
+// semantics stay in this section.
 
 function embedSrc(provider: VideoProvider, videoId?: string): string | null {
   if (!videoId) return null;

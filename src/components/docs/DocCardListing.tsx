@@ -1,4 +1,4 @@
-import Card, { type CardProps } from '@/components/blocks/Card';
+import Card, { type CardProps } from '@/components/sections/Card';
 
 // Area-overview body for the docs root + group index pages: a title and a grid
 // of cards (sub-collections or leaf docs). The sidebar owns the full leaf tree,

@@ -132,7 +132,7 @@ export function discordKeyForArea(area?: string): string | undefined {
 }
 
 // One-line positioning statement. Canonical copy lives here; the footer reads
-// it directly. The home/about hero subtitles repeat it in markdown (block
+// it directly. The home/about hero subtitles repeat it in markdown (section
 // frontmatter can't read this constant) — keep them in sync by hand.
 // Placeholder phrasing, expected to evolve.
 export const tagline =

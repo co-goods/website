@@ -1,5 +1,5 @@
-// Block components — composable section components used by custom pages and
-// (later) invoked from markdown via fenced-code section blocks.
+// Section components — composable section components used by custom pages and
+// (later) invoked from markdown via fenced-code sections.
 
 export { default as Hero } from './Hero';
 export { default as Quote } from './Quote';
