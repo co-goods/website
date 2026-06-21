@@ -1,6 +1,6 @@
 import { loadEvents, type CoGoodsEvent, type EventKind } from '@/lib/events';
 
-// Renders community events from data/events.yaml. Authored as a block:
+// Renders community events from data/events.yaml. Authored as a section:
 //   ```events
 //   filter: upcoming   # upcoming (default) | past | all
 //   limit: 5

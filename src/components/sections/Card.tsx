@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
-// A single content card. Dual-use, like the other blocks: imported directly by
-// layouts (e.g. the umbrella pillar pages) and rendered from a `cardgrid` block
+// A single content card. Dual-use, like the other sections: imported directly by
+// layouts (e.g. the umbrella pillar pages) and rendered from a `cardgrid` section
 // on composed pages. A card with `href` is clickable as a whole; `cta` adds a
 // visible "read more" affordance. `id` makes the card an in-page anchor target.
 //

@@ -5,10 +5,10 @@ import { resolveDiscord } from '@/site.config';
 // join the discussion on Discord. Replaces the thin page-actions row with a
 // card that frames these as participation, not chrome.
 //
-// Dual-use, like every block: registered as the `contribute` block for .md
+// Dual-use, like every section: registered as the `contribute` section for .md
 // composed pages + overlays, and imported directly by the article layouts
 // (where it gets a page-specific editUrl + the page's discord value). As a
-// block, an author supplies editUrl/discord/heading/body via fence YAML.
+// section, an author supplies editUrl/discord/heading/body via fence YAML.
 //
 // `discord` accepts a full URL, a named key (e.g. "invite", "events" — see
 // site.config links), or nothing — resolveDiscord always yields a link

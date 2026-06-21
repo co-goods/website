@@ -1,20 +1,20 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { parseBlocks } from './blockParser';
-import { renderBlockBody } from './renderBlocks';
-import { BLOCK_SPECS } from '@/components/blocks/registry';
-import type { RenderedBlock } from '@/components/blocks/BlockRenderer';
+import { parseSections } from './sectionParser';
+import { renderSectionBody } from './renderSections';
+import { SECTION_SPECS } from '@/components/sections/registry';
+import type { RenderedSection } from '@/components/sections/SectionRenderer';
 
 // An overlay (splice) file layers site-specific sections onto a typed page
 // without the source content knowing about it. It lives parallel to the source
 // at content/overlays/<collection-folder>/<slug>.md, mirroring the source path.
 //
-// The file is ordinary fenced-block markdown: each top-level block is one
-// spliced section. Splice metadata rides as reserved props on the block —
+// The file is ordinary fenced-section markdown: each top-level section is one
+// spliced section. Splice metadata rides as reserved props on the section —
 // `region` (where it lands), `position` (order within the region), and an
-// optional `name` anchor — which are stripped before the block's own props
-// reach its component. This reuses the page-block vocabulary verbatim; there is
+// optional `name` anchor — which are stripped before the section's own props
+// reach its component. This reuses the page-section vocabulary verbatim; there is
 // no second authoring mechanism.
 
 // Overlays live in the website repo (not the content submodule), under
@@ -28,11 +28,11 @@ const REGIONS: Region[] = ['top', 'body', 'sidebar', 'bottom'];
 // Pre-resolved render slots. `body` is split around `default` (the layout's own
 // content — the markdown body) into the sections that precede and follow it.
 export interface OverlaySlots {
-  top: RenderedBlock[];
-  bodyBefore: RenderedBlock[];
-  bodyAfter: RenderedBlock[];
-  sidebar: RenderedBlock[];
-  bottom: RenderedBlock[];
+  top: RenderedSection[];
+  bodyBefore: RenderedSection[];
+  bodyAfter: RenderedSection[];
+  sidebar: RenderedSection[];
+  bottom: RenderedSection[];
 }
 
 function emptySlots(): OverlaySlots {
@@ -71,12 +71,12 @@ export async function loadOverlay(
   if (!fs.existsSync(filepath)) return null;
 
   const { content } = matter(fs.readFileSync(filepath, 'utf8'));
-  const parsed = parseBlocks(content, BLOCK_SPECS);
+  const parsed = parseSections(content, SECTION_SPECS);
   if (!parsed.length) return null;
 
   const sections = await Promise.all(
-    parsed.map(async (block) => {
-      const { region, position, name, ...props } = block.props as {
+    parsed.map(async (section) => {
+      const { region, position, name, ...props } = section.props as {
         region?: string;
         position?: unknown;
         name?: string;
@@ -85,11 +85,11 @@ export async function loadOverlay(
       return {
         region: (REGIONS.includes(region as Region) ? region : 'body') as Region,
         position,
-        block: {
-          name: block.name,
+        section: {
+          name: section.name,
           props,
-          bodyHtml: await renderBlockBody(block.bodyMarkdown),
-        } as RenderedBlock,
+          bodyHtml: await renderSectionBody(section.bodyMarkdown),
+        } as RenderedSection,
       };
     }),
   );
@@ -100,11 +100,11 @@ export async function loadOverlay(
       .filter((s) => s.region === region)
       .sort((a, b) => positionRank(a.position) - positionRank(b.position));
     for (const s of inRegion) {
-      if (region === 'top') slots.top.push(s.block);
-      else if (region === 'bottom') slots.bottom.push(s.block);
-      else if (region === 'sidebar') slots.sidebar.push(s.block);
-      else if (isBeforeDefault(s.position)) slots.bodyBefore.push(s.block);
-      else slots.bodyAfter.push(s.block);
+      if (region === 'top') slots.top.push(s.section);
+      else if (region === 'bottom') slots.bottom.push(s.section);
+      else if (region === 'sidebar') slots.sidebar.push(s.section);
+      else if (isBeforeDefault(s.position)) slots.bodyBefore.push(s.section);
+      else slots.bodyAfter.push(s.section);
     }
   }
   return slots;

@@ -23,7 +23,7 @@ interface ImageProps {
 //
 // TODO: migrate to Grund — the responsive image + aspect-ratio box belong in
 // a Grund Figure/ResponsiveImage Component (aspect-ratios foundation); the
-// authoring vocabulary and license semantics stay in this block.
+// authoring vocabulary and license semantics stay in this section.
 
 export default function Image({
   src,

@@ -1,8 +1,8 @@
 import Toc from '@/components/docs/Toc';
 import { TocEntry } from '@/lib/markdown';
-import { BlockRenderer } from '@/components/blocks/BlockRenderer';
+import { SectionRenderer } from '@/components/sections/SectionRenderer';
 import type { OverlaySlots } from '@/lib/overlays';
-import ContributeCallout from '@/components/blocks/ContributeCallout';
+import ContributeCallout from '@/components/sections/ContributeCallout';
 import { Breadcrumb } from './atoms';
 
 // Two-column shell: main column for header + body, optional right rail for TOC.
@@ -34,7 +34,7 @@ export default function ArticleShell({
   const showSidebarOverlay = overlay && overlay.sidebar.length > 0;
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      {overlay && overlay.top.length > 0 && <BlockRenderer blocks={overlay.top} />}
+      {overlay && overlay.top.length > 0 && <SectionRenderer sections={overlay.top} />}
       <div className={
         showToc || showSidebarOverlay
           ? 'grid grid-cols-1 lg:grid-cols-[1fr_14rem] gap-12'
@@ -43,19 +43,19 @@ export default function ArticleShell({
         <article className="min-w-0">
           <Breadcrumb segments={segments} />
           {header}
-          {overlay && overlay.bodyBefore.length > 0 && <BlockRenderer blocks={overlay.bodyBefore} />}
+          {overlay && overlay.bodyBefore.length > 0 && <SectionRenderer sections={overlay.bodyBefore} />}
           {children}
-          {overlay && overlay.bodyAfter.length > 0 && <BlockRenderer blocks={overlay.bodyAfter} />}
+          {overlay && overlay.bodyAfter.length > 0 && <SectionRenderer sections={overlay.bodyAfter} />}
           <ContributeCallout editUrl={editUrl} discord={discord} />
         </article>
         {(showToc || showSidebarOverlay) && (
           <aside className="hidden lg:block lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto">
             {showToc && <Toc entries={toc} />}
-            {showSidebarOverlay && <BlockRenderer blocks={overlay!.sidebar} />}
+            {showSidebarOverlay && <SectionRenderer sections={overlay!.sidebar} />}
           </aside>
         )}
       </div>
-      {overlay && overlay.bottom.length > 0 && <BlockRenderer blocks={overlay.bottom} />}
+      {overlay && overlay.bottom.length > 0 && <SectionRenderer sections={overlay.bottom} />}
     </div>
   );
 }

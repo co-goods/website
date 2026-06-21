@@ -11,18 +11,18 @@ import Events from './Events';
 import ContributeCallout from './ContributeCallout';
 import CardGrid from './CardGrid';
 import Team from './Team';
-import type { BlockSpecMap } from '@/lib/blockParser';
+import type { SectionSpecMap } from '@/lib/sectionParser';
 
 interface RegistryEntry {
-  // Block prop shapes vary per component; the renderer spreads parsed props.
+  // Section prop shapes vary per component; the renderer spreads parsed props.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: ComponentType<any>;
   body: boolean;
 }
 
-// The authoring vocabulary: maps a fenced block name to its component and
+// The authoring vocabulary: maps a fenced section name to its component and
 // whether it consumes a markdown body.
-export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
+export const SECTION_REGISTRY: Record<string, RegistryEntry> = {
   hero: { component: Hero, body: false },
   prose: { component: Prose, body: true },
   quote: { component: Quote, body: true },
@@ -38,6 +38,6 @@ export const BLOCK_REGISTRY: Record<string, RegistryEntry> = {
 };
 
 // Body flags only — handed to the parser, which stays component-agnostic.
-export const BLOCK_SPECS: BlockSpecMap = Object.fromEntries(
-  Object.entries(BLOCK_REGISTRY).map(([name, { body }]) => [name, { body }])
+export const SECTION_SPECS: SectionSpecMap = Object.fromEntries(
+  Object.entries(SECTION_REGISTRY).map(([name, { body }]) => [name, { body }])
 );

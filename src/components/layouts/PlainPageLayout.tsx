@@ -1,4 +1,4 @@
-import ContributeCallout from '@/components/blocks/ContributeCallout';
+import ContributeCallout from '@/components/sections/ContributeCallout';
 
 interface PlainPageLayoutProps {
   frontmatter: Record<string, unknown>;

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Card from '@/components/blocks/Card';
+import Card from '@/components/sections/Card';
 import FilterableIndex from '@/components/FilterableIndex';
 import { IndexData, UmbrellaIndexData } from '@/lib/content/index-data';
 

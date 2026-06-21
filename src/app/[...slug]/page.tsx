@@ -6,8 +6,8 @@ import matter from 'gray-matter';
 import { resolveUrl } from '@/lib/content/resolver';
 import { isCollectionEnabled, isIndexable, discordKeyForArea } from '@/site.config';
 import { readAndRender, renderMarkdown } from '@/lib/markdown';
-import { renderPageBlocks } from '@/lib/renderBlocks';
-import { BlockRenderer } from '@/components/blocks/BlockRenderer';
+import { renderPageSections } from '@/lib/renderSections';
+import { SectionRenderer } from '@/components/sections/SectionRenderer';
 import { loadOverlay } from '@/lib/overlays';
 import {
   getCollectionIndex,
@@ -205,16 +205,16 @@ export default async function CatchAll({ params }: PageProps) {
 
   // resolved.kind === 'page'
 
-  // Composed pages (the pages/ namespace) are authored as section blocks,
-  // same as the home page — render them through the block pipeline rather
+  // Composed pages (the pages/ namespace) are authored as sections,
+  // same as the home page — render them through the section pipeline rather
   // than as a markdown article.
   if (resolved.collection.name === 'pages') {
     const raw = fs.readFileSync(resolved.filepath, 'utf8');
-    const blocks = await renderPageBlocks(raw);
+    const sections = await renderPageSections(raw);
     const pageLicense = matter(raw).data.license;
     return (
       <>
-        <BlockRenderer blocks={blocks} />
+        <SectionRenderer sections={sections} />
         {typeof pageLicense === 'string' && pageLicense.trim() && (
           <div className="px-4 sm:px-6 lg:px-8 pb-12">
             <div className="mx-auto max-w-3xl">
